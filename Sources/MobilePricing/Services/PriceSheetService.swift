@@ -52,7 +52,7 @@ public struct PriceSheetService {
         }
     }
 
-    func getPrices(itemNid: Int) -> [(PriceSheetLink, Money)] {
+    private func getPrices(itemNid: Int) -> [(PriceSheetLink, Money)] {
         var allPrices = [(PriceSheetLink, Money)]()
 
         for var link in links {
@@ -62,6 +62,26 @@ public struct PriceSheetService {
         }
 
         return allPrices
+    }
+
+    func getBestPriceFromPriceSheets(itemNid: Int) -> PriceWithDescription? {
+        let allPrices = getPrices(itemNid: itemNid)
+
+        guard let tuple = allPrices.first else {
+            return nil
+        }
+
+        let priceSheetLink = tuple.0
+        let price = tuple.1
+
+        let pwd = PriceWithDescription(price: price) {
+            let priceSheet = priceSheetLink.priceSheet
+            let priceBook = mobileDownload.priceBooks[priceSheet.priceBookNid]
+
+            return "\(priceBook.recName)"
+        }
+
+        return pwd
     }
 
     private func getAllPriceSheetLinks() -> [PriceSheetLink] {
