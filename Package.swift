@@ -14,7 +14,8 @@ let package = Package(
     ],
     dependencies: [
         .package(path: "../MoneyAndExchangeRates"),
-        .package(path: "../MobileDownload")
+        .package(path: "../MobileDownload"),
+        .package(path: "../MobileDownloadDecoder") // mpr: handy when I change things that the decoder knows about
         // Dependencies declare other packages that this package depends on.
         // .package(url: /* package url */, from: "1.0.0"),
     ],
@@ -23,9 +24,9 @@ let package = Package(
         // Targets can depend on other targets in this package, and on products in packages this package depends on.
         .target(
             name: "MobilePricing",
-            dependencies: ["MoneyAndExchangeRates", "MobileDownload"]),
+            dependencies: ["MoneyAndExchangeRates", "MobileDownload", "MobileDownloadDecoder"]),
         .testTarget(
             name: "MobilePricingTests",
-            dependencies: ["MobilePricing", "MoneyAndExchangeRates", "MobileDownload"]),
+            dependencies: ["MobilePricing", "MoneyAndExchangeRates", "MobileDownload", "MobileDownloadDecoder"]),
     ]
 )

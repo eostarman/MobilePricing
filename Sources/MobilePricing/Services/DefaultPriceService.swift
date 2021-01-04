@@ -9,7 +9,8 @@ import Foundation
 import MobileDownload
 import MoneyAndExchangeRates
 
-struct ItemDefaultPriceService {
+/// Each item can have a default price. This price is used unless a price sheet or customer special price is found.
+struct DefaultPriceService {
 
     /// This gets the default price from the item record, if there is one
     static func getDefaultPrice(itemNid: Int, date: Date) -> MoneyWithoutCurrency? {

@@ -36,26 +36,19 @@ public struct PriceSheetService {
     public struct PriceSheetLink {
         let linkSource: LinkSource
         let priceSheet: PriceSheetRecord
-        let currency: Currency
 
         let priceLevel: Int
         let canUseAutomaticColumns: Bool
 
-        public mutating func getPrice(itemNid: Int) -> Money? {
-            let pricesByItemNid = priceSheet.getPrices(priceLevel: priceLevel)
-
-            guard let price = pricesByItemNid[itemNid] else {
-                return nil
-            }
-
-            return price.withCurrency(currency)
+        public func getPrice(itemNid: Int) -> Money? {
+            priceSheet.getPrice(itemNid: itemNid, priceLevel: priceLevel)
         }
     }
 
     private func getPrices(itemNid: Int) -> [(PriceSheetLink, Money)] {
         var allPrices = [(PriceSheetLink, Money)]()
 
-        for var link in links {
+        for link in links {
             if let price = link.getPrice(itemNid: itemNid) {
                 allPrices.append((link, price))
             }
@@ -104,9 +97,7 @@ public struct PriceSheetService {
                     continue
                 }
 
-                let priceBook = mobileDownload.priceBooks[priceSheet.priceBookNid]
-
-                let link = PriceSheetLink(linkSource: .PriceRule, priceSheet: priceSheet, currency: priceBook.currency, priceLevel: priceRule.priceLevel, canUseAutomaticColumns: priceRule.canUseAutomaticColumns)
+                let link = PriceSheetLink(linkSource: .PriceRule, priceSheet: priceSheet, priceLevel: priceRule.priceLevel, canUseAutomaticColumns: priceRule.canUseAutomaticColumns)
 
                 links.append(link)
             }
@@ -117,15 +108,13 @@ public struct PriceSheetService {
                 continue
             }
 
-            let priceBook = mobileDownload.priceBooks[priceSheet.priceBookNid]
-
             if let warehouse = priceSheet.warehouses[shipFromWhseNid] {
-                let link = PriceSheetLink(linkSource: .Warehouse, priceSheet: priceSheet, currency: priceBook.currency, priceLevel: warehouse.priceLevel, canUseAutomaticColumns: warehouse.canUseAutomaticColumns)
+                let link = PriceSheetLink(linkSource: .Warehouse, priceSheet: priceSheet, priceLevel: warehouse.priceLevel, canUseAutomaticColumns: warehouse.canUseAutomaticColumns)
                 links.append(link)
             }
 
             if let customer = priceSheet.customers[cusNid] {
-                let link = PriceSheetLink(linkSource: .Customer, priceSheet: priceSheet, currency: priceBook.currency, priceLevel: customer.priceLevel, canUseAutomaticColumns: customer.canUseAutomaticColumns)
+                let link = PriceSheetLink(linkSource: .Customer, priceSheet: priceSheet, priceLevel: customer.priceLevel, canUseAutomaticColumns: customer.canUseAutomaticColumns)
                 links.append(link)
             }
         }

@@ -22,13 +22,10 @@ func testRecord<T: Record>(recNid: Int) -> T {
     return record
 }
 
-func testItem(itemNid: Int) -> ItemRecord {
-    mobileDownload.items.add(testRecord(recNid: itemNid))
-}
-
-func testCustomer(cusNid: Int) -> CustomerRecord {
-    mobileDownload.customers.add(testRecord(recNid: cusNid))
-}
+func testWarehouse(whseNid: Int) -> WarehouseRecord { mobileDownload.warehouses.add(testRecord(recNid: whseNid)) }
+func testItem(itemNid: Int) -> ItemRecord { mobileDownload.items.add(testRecord(recNid: itemNid)) }
+func testCustomer(cusNid: Int) -> CustomerRecord { mobileDownload.customers.add(testRecord(recNid: cusNid)) }
+func testPriceSheet(priceSheetNid: Int) -> PriceSheetRecord { mobileDownload.priceSheets.add(testRecord(recNid: priceSheetNid)) }
 
 // https://www.avanderlee.com/swift/expressible-literals/
 extension Date: ExpressibleByStringLiteral {

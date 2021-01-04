@@ -36,15 +36,15 @@ public struct FrontlinePriceService {
 
     func getPriceWithDescription(itemNid: Int) -> PriceWithDescription? {
         if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(cusNid: cusNid, itemNid: itemNid, date: date) {
-            return PriceWithDescription(price: specialPrice) { "Special price " }
+            return PriceWithDescription(price: specialPrice) { "Special price for customer" }
         }
 
         if let priceBookPrice = priceSheetService.getBestPriceFromPriceSheets(itemNid: itemNid) {
             return priceBookPrice
         }
 
-        if let itemDefaultPrice = ItemDefaultPriceService.getDefaultPrice(itemNid: itemNid, date: date) {
-            return PriceWithDescription(price: itemDefaultPrice.withCurrency(.USD)) { "default price" }
+        if let itemDefaultPrice = DefaultPriceService.getDefaultPrice(itemNid: itemNid, date: date) {
+            return PriceWithDescription(price: itemDefaultPrice.withCurrency(.USD)) { "default price for item" }
         }
 
         return nil
