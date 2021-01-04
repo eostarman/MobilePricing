@@ -26,7 +26,7 @@ public struct FrontlinePriceService {
     public init(shipFromWhseNid: Int, cusNid: Int, date: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
         self.shipFromWhseNid = shipFromWhseNid
         self.cusNid = cusNid
-        pricingParentNid = mobileDownload.customers[cusNid].pricingParentNid
+        pricingParentNid = mobileDownload.customers[cusNid].pricingParentNid ?? cusNid
         self.date = date
         self.transactionCurrency = transactionCurrency
         self.numberOfDecimals = numberOfDecimals
@@ -35,7 +35,7 @@ public struct FrontlinePriceService {
     }
 
     func getPriceWithDescription(itemNid: Int) -> PriceWithDescription? {
-        if let specialPrice = CustomerSpecialPriceService.getCustomerSpecialPrice(cusNid: cusNid, itemNid: itemNid, date: date) {
+        if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(cusNid: cusNid, itemNid: itemNid, date: date) {
             return PriceWithDescription(price: specialPrice) { "Special price " }
         }
 

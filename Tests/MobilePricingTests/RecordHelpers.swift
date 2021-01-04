@@ -23,9 +23,11 @@ func testRecord<T: Record>(recNid: Int) -> T {
 }
 
 func testItem(itemNid: Int) -> ItemRecord {
-    let item: ItemRecord = testRecord(recNid: itemNid)
-    mobileDownload.items.add(record: item)
-    return item
+    mobileDownload.items.add(testRecord(recNid: itemNid))
+}
+
+func testCustomer(cusNid: Int) -> CustomerRecord {
+    mobileDownload.customers.add(testRecord(recNid: cusNid))
 }
 
 // https://www.avanderlee.com/swift/expressible-literals/

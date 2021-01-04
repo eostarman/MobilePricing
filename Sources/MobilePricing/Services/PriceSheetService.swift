@@ -86,7 +86,7 @@ public struct PriceSheetService {
 
     private func getAllPriceSheetLinks() -> [PriceSheetLink] {
         let customer = mobileDownload.customers[cusNid]
-        let pricingParent = customer.pricingParentNid > 0 ? mobileDownload.customers[customer.pricingParentNid] : customer
+        let pricingParent = mobileDownload.customers[customer.pricingParentNid ?? cusNid]
         let priceRuleNids = pricingParent.priceRuleNids
 
         var links: [PriceSheetLink] = []
