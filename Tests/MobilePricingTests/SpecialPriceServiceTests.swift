@@ -12,14 +12,6 @@ import MoneyAndExchangeRates
 
 class SpecialPriceServiceTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        mobileDownload = MobileDownload()
-    }
-
-    override func tearDownWithError() throws {
-        mobileDownload = MobileDownload()
-    }
-
     func testBasicSpecialPrice() throws {
 
         mobileDownload = MobileDownload()

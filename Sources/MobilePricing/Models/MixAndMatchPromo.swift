@@ -22,8 +22,8 @@ public class MixAndMatchPromo {
 
     // is this promotion triggered by the quantities on this order
     func isTriggered(qtys: TriggerQtys) -> Bool {
-        var totalsByTriggerGroup = [0, 0, 0, 0, 0, 0] // group (0) and groups 1-5 (Group A thru Group F)
-        var totalForAllTriggerItems = 0
+        var totalsByTriggerGroup: [Double] = [0, 0, 0, 0, 0, 0] // group (0) and groups 1-5 (Group A thru Group F)
+        var totalForAllTriggerItems = 0.0
 
         for keyvalue in qtys.quantitiesByItem {
             let itemNid = keyvalue.key
@@ -42,12 +42,12 @@ public class MixAndMatchPromo {
             return false
         }
 
-        if totalForAllTriggerItems < caseMinimum { // you bought some, but not enough
+        if totalForAllTriggerItems < Double(caseMinimum) { // you bought some, but not enough
             return false
         }
 
         for triggerGroup in 1 ... 5 { // you bought enough, but not from the targeted trigger groups (Group A thru group F) which have their own minimums
-            if totalsByTriggerGroup[triggerGroup] < triggerGroupMinimums[triggerGroup] {
+            if totalsByTriggerGroup[triggerGroup] < Double(triggerGroupMinimums[triggerGroup]) {
                 return false
             }
         }
