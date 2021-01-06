@@ -12,7 +12,7 @@ import MoneyAndExchangeRates
 
 public final class PriceSheetService {
     public let shipFrom: WarehouseRecord
-    public let shipTo: CustomerRecord
+    public let sellTo: CustomerRecord
     public let pricingParent: CustomerRecord
     public let pricingDate: Date
     let isDepositSchedule: Bool
@@ -27,10 +27,10 @@ public final class PriceSheetService {
         priceSheetsForCustomer.isEmpty && priceSheetsFromRules.isEmpty && priceSheetsForWarehouse.isEmpty
     }
 
-    public init(shipFrom: WarehouseRecord, shipTo: CustomerRecord, pricingDate: Date, isDepositSchedule: Bool = false) {
+    public init(shipFrom: WarehouseRecord, sellTo: CustomerRecord, pricingDate: Date, isDepositSchedule: Bool = false) {
         self.shipFrom = shipFrom
-        self.shipTo = shipTo
-        self.pricingParent = mobileDownload.customers[shipTo.pricingParentNid ?? shipTo.recNid]
+        self.sellTo = sellTo
+        self.pricingParent = mobileDownload.customers[sellTo.pricingParentNid ?? sellTo.recNid]
         self.pricingDate = pricingDate
         self.isDepositSchedule = isDepositSchedule
 

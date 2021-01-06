@@ -18,8 +18,8 @@ public struct PromoService {
 
     var unsupportedPromoSections: [PromoSectionRecord] = []
 
-    public init(shipTo: CustomerRecord, pricingDate: Date) {
-        let pricingParent = mobileDownload.customers[shipTo.pricingParentNid ?? shipTo.recNid]
+    public init(sellTo: CustomerRecord, pricingDate: Date) {
+        let pricingParent = mobileDownload.customers[sellTo.pricingParentNid ?? sellTo.recNid]
 
         for promoCode in mobileDownload.promoCodes.getAll() {
             if promoCode.isCustomerSelected(pricingParent) {
