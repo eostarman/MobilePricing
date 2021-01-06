@@ -14,7 +14,16 @@ let christmasEve: Date = "12-24-2020"
 let christmasDay: Date = "12-25-2020"
 let dayAfterChristmas: Date = "12-26-2020"
 
-func testRecord<T: Record>(recNid: Int) -> T {
+
+fileprivate var numberOfTestRecordsCreated = 0
+fileprivate func testRecNid() -> Int {
+    numberOfTestRecordsCreated += 1
+    return numberOfTestRecordsCreated
+}
+
+fileprivate func testRecord<T: Record>() -> T {
+    let recNid = testRecNid()
+
     var record = T()
     record.recNid = recNid
     record.recKey = "\(recNid)"
@@ -22,10 +31,11 @@ func testRecord<T: Record>(recNid: Int) -> T {
     return record
 }
 
-func testWarehouse(whseNid: Int) -> WarehouseRecord { mobileDownload.warehouses.add(testRecord(recNid: whseNid)) }
-func testItem(itemNid: Int) -> ItemRecord { mobileDownload.items.add(testRecord(recNid: itemNid)) }
-func testCustomer(cusNid: Int) -> CustomerRecord { mobileDownload.customers.add(testRecord(recNid: cusNid)) }
-func testPriceSheet(priceSheetNid: Int) -> PriceSheetRecord { mobileDownload.priceSheets.add(testRecord(recNid: priceSheetNid)) }
+func testWarehouse() -> WarehouseRecord { mobileDownload.warehouses.add(testRecord()) }
+func testItem() -> ItemRecord { mobileDownload.items.add(testRecord()) }
+func testCustomer() -> CustomerRecord { mobileDownload.customers.add(testRecord()) }
+func testPriceSheet() -> PriceSheetRecord { mobileDownload.priceSheets.add(testRecord()) }
+func testPriceRule() -> PriceRuleRecord { mobileDownload.priceRules.add(testRecord())}
 
 // https://www.avanderlee.com/swift/expressible-literals/
 extension Date: ExpressibleByStringLiteral {

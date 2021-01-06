@@ -12,11 +12,9 @@ import MoneyAndExchangeRates
 struct SpecialPriceService {
 
     /// Customers can have special prices assigned to them (based on dates). So, if they buy that item for delivery within the given dates, then they *will* get that front-line price. The currency is based on the customer's transactionCurrency
-    static func getCustomerSpecialPrice(cusNid: Int, itemNid: Int, date: Date) -> Money? {
-        var customer = mobileDownload.customers[cusNid]
-        if let pricingParentNid = customer.pricingParentNid {
-            customer = mobileDownload.customers[pricingParentNid]
-        }
+    static func getCustomerSpecialPrice(_ sellToCustomer: CustomerRecord, _ item: ItemRecord, date: Date) -> Money? {
+        let itemNid = item.recNid
+        let customer = mobileDownload.customers[sellToCustomer.pricingParentNid ?? sellToCustomer.recNid]
 
         guard let specialPrices = customer.specialPrices else {
             return nil

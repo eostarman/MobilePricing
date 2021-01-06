@@ -56,7 +56,8 @@ public struct PromoService {
         let qtys = TriggerQtys()
         for line in lines {
             line.clearDiscounts()
-            qtys.addItemAndQty(itemNid: line.itemNid, qty: line.qtyOrdered)
+            let item = mobileDownload.items[line.itemNid]
+            qtys.addItemAndQty(item, qty: line.qtyOrdered)
         }
 
         for promo in mixAndMatchPromos {

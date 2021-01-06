@@ -12,9 +12,9 @@ import MoneyAndExchangeRates
 
 /// Get a customer's front-line price (before any discounts, deposits or taxes)
 public struct FrontlinePriceService {
-    let shipFromWhseNid: Int
-    let cusNid: Int
-    let pricingParentNid: Int
+    let shipFrom: WarehouseRecord
+    let shipTo: CustomerRecord
+    let pricingParent: CustomerRecord
     let date: Date
     let transactionCurrency: Currency
     let numberOfDecimals: Int
@@ -23,15 +23,15 @@ public struct FrontlinePriceService {
 
     /// The front-line price is a function of which warehouse ships the product (potentially), which customer is buying the product, when they are getting the product (deliveer-date rather than order-date). It will be converted to
     /// the transaction currency (the currency of the order) and the number of decimals (e.g. dairies and bakeries in the U.S. sell to schools and hospitals in fractions of a penny)
-    public init(shipFromWhseNid: Int, cusNid: Int, date: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
-        self.shipFromWhseNid = shipFromWhseNid
-        self.cusNid = cusNid
-        pricingParentNid = mobileDownload.customers[cusNid].pricingParentNid ?? cusNid
+    public init(_ shipFrom: WarehouseRecord, _ shipTo: CustomerRecord, date: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
+        self.shipFrom = shipFrom
+        self.shipTo = shipTo
+        pricingParent = mobileDownload.customers[shipTo.pricingParentNid ?? shipTo.recNid]
         self.date = date
         self.transactionCurrency = transactionCurrency
         self.numberOfDecimals = numberOfDecimals
 
-        priceSheetService = PriceSheetService(shipFromWhseNid: shipFromWhseNid, cusNid: cusNid, date: date, isDepositSchedule: false)
+        priceSheetService = PriceSheetService(shipFrom, shipTo, date: date, isDepositSchedule: false)
     }
 
     enum FrontlinePrice {
@@ -56,16 +56,16 @@ public struct FrontlinePriceService {
     ///   - itemNid: the item being priced
     ///   - triggerQuantities: Quantities being sold on the order (excluding any pickups - those are different from a sale)
     /// - Returns: front-line price (either from the customer's special price for the item, from a price sheet or from the item's default price)
-    func getPrice(itemNid: Int, triggerQuantities: TriggerQtys) -> FrontlinePrice? {
-        if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(cusNid: cusNid, itemNid: itemNid, date: date) {
+    func getPrice(_ item: ItemRecord, triggerQuantities: TriggerQtys) -> FrontlinePrice? {
+        if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(pricingParent, item, date: date) {
             return .specialPriceForCustomer(price: specialPrice)
         }
 
-        if let priceSheetPrice = priceSheetService.getPrice(itemNid: itemNid, triggerQuantities: triggerQuantities, transactionCurrency: transactionCurrency) {
+        if let priceSheetPrice = priceSheetService.getPrice(item, triggerQuantities: triggerQuantities, transactionCurrency: transactionCurrency) {
             return .fromPriceSheet(priceSheetPrice: priceSheetPrice)
         }
 
-        if let itemDefaultPrice = DefaultPriceService.getDefaultPrice(itemNid: itemNid, date: date) {
+        if let itemDefaultPrice = DefaultPriceService.getDefaultPrice(item, date: date) {
             return .itemDefaultPrice(price: itemDefaultPrice.withCurrency(.USD))
         }
 
@@ -75,8 +75,8 @@ public struct FrontlinePriceService {
     /// Get the lowest (best for the customer) frontline price for an item that's being sold to a customer on a date (based on the delivery date). If there's a special price for the customer then that'll be used; if not, then the price books will be checked. Otherwise, the default prices on the item record will be used.
     /// - Parameter itemNid: the item (or alt pack) to get the price for. Note that split-case charges are not handled here
     /// - Returns: the price (with the currency set to the current transaction currency based on the exchange rates) or nil if there is *no* frontline price
-    public func getPrice(itemNid: Int) -> Money? {
-        guard let frontlinePrice = getPrice(itemNid: itemNid, triggerQuantities: [:]) else {
+    public func getPrice(_ item: ItemRecord) -> Money? {
+        guard let frontlinePrice = getPrice(item, triggerQuantities: [:]) else {
             return nil
         }
 

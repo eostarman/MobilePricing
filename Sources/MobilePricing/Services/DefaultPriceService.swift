@@ -13,8 +13,7 @@ import MoneyAndExchangeRates
 struct DefaultPriceService {
 
     /// This gets the default price from the item record, if there is one
-    static func getDefaultPrice(itemNid: Int, date: Date) -> MoneyWithoutCurrency? {
-        let item = mobileDownload.items[itemNid]
+    static func getDefaultPrice(_ item: ItemRecord, date: Date) -> MoneyWithoutCurrency? {
 
         // see FrontlinePriceCalculator.cs
         if let defaultPrice2EffectiveDate = item.defaultPrice2EffectiveDate, let defaultPrice2 = item.defaultPrice2, date >= defaultPrice2EffectiveDate {

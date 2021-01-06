@@ -21,51 +21,51 @@ class DefaultPriceServiceTests: XCTestCase {
     }
 
     func testSimpleDefaultPrice() throws {
-        let item = testItem(itemNid: 1001)
-        item.defaultPrice = 1.50
+        let beer = testItem()
+        beer.defaultPrice = 1.50
 
-        let price = DefaultPriceService.getDefaultPrice(itemNid: 1001, date: christmasDay)
+        let price = DefaultPriceService.getDefaultPrice(beer, date: christmasDay)
 
         XCTAssertNotNil(price)
         XCTAssertEqual(price!, MoneyWithoutCurrency(1.50))
     }
 
     func testSimpleDefaultPriceWithPrior() throws {
-        let item = testItem(itemNid: 1001)
-        item.defaultPricePrior = 1.33
-        item.defaultPriceEffectiveDate = christmasDay
-        item.defaultPrice = 1.50
+        let beer = testItem()
+        beer.defaultPricePrior = 1.33
+        beer.defaultPriceEffectiveDate = christmasDay
+        beer.defaultPrice = 1.50
 
-        let priceBeforeChristmasDay = DefaultPriceService.getDefaultPrice(itemNid: 1001, date: christmasEve)
+        let priceBeforeChristmasDay = DefaultPriceService.getDefaultPrice(beer, date: christmasEve)
         XCTAssertNotNil(priceBeforeChristmasDay)
         XCTAssertEqual(priceBeforeChristmasDay!, MoneyWithoutCurrency(1.33))
 
-        let priceOnChristmasDay = DefaultPriceService.getDefaultPrice(itemNid: 1001, date: christmasDay)
+        let priceOnChristmasDay = DefaultPriceService.getDefaultPrice(beer, date: christmasDay)
         XCTAssertNotNil(priceOnChristmasDay)
         XCTAssertEqual(priceOnChristmasDay!, MoneyWithoutCurrency(1.50))
 
-        let priceAfterChristmasDay = DefaultPriceService.getDefaultPrice(itemNid: 1001, date: dayAfterChristmas)
+        let priceAfterChristmasDay = DefaultPriceService.getDefaultPrice(beer, date: dayAfterChristmas)
         XCTAssertNotNil(priceAfterChristmasDay)
         XCTAssertEqual(priceAfterChristmasDay!, MoneyWithoutCurrency(1.50))
     }
 
     func testSimpleDefaultPriceWithPriorAndFuturePrices() throws {
-        let item = testItem(itemNid: 1001)
-        item.defaultPricePrior = 1.33
-        item.defaultPriceEffectiveDate = christmasDay
-        item.defaultPrice = 1.50
-        item.defaultPrice2EffectiveDate = dayAfterChristmas
-        item.defaultPrice2 = 1.75
+        let beer = testItem()
+        beer.defaultPricePrior = 1.33
+        beer.defaultPriceEffectiveDate = christmasDay
+        beer.defaultPrice = 1.50
+        beer.defaultPrice2EffectiveDate = dayAfterChristmas
+        beer.defaultPrice2 = 1.75
 
-        let priceBeforeChristmasDay = DefaultPriceService.getDefaultPrice(itemNid: 1001, date: christmasEve)
+        let priceBeforeChristmasDay = DefaultPriceService.getDefaultPrice(beer, date: christmasEve)
         XCTAssertNotNil(priceBeforeChristmasDay)
         XCTAssertEqual(priceBeforeChristmasDay!, MoneyWithoutCurrency(1.33))
 
-        let priceOnChristmasDay = DefaultPriceService.getDefaultPrice(itemNid: 1001, date: christmasDay)
+        let priceOnChristmasDay = DefaultPriceService.getDefaultPrice(beer, date: christmasDay)
         XCTAssertNotNil(priceOnChristmasDay)
         XCTAssertEqual(priceOnChristmasDay!, MoneyWithoutCurrency(1.50))
 
-        let priceAfterChristmasDay = DefaultPriceService.getDefaultPrice(itemNid: 1001, date: dayAfterChristmas)
+        let priceAfterChristmasDay = DefaultPriceService.getDefaultPrice(beer, date: dayAfterChristmas)
         XCTAssertNotNil(priceAfterChristmasDay)
         XCTAssertEqual(priceAfterChristmasDay!, MoneyWithoutCurrency(1.75))
     }

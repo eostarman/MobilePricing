@@ -16,7 +16,9 @@ public final class TriggerQtys {
 
     }
 
-    func addItemAndQty(itemNid: Int, qty: Int) {
+    func addItemAndQty(_ item: ItemRecord, qty: Int) {
+        let itemNid = item.recNid
+
         if let priorQty = quantitiesByItem[itemNid] {
             quantitiesByItem[itemNid] = priorQty + Double(qty)
         } else {
@@ -28,8 +30,8 @@ public final class TriggerQtys {
     /// Return the quantity for the itemNid. If the weight is needed, then the item's weight is retrieved from mobileDownload
     /// - Parameters:
     ///   - isCaseMinimum: true to get cases (actually the qty for the item); false to get the total weight instead
-    func getCasesOrWeight(itemNid: Int, isCaseMinimum: Bool) -> Double {
-        let itemTriggerQty = getQty(itemNid: itemNid)
+    func getCasesOrWeight(_ item: ItemRecord, isCaseMinimum: Bool) -> Double {
+        let itemTriggerQty = getQty(item)
         if itemTriggerQty == 0 {
             return 0
         }
@@ -37,13 +39,13 @@ public final class TriggerQtys {
         if isCaseMinimum {
             return itemTriggerQty
         } else {
-            let weight = itemTriggerQty * mobileDownload.items[itemNid].itemWeight
+            let weight = itemTriggerQty * item.itemWeight
             return weight
         }
     }
 
-    func getQty(itemNid: Int) -> Double {
-        quantitiesByItem[itemNid] ?? 0
+    func getQty(_ item: ItemRecord) -> Double {
+        quantitiesByItem[item.recNid] ?? 0
     }
 }
 
@@ -51,7 +53,7 @@ extension TriggerQtys: ExpressibleByDictionaryLiteral {
     public convenience init(dictionaryLiteral elements: (Int, Int)...) {
         self.init()
         for (itemNid, count) in elements {
-            self.addItemAndQty(itemNid: itemNid, qty: count)
+            self.addItemAndQty(mobileDownload.items[itemNid], qty: count)
         }
     }
 }
