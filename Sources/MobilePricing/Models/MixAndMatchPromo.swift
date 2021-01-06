@@ -60,7 +60,7 @@ public class MixAndMatchPromo {
         discountsByItemNid[itemNid]
     }
 
-    public init(promoCode: PromoCodeRecord, promoSection: PromoSectionRecord) {
+    public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord) {
         currency = promoCode.currency
         note = promoSection.getNote()
         promoItems = promoSection.getPromoItems()

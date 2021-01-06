@@ -15,7 +15,7 @@ public struct FrontlinePriceService {
     let shipFrom: WarehouseRecord
     let shipTo: CustomerRecord
     let pricingParent: CustomerRecord
-    let date: Date
+    let pricingDate: Date
     let transactionCurrency: Currency
     let numberOfDecimals: Int
 
@@ -23,15 +23,15 @@ public struct FrontlinePriceService {
 
     /// The front-line price is a function of which warehouse ships the product (potentially), which customer is buying the product, when they are getting the product (deliveer-date rather than order-date). It will be converted to
     /// the transaction currency (the currency of the order) and the number of decimals (e.g. dairies and bakeries in the U.S. sell to schools and hospitals in fractions of a penny)
-    public init(_ shipFrom: WarehouseRecord, _ shipTo: CustomerRecord, date: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
+    public init(shipFrom: WarehouseRecord, shipTo: CustomerRecord, pricingDate: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
         self.shipFrom = shipFrom
         self.shipTo = shipTo
-        pricingParent = mobileDownload.customers[shipTo.pricingParentNid ?? shipTo.recNid]
-        self.date = date
+        self.pricingParent = mobileDownload.customers[shipTo.pricingParentNid ?? shipTo.recNid]
+        self.pricingDate = pricingDate
         self.transactionCurrency = transactionCurrency
         self.numberOfDecimals = numberOfDecimals
 
-        priceSheetService = PriceSheetService(shipFrom, shipTo, date: date, isDepositSchedule: false)
+        priceSheetService = PriceSheetService(shipFrom: shipFrom, shipTo: shipTo, pricingDate: pricingDate, isDepositSchedule: false)
     }
 
     enum FrontlinePrice {
@@ -57,7 +57,7 @@ public struct FrontlinePriceService {
     ///   - triggerQuantities: Quantities being sold on the order (excluding any pickups - those are different from a sale)
     /// - Returns: front-line price (either from the customer's special price for the item, from a price sheet or from the item's default price)
     func getPrice(_ item: ItemRecord, triggerQuantities: TriggerQtys) -> FrontlinePrice? {
-        if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(pricingParent, item, date: date) {
+        if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(shipTo: shipTo, item, pricingDate: pricingDate) {
             return .specialPriceForCustomer(price: specialPrice)
         }
 
@@ -65,7 +65,7 @@ public struct FrontlinePriceService {
             return .fromPriceSheet(priceSheetPrice: priceSheetPrice)
         }
 
-        if let itemDefaultPrice = DefaultPriceService.getDefaultPrice(item, date: date) {
+        if let itemDefaultPrice = DefaultPriceService.getDefaultPrice(item, pricingDate: pricingDate) {
             return .itemDefaultPrice(price: itemDefaultPrice.withCurrency(.USD))
         }
 
@@ -83,7 +83,7 @@ public struct FrontlinePriceService {
         let price = frontlinePrice.price
 
         if price.currency != transactionCurrency {
-            guard let convertedPrice = mobileDownload.handheld.exchangeRates.getMoney(from: price, to: transactionCurrency, date: date) else {
+            guard let convertedPrice = mobileDownload.handheld.exchangeRates.getMoney(from: price, to: transactionCurrency, date: pricingDate) else {
                 return nil
             }
 

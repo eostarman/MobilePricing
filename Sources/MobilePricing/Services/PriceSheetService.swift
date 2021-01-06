@@ -14,7 +14,7 @@ public final class PriceSheetService {
     public let shipFrom: WarehouseRecord
     public let shipTo: CustomerRecord
     public let pricingParent: CustomerRecord
-    public let date: Date
+    public let pricingDate: Date
     let isDepositSchedule: Bool
 
     /// price sheets that are directly assigned to the customer - these takes precedence over the price-rules or warehouse default price sheets
@@ -27,11 +27,11 @@ public final class PriceSheetService {
         priceSheetsForCustomer.isEmpty && priceSheetsFromRules.isEmpty && priceSheetsForWarehouse.isEmpty
     }
 
-    public init(_ shipFrom: WarehouseRecord, _ shipTo: CustomerRecord, date: Date, isDepositSchedule: Bool = false) {
+    public init(shipFrom: WarehouseRecord, shipTo: CustomerRecord, pricingDate: Date, isDepositSchedule: Bool = false) {
         self.shipFrom = shipFrom
         self.shipTo = shipTo
         self.pricingParent = mobileDownload.customers[shipTo.pricingParentNid ?? shipTo.recNid]
-        self.date = date
+        self.pricingDate = pricingDate
         self.isDepositSchedule = isDepositSchedule
 
         getAllPriceSheetLinks()
@@ -144,7 +144,7 @@ public final class PriceSheetService {
         let priceRuleNids = pricingParent.priceRuleNids
 
         let activePriceSheets = mobileDownload.priceSheets.getAll().filter { priceSheet in
-            priceSheet.isDepositSchedule == isDepositSchedule && priceSheet.isActive(on: date)
+            priceSheet.isDepositSchedule == isDepositSchedule && priceSheet.isActive(on: pricingDate)
         }
 
         for priceRuleNid in priceRuleNids {

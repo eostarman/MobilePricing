@@ -43,7 +43,7 @@ class PriceSheetServicePricingTests: XCTestCase {
             priceSheet.assignTo(mike, priceLevel: 1, canUseAutomaticColumns: false)
 
             // okay - let's fire up a service to provide pricing from the mobileDownload
-            let pricer = PriceSheetService(holland, mike, date: christmasDay)
+            let pricer = PriceSheetService(holland, mike, christmasDay)
 
             let price = pricer.getPrice(beer, triggerQuantities: [:], transactionCurrency: .USD)
             let priceAt100 = pricer.getPrice(beer, triggerQuantities: [beer.recNid:100], transactionCurrency: .USD)
@@ -59,7 +59,7 @@ class PriceSheetServicePricingTests: XCTestCase {
             priceSheet.assignTo(mike, priceLevel: 2, canUseAutomaticColumns: false)
 
             // okay - let's fire up a service to provide pricing from the mobileDownload
-            let pricer = PriceSheetService(holland, mike, date: christmasDay)
+            let pricer = PriceSheetService(holland, mike, christmasDay)
 
             let price = pricer.getPrice(beer, triggerQuantities: [:], transactionCurrency: .USD)
 
@@ -96,7 +96,7 @@ class PriceSheetServicePricingTests: XCTestCase {
             priceSheet.assignTo(mike, priceLevel: 1, canUseAutomaticColumns: true)
 
             // okay - let's fire up a service to provide pricing from the mobileDownload
-            let pricer = PriceSheetService(holland, mike, date: christmasDay)
+            let pricer = PriceSheetService(holland, mike, christmasDay)
 
             let priceAt1 = pricer.getPrice(beer, triggerQuantities: [beer.recNid:9], transactionCurrency: .USD)
             let priceAt10 = pricer.getPrice(beer, triggerQuantities: [beer.recNid:10], transactionCurrency: .USD)
@@ -179,7 +179,7 @@ class PriceSheetServicePricingTests: XCTestCase {
 
         // mike's price sheet is to be used here
         if true {
-            let pricer = PriceSheetService(holland, mike, date: christmasDay)
+            let pricer = PriceSheetService(holland, mike, christmasDay)
 
             let price = pricer.getPrice(beer, triggerQuantities: [:], transactionCurrency: .USD)
 
@@ -191,7 +191,7 @@ class PriceSheetServicePricingTests: XCTestCase {
         if true {
             mikesPriceSheet.unassignFrom(mike)
 
-            let pricer = PriceSheetService(holland, mike, date: christmasDay)
+            let pricer = PriceSheetService(holland, mike, christmasDay)
 
             let price = pricer.getPrice(beer, triggerQuantities: [:], transactionCurrency: .USD)
 
@@ -203,7 +203,7 @@ class PriceSheetServicePricingTests: XCTestCase {
         if true {
             hollandPriceSheet.unassignFrom(holland)
 
-            let pricer = PriceSheetService(holland, mike, date: christmasDay)
+            let pricer = PriceSheetService(holland, mike, christmasDay)
 
             let price = pricer.getPrice(beer, triggerQuantities: [:], transactionCurrency: .USD)
 

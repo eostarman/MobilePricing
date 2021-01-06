@@ -11,8 +11,6 @@ import MoneyAndExchangeRates
 
 // this will parse, process and apply promotions for a customer on a given date
 public struct PromoService {
-    let cusNid: Int
-    let date: Date
 
     var promoCodesForThisCustomer: [Int: PromoCodeRecord] = [:]
 
@@ -20,12 +18,11 @@ public struct PromoService {
 
     var unsupportedPromoSections: [PromoSectionRecord] = []
 
-    public init(cusNid: Int, date: Date) {
-        self.cusNid = cusNid
-        self.date = date
+    public init(shipTo: CustomerRecord, pricingDate: Date) {
+        let pricingParent = mobileDownload.customers[shipTo.pricingParentNid ?? shipTo.recNid]
 
         for promoCode in mobileDownload.promoCodes.getAll() {
-            if promoCode.isCustomerSelected(cusNid: cusNid) {
+            if promoCode.isCustomerSelected(pricingParent) {
                 promoCodesForThisCustomer[promoCode.recNid] = promoCode
             }
         }
@@ -39,12 +36,12 @@ public struct PromoService {
                 continue
             }
 
-            if !promoSection.isActiveOnDate(date) {
+            if !promoSection.isActiveOnDate(pricingDate) {
                 continue
             }
 
             if promoSection.isMixAndMatch, promoSection.promoPlan == .Default {
-                let mixAndMatchPromo = MixAndMatchPromo(promoCode: promoCode, promoSection: promoSection)
+                let mixAndMatchPromo = MixAndMatchPromo(promoCode, promoSection)
                 mixAndMatchPromos.append(mixAndMatchPromo)
             } else {
                 unsupportedPromoSections.append(promoSection)
