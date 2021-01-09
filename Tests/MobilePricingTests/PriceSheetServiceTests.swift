@@ -14,9 +14,9 @@ class PriceSheetServiceTests: XCTestCase {
 
     func testItemPrice() {
         mobileDownload = MobileDownload()
-        let priceSheet = testPriceSheet()
+        let priceSheet = mobileDownload.testPriceSheet()
         priceSheet.currency = .EUR
-        let beer = testItem()
+        let beer = mobileDownload.testItem()
 
         XCTAssertNil(priceSheet.getPrice(beer, priceLevel: 1))
 
@@ -26,7 +26,7 @@ class PriceSheetServiceTests: XCTestCase {
 
     func testActiveDate() {
         mobileDownload = MobileDownload()
-        let priceSheet = testPriceSheet()
+        let priceSheet = mobileDownload.testPriceSheet()
         
         priceSheet.startDate = christmasDay
         priceSheet.endDate = dayAfterChristmas
@@ -43,9 +43,9 @@ class PriceSheetServiceTests: XCTestCase {
 
     func testQtyBasedMinimums() {
         mobileDownload = MobileDownload()
-        let priceSheet = testPriceSheet()
+        let priceSheet = mobileDownload.testPriceSheet()
 
-        let beer = testItem()
+        let beer = mobileDownload.testItem()
 
         priceSheet.setPrice(beer, priceLevel: 1, price: 1.55)
 
@@ -61,13 +61,13 @@ class PriceSheetServiceTests: XCTestCase {
     func testWeightBasedMinimumsMixAndMatch() {
         mobileDownload = MobileDownload()
 
-        let beer = testItem()
+        let beer = mobileDownload.testItem()
         beer.itemWeight = 2.0               // e.g. each 1 of these things will weigh 2lbs
 
-        let hamburger = testItem()
+        let hamburger = mobileDownload.testItem()
         hamburger.itemWeight = 0.5               // e.g. each 1 of these things will weigh 2lbs
 
-        let priceSheet = testPriceSheet()
+        let priceSheet = mobileDownload.testPriceSheet()
 
         priceSheet.setPrice(beer, priceLevel: 1, price: 1.55)
         priceSheet.setPrice(hamburger, priceLevel: 2, price: 1.55)
@@ -95,14 +95,14 @@ class PriceSheetServiceTests: XCTestCase {
 
     func testNonMixAndMatch() {
         mobileDownload = MobileDownload()
-        let priceSheet = testPriceSheet()
+        let priceSheet = mobileDownload.testPriceSheet()
         priceSheet.perItemMinimums = true
 
-        let beer = testItem()
-        let cider = testItem()
+        let beer = mobileDownload.testItem()
+        let soda = mobileDownload.testItem()
 
         priceSheet.setPrice(beer, priceLevel: 1, price: 1.55)
-        priceSheet.setPrice(cider, priceLevel: 1, price: 1.55)
+        priceSheet.setPrice(soda, priceLevel: 1, price: 1.55)
 
         priceSheet.setAutoColumn(priceLevel: 1, minimumCases: 10)
 
@@ -115,7 +115,8 @@ class PriceSheetServiceTests: XCTestCase {
         // okay - you bought 10, and this meets the minimum for item #1001
         XCTAssertTrue(priceSheet.isFrontlinePriceLevelTriggered(beer, priceLevel: 1, triggerQuantities: [beer.recNid:10]))
 
-        // you bought 10 ciders, so the beer price is *not* triggered
-        XCTAssertFalse(priceSheet.isFrontlinePriceLevelTriggered(beer, priceLevel: 1, triggerQuantities: [cider.recNid:10]))
+        // you bought 10 of item #1002, so item #1001 isn't triggered
+        XCTAssertFalse(priceSheet.isFrontlinePriceLevelTriggered(beer, priceLevel: 1, triggerQuantities: [soda.recNid:10]))
     }
+
 }

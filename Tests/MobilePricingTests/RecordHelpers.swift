@@ -14,16 +14,12 @@ let christmasEve: Date = "12-24-2020"
 let christmasDay: Date = "12-25-2020"
 let dayAfterChristmas: Date = "12-26-2020"
 
-
 fileprivate var numberOfTestRecordsCreated = 0
-fileprivate func testRecNid() -> Int {
-    numberOfTestRecordsCreated += 1
-    return numberOfTestRecordsCreated
-}
 
 fileprivate func testRecord<T: Record>() -> T {
-    let recNid = testRecNid()
-
+    numberOfTestRecordsCreated += 1
+    let recNid = numberOfTestRecordsCreated
+    
     var record = T()
     record.recNid = recNid
     record.recKey = "\(recNid)"
@@ -31,11 +27,15 @@ fileprivate func testRecord<T: Record>() -> T {
     return record
 }
 
-func testWarehouse() -> WarehouseRecord { mobileDownload.warehouses.add(testRecord()) }
-func testItem() -> ItemRecord { mobileDownload.items.add(testRecord()) }
-func testCustomer() -> CustomerRecord { mobileDownload.customers.add(testRecord()) }
-func testPriceSheet() -> PriceSheetRecord { mobileDownload.priceSheets.add(testRecord()) }
-func testPriceRule() -> PriceRuleRecord { mobileDownload.priceRules.add(testRecord())}
+extension MobileDownload {
+    func testWarehouse() -> WarehouseRecord { warehouses.add(testRecord()) }
+    func testItem() -> ItemRecord { items.add(testRecord()) }
+    func testCustomer() -> CustomerRecord { customers.add(testRecord()) }
+    func testPriceSheet() -> PriceSheetRecord { priceSheets.add(testRecord()) }
+    func testPriceRule() -> PriceRuleRecord { priceRules.add(testRecord())}
+    func testPromoCode() -> PromoCodeRecord { promoCodes.add(testRecord())}
+    func testPromoSection() -> PromoSectionRecord { promoSections.add(testRecord())}
+}
 
 // https://www.avanderlee.com/swift/expressible-literals/
 extension Date: ExpressibleByStringLiteral {
@@ -56,17 +56,4 @@ extension MoneyWithoutCurrency: ExpressibleByFloatLiteral {
         }
         self = money
     }
-}
-
-enum TestError : Error {
-    case badAmount(String)
-}
-
-func USD(_ amount: Double) -> Money {
-    let amountAsString = "\(amount)"
-
-    guard let money = MoneyWithoutCurrency("\(amount)") else {
-        fatalError("ERROR: Bad amount: '\(amountAsString)'")
-    }
-    return money.withCurrency(.USD)
 }

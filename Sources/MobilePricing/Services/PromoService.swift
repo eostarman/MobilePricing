@@ -14,15 +14,19 @@ public struct PromoService {
 
     var promoCodesForThisCustomer: [Int: PromoCodeRecord] = [:]
 
-    public var mixAndMatchPromos: [MixAndMatchPromo] = []
+    var mixAndMatchPromos: [MixAndMatchPromo] = []
 
     var unsupportedPromoSections: [PromoSectionRecord] = []
-
-    public init(sellTo: CustomerRecord, pricingDate: Date) {
-        let pricingParent = mobileDownload.customers[sellTo.pricingParentNid ?? sellTo.recNid]
+    
+    var isEmpty: Bool {
+        mixAndMatchPromos.isEmpty
+    }
+    
+    /// Gather all promotions from the mobileDownload for this customer that are active on the given date
+    public init(_ customer: CustomerRecord, _ date: Date) {
 
         for promoCode in mobileDownload.promoCodes.getAll() {
-            if promoCode.isCustomerSelected(pricingParent) {
+            if promoCode.isCustomerSelected(customer) {
                 promoCodesForThisCustomer[promoCode.recNid] = promoCode
             }
         }
@@ -36,7 +40,7 @@ public struct PromoService {
                 continue
             }
 
-            if !promoSection.isActiveOnDate(pricingDate) {
+            if !promoSection.isActiveOnDate(date) {
                 continue
             }
 
@@ -48,9 +52,22 @@ public struct PromoService {
             }
         }
     }
-
-    public func computeDiscounts(lines: [SaleLine]) {
+    
+    
+    /// Convenience method useful during testing
+    /// Find the best discount for each sale - the discount is converted to the same currency as the unitPrice. If any discounts are in a different currency than the price and the mobileDownload
+    /// has no exchange rates, then those discounts are ignored
+    /// - Parameter lines: Each of the sales - these should identify an item (or alt-pack), a non-negative quantity and a non-null price. The best discount (if any) for each line is computed.
+    public func computeDiscounts(_ lines: SaleLine ...) {
+        computeDiscounts(lines)
+    }
+    
+    /// Find the best discount for each sale - the discount is converted to the same currency as the unitPrice. If any discounts are in a different currency than the price and the mobileDownload
+    /// has no exchange rates, then those discounts are ignored
+    /// - Parameter lines: Each of the sales - these should identify an item (or alt-pack), a non-negative quantity and a non-null price. The best discount (if any) for each line is computed.
+    public func computeDiscounts(_ lines: [SaleLine]) {
         let qtys = TriggerQtys()
+        
         for line in lines {
             line.clearDiscounts()
             let item = mobileDownload.items[line.itemNid]
@@ -65,8 +82,9 @@ public struct PromoService {
             }
 
             for line in lines {
-                if let promoItem = promo.getDiscount(line.itemNid), let amountoff = getAmountOff(promoItem: promoItem, price: line.price) {
-                    let discount = Discount(promoItem: promoItem, amountOff: amountoff)
+                if let promoItem = promo.getDiscount(line.itemNid),
+                   let amountoff = Self.getAmountOff(promoItem: promoItem, unitPrice: line.unitPrice) {
+                    let discount = DiscountWithReason(promoItem: promoItem, amountOff: amountoff)
                     line.addDiscount(discount: discount)
                 }
             }
@@ -77,11 +95,17 @@ public struct PromoService {
         }
     }
 
-    public func getAmountOff(promoItem: PromoItem, price: Money?) -> Money? {
-        guard let price = price else { return nil }
+    static func getAmountOff(promoItem: PromoItem, unitPrice: Money?) -> Money? {
+        guard let unitPrice = unitPrice else { return nil }
+        
+        if unitPrice.isZero {
+            return nil
+        }
+        
         let promoSection = mobileDownload.promoSections[promoItem.promoSectionNid]
         let promoCode = mobileDownload.promoCodes[promoSection.promoCodeNid]
-        let amountOff = promoItem.getUnitDisc(promoCode: promoCode, unitPrice: price, nbrPriceDecimals: 2)
+        
+        let amountOff = promoItem.getUnitDisc(promoCurrency: promoCode.currency, unitPrice: unitPrice, nbrPriceDecimals: 2)
         return amountOff
     }
 }

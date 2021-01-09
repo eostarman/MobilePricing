@@ -15,8 +15,13 @@ public final class TriggerQtys {
     public init() {
 
     }
-
+    
+    /// Add a *sale* to the trigger quantities (negative quantities representing credits or product pickups are ignored)
     func addItemAndQty(_ item: ItemRecord, qty: Int) {
+        if qty <= 0 {
+            return
+        }
+        
         let itemNid = item.recNid
 
         if let priorQty = quantitiesByItem[itemNid] {

@@ -13,7 +13,7 @@ import MoneyAndExchangeRates
 struct DefaultPriceService {
 
     /// This gets the default price from the item record, if there is one
-    static func getDefaultPrice(_ item: ItemRecord, pricingDate: Date) -> MoneyWithoutCurrency? {
+    static func getDefaultPrice(_ item: ItemRecord, _ pricingDate: Date) -> MoneyWithoutCurrency? {
 
         // see FrontlinePriceCalculator.cs
         if let defaultPrice2EffectiveDate = item.defaultPrice2EffectiveDate, let defaultPrice2 = item.defaultPrice2, pricingDate >= defaultPrice2EffectiveDate {

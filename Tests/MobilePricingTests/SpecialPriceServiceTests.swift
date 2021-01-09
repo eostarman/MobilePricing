@@ -16,9 +16,9 @@ class SpecialPriceServiceTests: XCTestCase {
 
         mobileDownload = MobileDownload()
 
-        let beer = testItem()
+        let beer = mobileDownload.testItem()
         
-        let mike = testCustomer()
+        let mike = mobileDownload.testCustomer()
         mike.transactionCurrencyNid = Currency.EUR.currencyNid
 
         mike.specialPrices = [
@@ -27,14 +27,14 @@ class SpecialPriceServiceTests: XCTestCase {
         ]
 
         if true {
-            let priceBeforeChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, date: christmasEve)
+            let priceBeforeChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, christmasEve)
             XCTAssertNil(priceBeforeChristmasDay)
 
-            let priceOnChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, date: christmasDay)
+            let priceOnChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, christmasDay)
             XCTAssertNotNil(priceOnChristmasDay)
             XCTAssertEqual(priceOnChristmasDay!, MoneyWithoutCurrency(1.75).withCurrency(.EUR))
 
-            let priceAfterChristmas = SpecialPriceService.getCustomerSpecialPrice(mike, beer, date: dayAfterChristmas)
+            let priceAfterChristmas = SpecialPriceService.getCustomerSpecialPrice(mike, beer, dayAfterChristmas)
             XCTAssertNotNil(priceAfterChristmas)
             XCTAssertEqual(priceAfterChristmas!, MoneyWithoutCurrency(1.95).withCurrency(.EUR))
         }
@@ -43,17 +43,16 @@ class SpecialPriceServiceTests: XCTestCase {
         if true {
             mike.specialPrices?.reverse()
 
-            let priceBeforeChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, date: christmasEve)
+            let priceBeforeChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, christmasEve)
             XCTAssertNil(priceBeforeChristmasDay)
 
-            let priceOnChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, date: christmasDay)
+            let priceOnChristmasDay = SpecialPriceService.getCustomerSpecialPrice(mike, beer, christmasDay)
             XCTAssertNotNil(priceOnChristmasDay)
             XCTAssertEqual(priceOnChristmasDay!, MoneyWithoutCurrency(1.75).withCurrency(.EUR))
 
-            let priceAfterChristmas = SpecialPriceService.getCustomerSpecialPrice(mike, beer, date: dayAfterChristmas)
+            let priceAfterChristmas = SpecialPriceService.getCustomerSpecialPrice(mike, beer, dayAfterChristmas)
             XCTAssertNotNil(priceAfterChristmas)
             XCTAssertEqual(priceAfterChristmas!, MoneyWithoutCurrency(1.95).withCurrency(.EUR))
         }
     }
-
 }

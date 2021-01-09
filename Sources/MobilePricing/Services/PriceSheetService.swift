@@ -27,7 +27,7 @@ public final class PriceSheetService {
         priceSheetsForCustomer.isEmpty && priceSheetsFromRules.isEmpty && priceSheetsForWarehouse.isEmpty
     }
 
-    public init(shipFrom: WarehouseRecord, sellTo: CustomerRecord, pricingDate: Date, isDepositSchedule: Bool = false) {
+    public init(_ shipFrom: WarehouseRecord, _ sellTo: CustomerRecord, _ pricingDate: Date, isDepositSchedule: Bool = false) {
         self.shipFrom = shipFrom
         self.sellTo = sellTo
         self.pricingParent = mobileDownload.customers[sellTo.pricingParentNid ?? sellTo.recNid]
@@ -95,7 +95,7 @@ public final class PriceSheetService {
 
     public func getPrice(_ priceSheetLink: PriceSheetLink, _ item: ItemRecord, triggerQuantities: TriggerQtys, transactionCurrency: Currency) -> PriceSheetPrice? {
         let priceSheet = priceSheetLink.priceSheet
-
+        
         var levelForBestPrice = priceSheetLink.priceLevel
         var bestPrice = priceSheet.getPrice(item, priceLevel: priceSheetLink.priceLevel)
 
@@ -207,7 +207,8 @@ extension PriceSheetRecord {
             var totalQty = 0.0
             for itemNid in triggerQuantities.itemNids {
                 if containsItem(itemNid: itemNid) {
-                    let qty = triggerQuantities.getCasesOrWeight(item, isCaseMinimum: columnInfo.isCaseMinimum)
+                    let triggerItem = mobileDownload.items[itemNid]
+                    let qty = triggerQuantities.getCasesOrWeight(triggerItem, isCaseMinimum: columnInfo.isCaseMinimum)
                     totalQty += qty
                 }
             }

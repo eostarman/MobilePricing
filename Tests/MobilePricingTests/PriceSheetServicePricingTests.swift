@@ -15,14 +15,14 @@ class PriceSheetServicePricingTests: XCTestCase {
     func testNonAutoColumns() {
         mobileDownload = MobileDownload()
 
-        let holland = testWarehouse()
+        let holland = mobileDownload.testWarehouse()
 
-        let mike = testCustomer()
+        let mike = mobileDownload.testCustomer()
 
-        let beer = testItem()
+        let beer = mobileDownload.testItem()
 
         // set up the beer price sheet
-        let priceSheet = testPriceSheet()
+        let priceSheet = mobileDownload.testPriceSheet()
 
         priceSheet.startDate = christmasDay
         priceSheet.endDate = christmasDay
@@ -71,10 +71,10 @@ class PriceSheetServicePricingTests: XCTestCase {
     func testAutoColumns() {
         mobileDownload = MobileDownload()
 
-        let holland = testWarehouse()
-        let mike = testCustomer()
-        let beer = testItem()
-        let priceSheet = testPriceSheet()
+        let holland = mobileDownload.testWarehouse()
+        let mike = mobileDownload.testCustomer()
+        let beer = mobileDownload.testItem()
+        let priceSheet = mobileDownload.testPriceSheet()
 
         // set up the beer price sheet
         if true {
@@ -119,11 +119,11 @@ class PriceSheetServicePricingTests: XCTestCase {
     func testAssignmentByPriceRule() {
         mobileDownload = MobileDownload()
 
-        let holland = testWarehouse()
-        let mike = testCustomer()
-        let beer = testItem()
-        let specialPriceSheet = testPriceSheet()
-        let hollandPriceSheet = testPriceSheet()
+        let holland = mobileDownload.testWarehouse()
+        let mike = mobileDownload.testCustomer()
+        let beer = mobileDownload.testItem()
+        let specialPriceSheet = mobileDownload.testPriceSheet()
+        let hollandPriceSheet = mobileDownload.testPriceSheet()
 
         // the price of beer bought from the Holland warehouse is 1.55; however, mike is on a special (higher) price of 1.83 because he has a nifty beer cooler
         if true {
@@ -149,13 +149,13 @@ class PriceSheetServicePricingTests: XCTestCase {
     func testPrecedenceCustomerVsWarehouse() {
         mobileDownload = MobileDownload()
 
-        let holland = testWarehouse()
-        let mike = testCustomer()
-        let beer = testItem()
+        let holland = mobileDownload.testWarehouse()
+        let mike = mobileDownload.testCustomer()
+        let beer = mobileDownload.testItem()
 
-        let mikesPriceSheet = testPriceSheet()
-        let specialPriceSheet = testPriceSheet()
-        let hollandPriceSheet = testPriceSheet()
+        let mikesPriceSheet = mobileDownload.testPriceSheet()
+        let specialPriceSheet = mobileDownload.testPriceSheet()
+        let hollandPriceSheet = mobileDownload.testPriceSheet()
 
         // the price of beer bought from the Holland warehouse is 1.55; however, mike is on a special (higher) price of 1.83 because he has a nifty beer cooler
         if true {

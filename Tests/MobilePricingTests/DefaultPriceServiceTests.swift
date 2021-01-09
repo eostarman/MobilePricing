@@ -12,16 +12,10 @@ import MoneyAndExchangeRates
 
 class DefaultPriceServiceTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        mobileDownload = MobileDownload()
-    }
-
-    override func tearDownWithError() throws {
-        mobileDownload = MobileDownload()
-    }
-
     func testSimpleDefaultPrice() throws {
-        let beer = testItem()
+        mobileDownload = MobileDownload()
+        
+        let beer = mobileDownload.testItem()
         beer.defaultPrice = 1.50
 
         let price = DefaultPriceService.getDefaultPrice(beer, christmasDay)
@@ -31,7 +25,9 @@ class DefaultPriceServiceTests: XCTestCase {
     }
 
     func testSimpleDefaultPriceWithPrior() throws {
-        let beer = testItem()
+        mobileDownload = MobileDownload()
+        
+        let beer = mobileDownload.testItem()
         beer.defaultPricePrior = 1.33
         beer.defaultPriceEffectiveDate = christmasDay
         beer.defaultPrice = 1.50
@@ -50,7 +46,9 @@ class DefaultPriceServiceTests: XCTestCase {
     }
 
     func testSimpleDefaultPriceWithPriorAndFuturePrices() throws {
-        let beer = testItem()
+        mobileDownload = MobileDownload()
+        
+        let beer = mobileDownload.testItem()
         beer.defaultPricePrior = 1.33
         beer.defaultPriceEffectiveDate = christmasDay
         beer.defaultPrice = 1.50
