@@ -11,6 +11,15 @@ import MoneyAndExchangeRates
 
 extension PromoItem {
 
+    public func getAmountOff(unitPrice: Money) -> Money {
+
+        let promoSection = mobileDownload.promoSections[promoSectionNid]
+        let promoCode = mobileDownload.promoCodes[promoSection.promoCodeNid]
+        
+        let amountOff = getUnitDisc(promoCurrency: promoCode.currency, unitPrice: unitPrice, nbrPriceDecimals: 2)
+        return amountOff ?? unitPrice.currency.zero
+    }
+    
     public func getUnitDisc(promoCurrency: Currency, unitPrice: Money, nbrPriceDecimals: Int, unitSplitCaseCharge: Money? = nil) -> Money? {
         if promoRateType == .percentOff {
             // KJQ 2/26/12 ... if a split case charge is involved it has already been rolled into the unitPrice

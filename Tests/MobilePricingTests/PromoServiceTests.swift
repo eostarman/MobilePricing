@@ -25,7 +25,7 @@ class PromoServiceTests: XCTestCase {
         
         XCTAssertFalse(promoService.isEmpty)
 
-        let amountOffSavings = PromoService.getAmountOff(promoItem: amountOff, unitPrice: Money(10.00, .EUR))
+        let amountOffSavings = amountOff.getAmountOff(unitPrice: Money(10.00, .EUR))
         XCTAssertEqual(amountOffSavings, Money(1.74, .EUR))
     }
 

@@ -57,9 +57,4 @@ class BuyXGetYPomoTests: XCTestCase {
         promoSection.setPromoItems([PromoItem(beer, promotedPrice: 2.33)])
         
     }
-    
-    
-    
-
-
 }

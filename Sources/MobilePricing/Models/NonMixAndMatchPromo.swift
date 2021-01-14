@@ -1,23 +1,28 @@
 //
-//  MixAndMatchPromo.swift
-//  MobileBench
+//  NonMixAndMatchPromo.swift
+//  MobilePricing
 //
-//  Created by Michael Rutherford on 7/21/20.
+//  Created by Michael Rutherford on 1/14/21.
 //
+
 
 import Foundation
 import MobileDownload
 import MoneyAndExchangeRates
 
-public class MixAndMatchPromo {
+public class NonMixAndMatchPromo {
+    private let promoSection: PromoSectionRecord
     public let currency: Currency
     public let note: String?
-    let triggerRequirements: TriggerRequirements?
     public let discountsByItemNid: [Int: PromoItem]
     
     // is this promotion triggered by the quantities on this order
-    func isTriggered(qtys: TriggerQtys) -> Bool {
-        guard let triggerRequirements = triggerRequirements else {
+    func isTriggered(itemNid: Int, qtys: TriggerQtys) -> Bool {
+        if discountsByItemNid[itemNid] == nil {
+            return false
+        }
+        
+        guard let triggerRequirements = promoSection.getNonMixAndMatchTriggerRequirements(itemNid: itemNid) else {
             return true
         }
         return triggerRequirements.isTriggered(qtys)
@@ -29,12 +34,14 @@ public class MixAndMatchPromo {
     }
 
     public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord) {
+        self.promoSection = promoSection
+        
         currency = promoCode.currency
         note = promoSection.getNote()
-        triggerRequirements = promoSection.getMixAndMatchTriggerRequirements()
                 
         let promoItemsProvidingDiscounts = promoSection.getPromoItems().filter { $0.hasDiscount }
 
         discountsByItemNid = Dictionary(uniqueKeysWithValues: promoItemsProvidingDiscounts.map { ($0.itemNid, $0) })
     }
 }
+

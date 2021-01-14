@@ -22,12 +22,10 @@ public final class TriggerQtys {
 extension TriggerQtys {
 
     /// Add a *sale* to the trigger quantities (negative quantities representing credits or product pickups are ignored)
-    func addItemAndQty(_ item: ItemRecord, qty: Int) {
+    func addItemAndQty(itemNid: Int, qty: Int) {
         if qty <= 0 {
             return
         }
-        
-        let itemNid = item.recNid
         
         if let priorQty = quantitiesByItem[itemNid] {
             quantitiesByItem[itemNid] = priorQty + qty
@@ -78,7 +76,7 @@ extension TriggerQtys: ExpressibleByDictionaryLiteral {
     public convenience init(dictionaryLiteral elements: (Int, Int)...) {
         self.init()
         for (itemNid, count) in elements {
-            self.addItemAndQty(mobileDownload.items[itemNid], qty: count)
+            self.addItemAndQty(itemNid: itemNid, qty: count)
         }
     }
 }
