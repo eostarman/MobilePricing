@@ -10,18 +10,21 @@ import MobileDownload
 @testable import MobilePricing
 import MoneyAndExchangeRates
 
-class MixAndMatchPromoTests: XCTestCase {
+class BuyXGetYPomoTests: XCTestCase {
 
     func testBasicPromo() throws {
         mobileDownload = MobileDownload()
         
         let beer = mobileDownload.testItem()
-        
-        
+
         let promoCode = mobileDownload.testPromoCode()
         let promoSection = mobileDownload.testPromoSection()
         
-        promoCode.currency = .EUR
+        promoSection.isBuyXGetY = true
+        promoSection.isMixAndMatch = false
+        promoSection.qtyX = 10
+        promoSection.qtyY = 1
+        
         promoSection.setPromoItems([ PromoItem(beer, percentOff: 10) ])
                 
         let mixAndMatchPromo = MixAndMatchPromo(promoCode, promoSection)

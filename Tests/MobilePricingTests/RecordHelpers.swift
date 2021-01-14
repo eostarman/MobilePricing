@@ -29,7 +29,12 @@ fileprivate func testRecord<T: Record>() -> T {
 
 extension MobileDownload {
     func testWarehouse() -> WarehouseRecord { warehouses.add(testRecord()) }
-    func testItem() -> ItemRecord { items.add(testRecord()) }
+    func testItem() -> ItemRecord {
+        let item = items.add(testRecord())
+        item.altPackCasecount = 1
+        item.altPackFamilyNid = item.recNid
+        return item        
+    }
     func testCustomer() -> CustomerRecord { customers.add(testRecord()) }
     func testPriceSheet() -> PriceSheetRecord { priceSheets.add(testRecord()) }
     func testPriceRule() -> PriceRuleRecord { priceRules.add(testRecord())}

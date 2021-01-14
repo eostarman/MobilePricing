@@ -119,6 +119,7 @@ public final class PriceSheetService {
         }
 
         for priceLevel in automaticColumns {
+
             if !priceSheet.isFrontlinePriceLevelTriggered(item, priceLevel: priceLevel, triggerQuantities: triggerQuantities) {
                 continue
             }
@@ -178,41 +179,6 @@ public final class PriceSheetService {
                 let link = PriceSheetLink(priceSheet: priceSheet, priceLevel: customerLink.priceLevel, canUseAutomaticColumns: customerLink.canUseAutomaticColumns)
                 priceSheetsForCustomer.append(link)
             }
-        }
-    }
-}
-
-extension PriceSheetRecord {
-
-    // see IsFrontlinePriceLevelTriggered() in TriggerQtys.cs
-
-    /// Determine if the automatic column is "triggered" by the quantities the customer is ordering. For example, a price book may have two price sheets - one at quantity 1 and
-    /// another at quantity 10. The minimum can be based on the number of "cases" bought (the quantity) or on the gross weight. When it's based on the quantity bought, no conversion
-    /// to the primary packs is performed.
-    /// - Parameters:
-    ///   - triggerQuantities: the quantities ordered, by item
-    ///   - itemNid: the item (used only when the minimums are per-item)
-    ///   - priceLevel: the price level (column) in the price sheet
-    /// - Returns: true if the minimum is met for the price(s) in this column to take effect
-    func isFrontlinePriceLevelTriggered(_ item: ItemRecord, priceLevel: Int, triggerQuantities: TriggerQtys) -> Bool {
-        guard let columnInfo = columInfos[priceLevel], columnInfo.isAutoColumn, columnInfo.columnMinimum > 0 else {
-            return false
-        }
-
-        if perItemMinimums {
-            let qty = triggerQuantities.getCasesOrWeight(item, isCaseMinimum: columnInfo.isCaseMinimum)
-            return qty >= Double(columnInfo.columnMinimum)
-        }
-        else {
-            var totalQty = 0.0
-            for itemNid in triggerQuantities.itemNids {
-                if containsItem(itemNid: itemNid) {
-                    let triggerItem = mobileDownload.items[itemNid]
-                    let qty = triggerQuantities.getCasesOrWeight(triggerItem, isCaseMinimum: columnInfo.isCaseMinimum)
-                    totalQty += qty
-                }
-            }
-            return totalQty >= Double(columnInfo.columnMinimum)
         }
     }
 }

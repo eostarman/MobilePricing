@@ -8,14 +8,19 @@
 import Foundation
 import MobileDownload
 
+/// This contains the quantities of each item on an order (positive numbers only - i.e. sales but not returns, credits or pickups). This is matched to the TriggerRequirements to
+/// see if a promotion or price-sheet column applies to this order ("is triggered for this order")
 public final class TriggerQtys {
-    public var quantitiesByItem: [Int: Double] = [:]
+    public var quantitiesByItem: [Int: Int] = [:] // itemNid --> Qty on order
     public var itemNids: [Int] = []
-
-    public init() {
-
-    }
     
+    public init() {
+        
+    }
+}
+
+extension TriggerQtys {
+
     /// Add a *sale* to the trigger quantities (negative quantities representing credits or product pickups are ignored)
     func addItemAndQty(_ item: ItemRecord, qty: Int) {
         if qty <= 0 {
@@ -23,38 +28,53 @@ public final class TriggerQtys {
         }
         
         let itemNid = item.recNid
-
+        
         if let priorQty = quantitiesByItem[itemNid] {
-            quantitiesByItem[itemNid] = priorQty + Double(qty)
+            quantitiesByItem[itemNid] = priorQty + qty
         } else {
-            quantitiesByItem[itemNid] = Double(qty)
+            quantitiesByItem[itemNid] = qty
             itemNids.append(itemNid)
         }
     }
-
-    /// Return the quantity for the itemNid. If the weight is needed, then the item's weight is retrieved from mobileDownload
-    /// - Parameters:
-    ///   - isCaseMinimum: true to get cases (actually the qty for the item); false to get the total weight instead
-    func getCasesOrWeight(_ item: ItemRecord, isCaseMinimum: Bool) -> Double {
-        let itemTriggerQty = getQty(item)
-        if itemTriggerQty == 0 {
+    
+    /// A minimum requirement may be entered as a number of cases, and the order contains bottles; or, it may be in bottles and the order contains cases (or a mix of bottles and cases)
+    /// Frank Liqour required this for liquor sales. This is not the same as adding two different items together - just adding the alt-packs and representing the total in
+    /// terms of one of those alt-packs
+    func getRollupQty(itemNid resultItemNid: Int) -> Double {
+        let resultItem = mobileDownload.items[resultItemNid]
+        let primaryPack = mobileDownload.items[resultItem.altPackFamilyNid]
+        
+        var total = Double(quantitiesByItem[primaryPack.recNid] ?? 0)
+        
+        for altPackNid in primaryPack.altPackNids {
+            if let qty = quantitiesByItem[altPackNid] {
+                let thisAltPack = mobileDownload.items[altPackNid]
+                total += Double(qty) * thisAltPack.numberOfPrimaryPacks
+            }
+        }
+        
+        let resultTotal = total / resultItem.numberOfPrimaryPacks
+        
+        return resultTotal
+    }
+    
+    func getWeight(itemNid: Int) -> Double {
+        if let qty = quantitiesByItem[itemNid] {
+            let weight = mobileDownload.items[itemNid].itemWeight
+            return Double(qty) * weight
+        } else {
             return 0
         }
-
-        if isCaseMinimum {
-            return itemTriggerQty
-        } else {
-            let weight = itemTriggerQty * item.itemWeight
-            return weight
-        }
     }
-
-    func getQty(_ item: ItemRecord) -> Double {
-        quantitiesByItem[item.recNid] ?? 0
+    
+    func getQty(itemNid: Int) -> Int {
+        quantitiesByItem[itemNid] ?? 0
     }
 }
 
 extension TriggerQtys: ExpressibleByDictionaryLiteral {
+    
+    /// This allows initialization like this: [beer.recNid:10, wine.recNid:5]
     public convenience init(dictionaryLiteral elements: (Int, Int)...) {
         self.init()
         for (itemNid, count) in elements {

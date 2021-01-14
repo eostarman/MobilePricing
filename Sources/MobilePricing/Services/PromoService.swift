@@ -53,7 +53,6 @@ public struct PromoService {
         }
     }
     
-    
     /// Convenience method useful during testing
     /// Find the best discount for each sale - the discount is converted to the same currency as the unitPrice. If any discounts are in a different currency than the price and the mobileDownload
     /// has no exchange rates, then those discounts are ignored

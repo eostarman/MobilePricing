@@ -1,0 +1,128 @@
+//
+//  File.swift
+//  
+//
+//  Created by Michael Rutherford on 1/10/21.
+//
+
+import Foundation
+import MobileDownload
+
+//MARK: getBuyXGetYMixAndMatchPromo
+extension PromoSectionRecord {
+
+func getFreeItemNids() -> Set<Int> {
+    var freeItems: Set<Int> = []
+    
+    for item in getPromoItems() {
+        if item.is100PercentOff {
+            freeItems.insert(item.itemNid)
+        }
+    }
+    
+    return freeItems
+}
+    
+    func getBuyXGetYMixAndMatchPromo() -> BuyXGetYMixAndMatchPromo? {
+        guard isBuyXGetY, isMixAndMatch, let triggerRequirements = getTriggerRequirements() else {
+            return nil
+        }
+        
+        let freeItems = getFreeItemNids()
+        
+        let freeItemsThatAreTriggers = freeItems.filter { triggerRequirements.contains(itemNid: $0) }
+        let freeItemsThatAreNotTriggers = freeItems.filter { !triggerRequirements.contains(itemNid: $0) }
+        
+        let promo = BuyXGetYMixAndMatchPromo(promoSection: self, triggerRequirements: triggerRequirements, freeItemsThatAreTriggers: freeItemsThatAreTriggers, freeItemsThatAreNotTriggers: freeItemsThatAreNotTriggers, qtyX: qtyX, qtyY: qtyY)
+        
+        return promo
+    }
+}
+
+//MARK: getTriggerRequirements
+extension PromoSectionRecord {
+    
+    /// Get the trigger requirements for a mix-and-match promotion to get applied to an order (i.e. certain items *must* be on an order before this promo section is triggered)
+    func getTriggerRequirements() -> TriggerRequirements? {
+        if caseMinimum == 0 {
+            return nil
+        }
+        
+        let triggerItemNids = getTriggerItemNids()
+        if triggerItemNids.isEmpty {
+            return nil
+        }
+        
+        // this is a special case. If all items are trigger items and the minimum quantity you have to order is (1) then there is no
+        // real trigger requirement. Note that this won't work for a "case-rollup" promotion. Also, it doesn't apply to a
+        // situation where you must buy some *specific* items to get a discount on any of the other items
+        if caseMinimum == 1, !isCaseRollupPromo, triggerItemNids.count == getPromoItems().count {
+            return nil
+        }
+        
+        let groupRequirements = getTriggerGroupRequirements()
+        
+        let requirements = TriggerRequirements(basis: isCaseRollupPromo ? .caseRollup : .qty, minimum: caseMinimum, triggerItemNids: triggerItemNids, groupRequirements: groupRequirements)
+        
+        return requirements
+    }
+    
+    private func getTriggerGroupRequirements() -> [TriggerRequirements] {
+        var groupRequirements: [TriggerRequirements] = []
+        
+        for triggerGroup in getTriggerGroups() {
+            let minimum = getTriggerGroupMinimum(triggerGroup: triggerGroup)
+            let itemNids = getTriggerGroupItemNids(triggerGroup: triggerGroup)
+            
+            let requirement = TriggerRequirements(triggerGroup: triggerGroup, basis: isCaseRollupPromo ? .caseRollup : .qty, minimum: minimum, triggerItemNids: itemNids, groupRequirements: [])
+            
+            groupRequirements.append(requirement)
+        }
+
+        return groupRequirements
+    }
+    
+    /// Get the additional trigger groups that have a non-zero minimum requirement
+    func getTriggerGroups() -> [Int] {
+        var groups: [Int] = []
+        
+        if triggerGroup1Minimum > 0 { groups.append(1) }
+        if triggerGroup2Minimum > 0 { groups.append(2) }
+        if triggerGroup3Minimum > 0 { groups.append(3) }
+        if triggerGroup4Minimum > 0 { groups.append(4) }
+        if triggerGroup5Minimum > 0 { groups.append(5) }
+        
+        return groups
+    }
+    
+    /// Get the minimum requirement for a given trigger group
+    func getTriggerGroupMinimum(triggerGroup: Int) -> Int {
+        switch triggerGroup {
+        case 1: return triggerGroup1Minimum
+        case 2: return triggerGroup2Minimum
+        case 3: return triggerGroup3Minimum
+        case 4: return triggerGroup4Minimum
+        case 5: return triggerGroup5Minimum
+        default:
+            return 0
+        }
+    }
+    
+    func getTriggerGroupItemNids(triggerGroup: Int) -> Set<Int> {
+        Set(getPromoItems().filter { $0.triggerGroup == triggerGroup }.map { $0.itemNid })
+    }
+    
+    /// For a mix-and-match promotion return the trigger items. A promotion can be "triggered" by buying enough of certain items. If the trigger is based on
+    /// certain explicit itemNids, then those are returned. Otherwise, all itemNids (discounted or not) are returned
+    /// - Returns: itemNids
+    func getTriggerItemNids() -> Set<Int> {
+        let explicitItemNids = Set(getPromoItems().filter { $0.isExplicitTriggerItem }.map {$0.itemNid })
+        if !explicitItemNids.isEmpty {
+            return explicitItemNids
+        } else {
+            return Set(getPromoItems().map {$0.itemNid })
+        }
+    }
+}
+
+
