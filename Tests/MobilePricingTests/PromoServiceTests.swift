@@ -173,6 +173,31 @@ class PromoServiceTests: XCTestCase {
         promoService.computeDiscounts(beerSale)
         XCTAssertNil(beerSale.unitDisc)
     }
+    
+    func testNonMixAndMatchTriggeredAmountOffPromo() throws {
+        mobileDownload = MobileDownload()
+        let mike = mobileDownload.testCustomer()
+        
+        let beer = mobileDownload.testItem()
+        let darkBeer = mobileDownload.testItem()
+
+        let promoSection = mobileDownload.testPromotion(customer: mike,
+                                                        PromoItem(beer, amountOff: 1.74),
+                                                        PromoItem(darkBeer, amountOff: 1.55))
+        promoSection.caseMinimum = 10
+        promoSection.isMixAndMatch = false
+        
+        let promoService = PromoService(mike, christmasDay)
+        
+        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 10, unitPrice: Money(10.00, .EUR))
+        let darkBeerSale = SaleLine(id: 2, itemNid: darkBeer.recNid, qtyOrdered: 9, unitPrice: Money(10.00, .EUR))
+        
+        
+        // the discount is triggered at 10 cases
+        promoService.computeDiscounts(beerSale, darkBeerSale)
+        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .EUR))
+        XCTAssertNil(darkBeerSale.unitDisc)
+    }
 }
 
 //MARK helpers for testing
