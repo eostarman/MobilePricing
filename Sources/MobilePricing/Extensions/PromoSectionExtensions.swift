@@ -8,37 +8,6 @@
 import Foundation
 import MobileDownload
 
-//MARK: getBuyXGetYMixAndMatchPromo
-extension PromoSectionRecord {
-
-func getFreeItemNids() -> Set<Int> {
-    var freeItems: Set<Int> = []
-    
-    for item in getPromoItems() {
-        if item.is100PercentOff {
-            freeItems.insert(item.itemNid)
-        }
-    }
-    
-    return freeItems
-}
-    
-    func getBuyXGetYMixAndMatchPromo() -> BuyXGetYMixAndMatchPromo? {
-        guard isBuyXGetY, isMixAndMatch, let triggerRequirements = getMixAndMatchTriggerRequirements() else {
-            return nil
-        }
-        
-        let freeItems = getFreeItemNids()
-        
-        let freeItemsThatAreTriggers = freeItems.filter { triggerRequirements.contains(itemNid: $0) }
-        let freeItemsThatAreNotTriggers = freeItems.filter { !triggerRequirements.contains(itemNid: $0) }
-        
-        let promo = BuyXGetYMixAndMatchPromo(promoSection: self, triggerRequirements: triggerRequirements, freeItemsThatAreTriggers: freeItemsThatAreTriggers, freeItemsThatAreNotTriggers: freeItemsThatAreNotTriggers, qtyX: qtyX, qtyY: qtyY)
-        
-        return promo
-    }
-}
-
 //MARK: getTriggerRequirements
 extension PromoSectionRecord {
     

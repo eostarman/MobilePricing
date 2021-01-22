@@ -14,7 +14,33 @@
 
 import Foundation
 import MobileDownload
+import MoneyAndExchangeRates
 
-public struct BuyXGetYFreeService {
+public class BuyXGetYMixAndMatchService {
+    
+    var sales: [Sale] = []
+    
     init() {}
+    
+    func add(itemNid: Int, qtySold: Int, unitPrice: Money) {
+        sales.append(Sale(itemNid: itemNid, qtySold: qtySold, unitPrice: unitPrice))
+    }
+}
+
+extension BuyXGetYMixAndMatchService {
+    struct Sale {
+        let itemNid: Int
+        let qtySold: Int
+        let unitPrice: Money
+    }
+}
+
+extension BuyXGetYMixAndMatchPromo {
+    struct Solution {
+        
+    }
+    
+    func compute(qtys: TriggerQtys) -> Solution {
+        return Solution()
+    }
 }

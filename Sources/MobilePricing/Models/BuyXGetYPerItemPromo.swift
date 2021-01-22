@@ -14,7 +14,7 @@ struct BuyXGetYPerItemPromo {
 }
 
 extension BuyXGetYPerItemPromo {
-    struct Result {
+    struct Solution {
         
         /// The number being sold to the customer at full price
         let qtyAtFullPrice: Int
@@ -33,9 +33,9 @@ extension BuyXGetYPerItemPromo {
     /// of 11 will show that 10 were at full price and 1 was free (with zero unused freebies)
     /// - Parameter qtySold: The total on the order (includes the paid ones as well as the free ones)
     /// - Returns: the breakdown showing how many of the qtySold are at full price, how many are free, and how many additional ones can be added to the order for free (the unused freebies)
-    func compute(qtySold: Int) -> Result {
+    func compute(qtySold: Int) -> Solution {
         guard qtyX > 0, qtyY > 0 else {
-            return Result(qtyAtFullPrice: qtySold, qtyFree: 0, unusedFreebies: 0, qtyToAddToEarnMoreFreebies: 0)
+            return Solution(qtyAtFullPrice: qtySold, qtyFree: 0, unusedFreebies: 0, qtyToAddToEarnMoreFreebies: 0)
         }
         
         let bundle = qtyX + qtyY
@@ -57,14 +57,14 @@ extension BuyXGetYPerItemPromo {
             qtyToAddToEarnMoreFreebies = qtyX - residual
         }
         
-        return Result(qtyAtFullPrice: qtyAtFullPrice, qtyFree: qtyFree + unusedFreebies, unusedFreebies: unusedFreebies, qtyToAddToEarnMoreFreebies: qtyToAddToEarnMoreFreebies)
+        return Solution(qtyAtFullPrice: qtyAtFullPrice, qtyFree: qtyFree + unusedFreebies, unusedFreebies: unusedFreebies, qtyToAddToEarnMoreFreebies: qtyToAddToEarnMoreFreebies)
     }
     
 }
 
 extension PromoSectionRecord {
     func getBuyXGetYPerItemPromo() -> BuyXGetYPerItemPromo? {
-        guard isBuyXGetY && !isMixAndMatch else {
+        guard isBuyXGetY && !isMixAndMatch && qtyX > 0 && qtyY > 0 else {
             return nil
         }
         
