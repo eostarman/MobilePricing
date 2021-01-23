@@ -53,7 +53,7 @@ extension PromoSectionRecord {
     private func getTriggerGroupRequirements() -> [TriggerRequirements] {
         var groupRequirements: [TriggerRequirements] = []
         
-        for triggerGroup in getTriggerGroups() {
+        for triggerGroup in triggerGroupsWithNonZeroMinimums {
             let minimum = getTriggerGroupMinimum(triggerGroup: triggerGroup)
             let itemNids = getTriggerGroupItemNids(triggerGroup: triggerGroup)
             
@@ -66,7 +66,7 @@ extension PromoSectionRecord {
     }
     
     /// Get the additional trigger groups that have a non-zero minimum requirement
-    private func getTriggerGroups() -> [Int] {
+    var triggerGroupsWithNonZeroMinimums: [Int] {
         var groups: [Int] = []
         
         if triggerGroup1Minimum > 0 { groups.append(1) }
@@ -79,7 +79,7 @@ extension PromoSectionRecord {
     }
     
     /// Get the minimum requirement for a given trigger group
-    private func getTriggerGroupMinimum(triggerGroup: Int) -> Int {
+    func getTriggerGroupMinimum(triggerGroup: Int) -> Int {
         switch triggerGroup {
         case 1: return triggerGroup1Minimum
         case 2: return triggerGroup2Minimum

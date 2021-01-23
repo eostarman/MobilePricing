@@ -10,6 +10,8 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 public class StandardMixAndMatchPromoSection {
+    let promoSectionRecord: PromoSectionRecord
+    
     public let currency: Currency
     public let note: String?
     let triggerRequirements: TriggerRequirements
@@ -26,6 +28,8 @@ public class StandardMixAndMatchPromoSection {
     }
 
     public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord) {
+        self.promoSectionRecord = promoSection
+        
         currency = promoCode.currency
         note = promoSection.getNote()
         triggerRequirements = promoSection.getMixAndMatchTriggerRequirements()

@@ -13,7 +13,9 @@ import MoneyAndExchangeRates
 class BuyXGetYPerItemPromoTests: XCTestCase {
     
     func testBasicCalculation() {
-        let promo = BuyXGetYPerItemPromoSection(itemNids: [], qtyX: 10, qtyY: 3)
+        mobileDownload = MobileDownload()
+        let promoSection = mobileDownload.testPromoSection()
+        let promo = BuyXGetYPerItemPromoSection(promoSectionRecord: promoSection, itemNids: [], qtyX: 10, qtyY: 3)
         
         var solution: BuyXGetYPerItemPromoSection.Solution
         

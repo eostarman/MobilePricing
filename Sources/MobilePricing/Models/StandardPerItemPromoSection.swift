@@ -11,7 +11,7 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 public class StandardPerItemPromoSection {
-    private let promoSection: PromoSectionRecord
+    let promoSectionRecord: PromoSectionRecord
     public let currency: Currency
     public let note: String?
     public let discountsByItemNid: [Int: PromoItem]
@@ -22,7 +22,7 @@ public class StandardPerItemPromoSection {
             return false
         }
         
-        guard let triggerRequirements = promoSection.getNonMixAndMatchTriggerRequirements(itemNid: itemNid) else {
+        guard let triggerRequirements = promoSectionRecord.getNonMixAndMatchTriggerRequirements(itemNid: itemNid) else {
             return true
         }
         return triggerRequirements.isTriggered(qtys)
@@ -34,7 +34,7 @@ public class StandardPerItemPromoSection {
     }
 
     public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord) {
-        self.promoSection = promoSection
+        self.promoSectionRecord = promoSection
         
         currency = promoCode.currency
         note = promoSection.getNote()

@@ -17,13 +17,14 @@ class BuyXGetYMixAndMatchPromoTests: XCTestCase {
         mobileDownload = MobileDownload()
         
         let beer = mobileDownload.testItem()
+        let promoSection = mobileDownload.testPromoSection()
         
         let triggerItemNids: Set<Int> = [ beer.recNid ]
         let freeItemNids: Set<Int> = [ beer.recNid ]
         
         let triggerRequirements = TriggerRequirements(triggerGroup: nil, basis: .qty, minimum: 0, triggerItemNids: triggerItemNids, groupRequirements: [])
         
-        let promo = BuyXGetYMixAndMatchPromoSection(triggerRequirements: triggerRequirements, freeItemNids: freeItemNids, qtyX: 10, qtyY: 1)
+        let promo = BuyXGetYMixAndMatchPromoSection(promoSection, triggerRequirements, freeItemNids: freeItemNids, qtyX: 10, qtyY: 1)
         
         var solution: BuyXGetYMixAndMatchPromoSection.Solution
         

@@ -9,6 +9,7 @@ import Foundation
 import MobileDownload
 
 struct BuyXGetYPerItemPromoSection {
+    let promoSectionRecord: PromoSectionRecord
     let itemNids: Set<Int>
     let qtyX: Int
     let qtyY: Int
@@ -85,6 +86,6 @@ extension PromoSectionRecord {
         
         let itemNids = getTriggerItemNids()
         
-        return BuyXGetYPerItemPromoSection(itemNids: itemNids, qtyX: qtyX, qtyY: qtyY)        
+        return BuyXGetYPerItemPromoSection(promoSectionRecord: self, itemNids: itemNids, qtyX: qtyX, qtyY: qtyY)        
     }
 }

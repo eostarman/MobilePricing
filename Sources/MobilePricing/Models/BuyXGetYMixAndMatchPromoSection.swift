@@ -9,7 +9,7 @@ import Foundation
 import MobileDownload
 
 struct BuyXGetYMixAndMatchPromoSection {
-
+    let promoSectionRecord: PromoSectionRecord
     let triggerRequirements: TriggerRequirements
     let freeItemNids: Set<Int>
     let freeItemsThatAreTriggers: Set<Int>
@@ -17,7 +17,9 @@ struct BuyXGetYMixAndMatchPromoSection {
     let qtyX: Int
     let qtyY: Int
     
-    init(triggerRequirements: TriggerRequirements, freeItemNids: Set<Int>, qtyX: Int, qtyY: Int) {
+    init(_ promoSectionRecord: PromoSectionRecord, _ triggerRequirements: TriggerRequirements, freeItemNids: Set<Int>, qtyX: Int, qtyY: Int) {
+        self.promoSectionRecord = promoSectionRecord
+        
         self.triggerRequirements = triggerRequirements
         self.freeItemNids = freeItemNids
         
@@ -30,6 +32,7 @@ struct BuyXGetYMixAndMatchPromoSection {
 }
 
 extension BuyXGetYMixAndMatchPromoSection : PromoSection {
+
     func isTriggerItemOrRelatedAltPack(itemNid: Int) -> Bool {
         triggerRequirements.isTriggerItemOrRelatedAltPack(itemNid: itemNid)
     }
@@ -52,7 +55,7 @@ extension PromoSectionRecord {
         let triggerRequirements = getMixAndMatchTriggerRequirements()
         let freeItemNids = getFreeItemNids()
         
-        let promo = BuyXGetYMixAndMatchPromoSection(triggerRequirements: triggerRequirements, freeItemNids: freeItemNids, qtyX: qtyX, qtyY: qtyY)
+        let promo = BuyXGetYMixAndMatchPromoSection(self, triggerRequirements, freeItemNids: freeItemNids, qtyX: qtyX, qtyY: qtyY)
         
         return promo
     }
