@@ -35,7 +35,7 @@ extension BuyXGetYMixAndMatchService {
     }
 }
 
-extension BuyXGetYMixAndMatchPromo {
+extension BuyXGetYMixAndMatchPromoSection {
     struct Solution {
         
     }

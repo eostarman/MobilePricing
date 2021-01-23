@@ -14,13 +14,22 @@ import MobileDownload
 struct TriggerRequirements {
 
     var triggerGroup: Int? = nil
-    var basis: Basis = .qty
-    var minimum: Int = 0
-    var triggerItemNids: Set<Int> = []
+    private var basis: Basis = .qty
+    private var minimum: Int = 0
+    private var triggerItemNids: Set<Int> = []
     
     /// When there are *additional* requirements on the items that must be bought, then those requirements are listed here (for example, the promo could
     /// apply when you buy 10 cases of diet soda, but at least 2 cases have to be the grape diet soda
-    var groupRequirements: [TriggerRequirements]
+    private var groupRequirements: [TriggerRequirements]
+    
+    internal init(triggerGroup: Int? = nil, basis: TriggerRequirements.Basis = .qty, minimum: Int = 0, triggerItemNids: Set<Int> = [], groupRequirements: [TriggerRequirements]) {
+        self.triggerGroup = triggerGroup
+        self.basis = basis
+        self.minimum = minimum
+        self.triggerItemNids = triggerItemNids
+        self.groupRequirements = groupRequirements
+    }
+
 }
 
 extension TriggerRequirements {
@@ -41,6 +50,40 @@ extension TriggerRequirements {
     
     func contains(itemNid: Int) -> Bool {
         triggerItemNids.contains(itemNid)
+    }
+    
+    func getTriggerGroup(itemNid: Int) -> Int? {
+        for group in groupRequirements {
+            if group.isTriggerItemOrRelatedAltPack(itemNid: itemNid) {
+                return group.triggerGroup
+            }
+        }
+        return nil
+    }
+    
+    func isTriggerItemOrRelatedAltPack(itemNid: Int) -> Bool {
+        if triggerItemNids.contains(itemNid) {
+            return true
+        }
+        
+        let altPackFamilyNid = mobileDownload.items[itemNid].altPackFamilyNid
+        if altPackFamilyNid == itemNid {
+            return false
+        }
+        
+        if triggerItemNids.contains(altPackFamilyNid) {
+            return true
+        }
+        
+        let altPackNids = mobileDownload.items[altPackFamilyNid].altPackNids
+        
+        for altPackNid in altPackNids {
+            if triggerItemNids.contains(altPackNid) {
+                return true
+            }
+        }
+        
+        return false
     }
     
     func isTriggered(_ triggerQtys: TriggerQtys) -> Bool {

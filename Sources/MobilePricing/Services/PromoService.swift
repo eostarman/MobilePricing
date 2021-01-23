@@ -14,8 +14,8 @@ public struct PromoService {
     
     var promoCodesForThisCustomer: [Int: PromoCodeRecord] = [:]
     
-    var mixAndMatchPromos: [MixAndMatchPromo] = []
-    var nonMixAndMatchPromos: [NonMixAndMatchPromo] = []
+    var mixAndMatchPromos: [StandardMixAndMatchPromoSection] = []
+    var nonMixAndMatchPromos: [StandardPerItemPromoSection] = []
     
     var unsupportedPromoSections: [PromoSectionRecord] = []
     
@@ -51,9 +51,9 @@ public struct PromoService {
             }
             
             if promoSection.isMixAndMatch, promoSection.promoPlan == .Default {
-                mixAndMatchPromos.append(MixAndMatchPromo(promoCode, promoSection))
+                mixAndMatchPromos.append(StandardMixAndMatchPromoSection(promoCode, promoSection))
             } else {
-                nonMixAndMatchPromos.append(NonMixAndMatchPromo(promoCode, promoSection))
+                nonMixAndMatchPromos.append(StandardPerItemPromoSection(promoCode, promoSection))
             }
         }
     }

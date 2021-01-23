@@ -8,12 +8,27 @@
 import Foundation
 import MobileDownload
 
-struct BuyXGetYPerItemPromo {
+struct BuyXGetYPerItemPromoSection {
+    let itemNids: Set<Int>
     let qtyX: Int
     let qtyY: Int
 }
 
-extension BuyXGetYPerItemPromo {
+extension BuyXGetYPerItemPromoSection : PromoSection {
+    func isTriggerItemOrRelatedAltPack(itemNid: Int) -> Bool {
+        itemNids.contains(itemNid)
+    }
+    
+    func hasDiscount(itemNid: Int) -> Bool {
+        itemNids.contains(itemNid)
+    }
+    
+    func getTriggerGroup(itemNid: Int) -> Int? {
+        nil
+    }
+}
+
+extension BuyXGetYPerItemPromoSection {
     struct Solution {
         
         /// The number being sold to the customer at full price
@@ -63,11 +78,13 @@ extension BuyXGetYPerItemPromo {
 }
 
 extension PromoSectionRecord {
-    func getBuyXGetYPerItemPromo() -> BuyXGetYPerItemPromo? {
+    func getBuyXGetYPerItemPromo() -> BuyXGetYPerItemPromoSection? {
         guard isBuyXGetY && !isMixAndMatch && qtyX > 0 && qtyY > 0 else {
             return nil
         }
         
-        return BuyXGetYPerItemPromo(qtyX: qtyX, qtyY: qtyY)        
+        let itemNids = getTriggerItemNids()
+        
+        return BuyXGetYPerItemPromoSection(itemNids: itemNids, qtyX: qtyX, qtyY: qtyY)        
     }
 }

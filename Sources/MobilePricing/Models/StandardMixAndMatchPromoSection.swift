@@ -1,30 +1,22 @@
 //
-//  NonMixAndMatchPromo.swift
-//  MobilePricing
+//  MixAndMatchPromo.swift
+//  MobileBench
 //
-//  Created by Michael Rutherford on 1/14/21.
+//  Created by Michael Rutherford on 7/21/20.
 //
-
 
 import Foundation
 import MobileDownload
 import MoneyAndExchangeRates
 
-public class NonMixAndMatchPromo {
-    private let promoSection: PromoSectionRecord
+public class StandardMixAndMatchPromoSection {
     public let currency: Currency
     public let note: String?
+    let triggerRequirements: TriggerRequirements
     public let discountsByItemNid: [Int: PromoItem]
     
     // is this promotion triggered by the quantities on this order
-    func isTriggered(itemNid: Int, qtys: TriggerQtys) -> Bool {
-        if discountsByItemNid[itemNid] == nil {
-            return false
-        }
-        
-        guard let triggerRequirements = promoSection.getNonMixAndMatchTriggerRequirements(itemNid: itemNid) else {
-            return true
-        }
+    func isTriggered(qtys: TriggerQtys) -> Bool {
         return triggerRequirements.isTriggered(qtys)
     }
 
@@ -34,10 +26,9 @@ public class NonMixAndMatchPromo {
     }
 
     public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord) {
-        self.promoSection = promoSection
-        
         currency = promoCode.currency
         note = promoSection.getNote()
+        triggerRequirements = promoSection.getMixAndMatchTriggerRequirements()
                 
         let promoItemsProvidingDiscounts = promoSection.getPromoItems().filter { $0.hasDiscount }
 
@@ -45,3 +36,16 @@ public class NonMixAndMatchPromo {
     }
 }
 
+extension StandardMixAndMatchPromoSection : PromoSection {
+    func isTriggerItemOrRelatedAltPack(itemNid: Int) -> Bool {
+        triggerRequirements.isTriggerItemOrRelatedAltPack(itemNid: itemNid)
+    }
+    
+    func hasDiscount(itemNid: Int) -> Bool {
+        discountsByItemNid[itemNid] != nil
+    }
+    
+    func getTriggerGroup(itemNid: Int) -> Int? {
+        triggerRequirements.getTriggerGroup(itemNid: itemNid)
+    }
+}

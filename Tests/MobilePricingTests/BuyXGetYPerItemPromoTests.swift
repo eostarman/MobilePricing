@@ -13,9 +13,9 @@ import MoneyAndExchangeRates
 class BuyXGetYPerItemPromoTests: XCTestCase {
     
     func testBasicCalculation() {
-        let promo = BuyXGetYPerItemPromo(qtyX: 10, qtyY: 3)
+        let promo = BuyXGetYPerItemPromoSection(itemNids: [], qtyX: 10, qtyY: 3)
         
-        var solution: BuyXGetYPerItemPromo.Solution
+        var solution: BuyXGetYPerItemPromoSection.Solution
         
         solution = promo.compute(qtySold: 13)
         XCTAssertEqual(solution.qtyAtFullPrice, 10)

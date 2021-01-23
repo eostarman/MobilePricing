@@ -21,9 +21,11 @@ class BuyXGetYMixAndMatchPromoTests: XCTestCase {
         let triggerItemNids: Set<Int> = [ beer.recNid ]
         let freeItemNids: Set<Int> = [ beer.recNid ]
         
-        let promo = BuyXGetYMixAndMatchPromo(triggerItemNids: triggerItemNids, freeItemNids: freeItemNids, qtyX: 10, qtyY: 1)
+        let triggerRequirements = TriggerRequirements(triggerGroup: nil, basis: .qty, minimum: 0, triggerItemNids: triggerItemNids, groupRequirements: [])
         
-        var solution: BuyXGetYMixAndMatchPromo.Solution
+        let promo = BuyXGetYMixAndMatchPromoSection(triggerRequirements: triggerRequirements, freeItemNids: freeItemNids, qtyX: 10, qtyY: 1)
+        
+        var solution: BuyXGetYMixAndMatchPromoSection.Solution
         
         solution = promo.compute(qtys: [beer.recNid:11])
         

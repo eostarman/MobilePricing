@@ -31,22 +31,17 @@ extension PromoSectionRecord {
     }
     
     /// Get the trigger requirements for a mix-and-match promotion to get applied to an order (i.e. certain items *must* be on an order before this promo section is triggered)
-    func getMixAndMatchTriggerRequirements() -> TriggerRequirements? {
-        if caseMinimum == 0 {
-            return nil
-        }
-        
+    func getMixAndMatchTriggerRequirements() -> TriggerRequirements {
+
         let triggerItemNids = getTriggerItemNids()
-        if triggerItemNids.isEmpty {
-            return nil
-        }
+
         
-        // this is a special case. If all items are trigger items and the minimum quantity you have to order is (1) then there is no
-        // real trigger requirement. Note that this won't work for a "case-rollup" promotion. Also, it doesn't apply to a
-        // situation where you must buy some *specific* items to get a discount on any of the other items
-        if caseMinimum == 1, !isCaseRollupPromo, triggerItemNids.count == getPromoItems().count {
-            return nil
-        }
+//        // this is a special case. If all items are trigger items and the minimum quantity you have to order is (1) then there is no
+//        // real trigger requirement. Note that this won't work for a "case-rollup" promotion. Also, it doesn't apply to a
+//        // situation where you must buy some *specific* items to get a discount on any of the other items
+//        if caseMinimum == 1, !isCaseRollupPromo, triggerItemNids.count == getPromoItems().count {
+//            return nil
+//        }
         
         let groupRequirements = getTriggerGroupRequirements()
         
