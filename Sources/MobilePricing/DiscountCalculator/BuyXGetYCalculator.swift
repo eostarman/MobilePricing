@@ -178,6 +178,112 @@ struct BuyXGetYCalculator {
         return resultingBundles
     }
     
+    static func getBuyXGetYPromos(allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> ([PromoTuple], [UnusedFreebie]) {
+        var buyXGetYPromos = allPromoSections.filter { $0.promoSection.promoSectionRecord.isBuyXGetY }
+        
+        var promoTuples: [PromoTuple] = []
+        var unusedFreebies: [UnusedFreebie] = []
+        
+        while !buyXGetYPromos.isEmpty {
+            // these (3) variables refer to the promo section that provides the best discount for the customer in this pass.
+            var bestClones: [FreebieAccumulator] = []
+            var bestPromoDiscounts: PromoDiscounts? = nil
+            var bestDCPromoSection: DCPromoSection? = nil
+            
+            var unusedFreebiesFromThisPass: [UnusedFreebie] = []
+            var ineffectualPromoSections: [DCPromoSection] = []
+            
+            for promoSection in buyXGetYPromos {
+                let clones = orderLines.map { $0.getClone() }
+                
+                let discounts = getPromoDiscounts(promoSection.promoSection, clones, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
+                
+                // here's a promo section that doesn't do anything - if triggered, it will either give me real discounts, or it'll have "potential" discounts ("unused freebies").
+                if discounts.unusedFreebies.isEmpty && discounts.discounts.isEmpty {
+                    ineffectualPromoSections.append(promoSection)
+                    continue
+                }
+                
+                if !discounts.unusedFreebies.isEmpty {
+                    unusedFreebiesFromThisPass.append(contentsOf: discounts.unusedFreebies)
+                }
+                
+                if !discounts.discounts.isEmpty {
+                    var useThisPromoSection = false
+                    
+                    if let bestSoFar = bestPromoDiscounts {
+                        
+                        if (discounts.totalDisc > bestSoFar.totalDisc) {
+                            useThisPromoSection = true
+                        }
+                        else if (discounts.totalDisc == bestSoFar.totalDisc && discounts.totalQtyDiscounted > bestSoFar.totalQtyDiscounted) {
+                            useThisPromoSection = true
+                        }
+                    } else {
+                        useThisPromoSection = true
+                    }
+                    
+                    if useThisPromoSection {
+                        bestClones = clones
+                        bestPromoDiscounts = discounts
+                        bestDCPromoSection = promoSection
+                    }
+                }
+            }
+            
+            // if nothing produces a discount, then we're done (but remember to return the unused freebies if there are any).
+            guard let dcPromoSection = bestDCPromoSection, let promoDiscounts = bestPromoDiscounts else {
+                unusedFreebies.append(contentsOf: unusedFreebiesFromThisPass)
+                break
+            }
+            
+            // I have a "best" discount, so choose it and "apply" it
+            for clone in bestClones {
+                clone.updateOriginalFromThisClone()
+            }
+            
+            unusedFreebies.append(contentsOf: promoDiscounts.unusedFreebies)
+            
+            let discountsByOrderLine = Dictionary(grouping: promoDiscounts.discounts) { $0.dcOrderLine.seq }
+            
+            for (_, discountsForOneOrderLine) in discountsByOrderLine {
+                
+                let discountsByAmounts = Dictionary(grouping: discountsForOneOrderLine, by: { DiscountAndRebate($0) })
+                
+                for (_, discountsByAmount) in discountsByAmounts {
+                    let totalQtyDiscount = discountsByAmount.map {$0.qtyDiscounted }.reduce(0, +)
+                    let first = discountsByAmount.first!
+                    
+                    let promoDiscount = PromoDiscount(dcOrderLine: first.dcOrderLine, qtyDiscounted: totalQtyDiscount, unitDisc: first.unitDisc, rebateAmount: first.rebateAmount)
+                    
+                    let promoTuple = PromoTuple(dcPromoSection: dcPromoSection, promoDiscount: promoDiscount)
+                    promoTuples.append(promoTuple)
+                }
+            }
+            
+            // I've used it and it's done its best (given us real discounts and also any unused-freebies) - so don't use it any more.
+            buyXGetYPromos.removeAll(where: { $0 === dcPromoSection })
+            
+            // but, these guys were useless - and they're not going to get any better going forward
+            for x in ineffectualPromoSections {
+                buyXGetYPromos.removeAll(where: { $0 === x })
+            }
+        }
+        
+        return (promoTuples, unusedFreebies)
+    }
+    
+    fileprivate struct DiscountAndRebate : Hashable {
+        let unitDisc: MoneyWithoutCurrency
+        let rebateAmount: MoneyWithoutCurrency
+        
+        init(_ promoDiscount: PromoDiscount) {
+            unitDisc = promoDiscount.unitDisc
+            rebateAmount = promoDiscount.rebateAmount
+        }
+        
+    }
+    
     static func getPromoDiscounts(_ promoSection: PromoSection, _ allOrderLines : [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoDiscounts {
         let orderLines: [FreebieAccumulator]
         
@@ -249,6 +355,7 @@ struct BuyXGetYCalculator {
                 }
             }
         }
+        
         var allDiscounts: [PromoDiscount] = []
         
         for freebieBundle in allFreebieBundles {
@@ -261,12 +368,11 @@ struct BuyXGetYCalculator {
             }
         }
         
-        
         let totalDisc = allDiscounts.map({ $0.totalDisc }).reduce(MoneyWithoutCurrency.zero, +)
         
         let promoDiscounts = PromoDiscounts(promoSection: promoSection, totalDisc: totalDisc, discounts: allDiscounts, unusedFreebies: allUnusedFreebies, freebieBundles: allFreebieBundles)
-
-
+        
+        
         return promoDiscounts
         
     }

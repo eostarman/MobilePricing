@@ -12,7 +12,9 @@ import MobileDownload
 /// see if a promotion or price-sheet column applies to this order ("is triggered for this order")
 public final class TriggerQtys {
     public var quantitiesByItem: [Int: Int] = [:] // itemNid --> Qty on order
+    
     public var itemNids: [Int] = []
+    public var altPackFamilyNids: Set<Int> = []
     
     public init() {
         
@@ -20,6 +22,18 @@ public final class TriggerQtys {
 }
 
 extension TriggerQtys {
+    
+    func getNonContractTriggerQtys(itemNidsCoveredByContractPromos: Set<Int>) -> TriggerQtys {
+        let nonContractTriggerQtys = TriggerQtys()
+        
+        for x in quantitiesByItem {
+            if !itemNidsCoveredByContractPromos.contains(x.key) {
+                nonContractTriggerQtys.addItemAndQty(itemNid: x.key, qty: x.value)
+            }
+        }
+        
+        return nonContractTriggerQtys
+    }
 
     /// Add a *sale* to the trigger quantities (negative quantities representing credits or product pickups are ignored)
     func addItemAndQty(itemNid: Int, qty: Int) {
@@ -31,7 +45,9 @@ extension TriggerQtys {
             quantitiesByItem[itemNid] = priorQty + qty
         } else {
             quantitiesByItem[itemNid] = qty
+            
             itemNids.append(itemNid)
+            altPackFamilyNids.insert(mobileDownload.items[itemNid].altPackFamilyNid)
         }
     }
     

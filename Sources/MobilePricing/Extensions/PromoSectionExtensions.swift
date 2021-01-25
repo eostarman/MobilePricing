@@ -106,6 +106,10 @@ extension PromoSectionRecord {
             return Set(getPromoItems().map {$0.itemNid })
         }
     }
+    
+    func getTargetItemNids() -> Set<Int> {
+        Set(getPromoItems().filter({ $0.hasDiscount }).map({ $0.itemNid }))
+    }
 }
 
 
