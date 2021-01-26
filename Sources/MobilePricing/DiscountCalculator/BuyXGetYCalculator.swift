@@ -361,7 +361,7 @@ struct BuyXGetYCalculator {
         for freebieBundle in allFreebieBundles {
             for b in freebieBundle.freebieTargets.filter({ $0.qtyFreeHere > 0 }) {
                 let rebateAmount = promoSection.promoSectionRecord.getPromoItems().filter({ $0.itemNid == b.item.itemNid }).first?.unitRebate ?? .zero
-                
+                // mpr: bug - I've mixed the transactionCurrency with the promoCurrency
                 let promoDiscount =  PromoDiscount(dcOrderLine: b.item.dcOrderLine, qtyDiscounted: freebieBundle.nbrTimes * b.qtyFreeHere, unitDisc: b.item.frontlinePrice, rebateAmount: rebateAmount)
                 
                 allDiscounts.append(promoDiscount);

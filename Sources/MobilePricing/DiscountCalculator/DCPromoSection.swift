@@ -11,6 +11,7 @@ class DCPromoSection {
     let promoPlan: ePromoPlanForMobileInvoice
     
     var isContractPromo: Bool { promoSectionRecord.isContractPromo }
+    var isAdditionalFee: Bool { promoSectionRecord.promoPlan == .AdditionalFee }
     
     let hasExplicitTriggerItems: Bool
     

@@ -17,7 +17,7 @@ public class StandardPerItemPromoSection {
     public let discountsByItemNid: [Int: PromoItem]
     
     // is this promotion triggered by the quantities on this order
-    func isTriggered(itemNid: Int, qtys: TriggerQtys) -> Bool {
+    func isTriggered(itemNid: Int, triggerQtys: TriggerQtys) -> Bool {
         if discountsByItemNid[itemNid] == nil {
             return false
         }
@@ -25,7 +25,7 @@ public class StandardPerItemPromoSection {
         guard let triggerRequirements = promoSectionRecord.getNonMixAndMatchTriggerRequirements(itemNid: itemNid) else {
             return true
         }
-        return triggerRequirements.isTriggered(qtys)
+        return triggerRequirements.isTriggered(triggerQtys)
     }
 
     // does this promotion have a discount for the item

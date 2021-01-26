@@ -18,8 +18,8 @@ public class StandardMixAndMatchPromoSection {
     public let discountsByItemNid: [Int: PromoItem]
     
     // is this promotion triggered by the quantities on this order
-    func isTriggered(qtys: TriggerQtys) -> Bool {
-        return triggerRequirements.isTriggered(qtys)
+    func isTriggered(triggerQtys: TriggerQtys) -> Bool {
+        return triggerRequirements.isTriggered(triggerQtys)
     }
 
     // does this promotion have a discount for the item
