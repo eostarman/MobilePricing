@@ -10,7 +10,7 @@
 // for standard promos it doesn't matter ... I'll compute all the ones that are triggered, then pick the deepest discount for each item
 
 // Frank Liquor had buy 50 get 1, but also a buy 50 get 3. So, prefer the (3).
-// var sortedBuyXGetY = allPromoSections.Where(x => x.IsBuyXGetY).OrderByDescending(x => x.QtyX).ThenByDescending(x => x.QtyY).ThenByDescending(x => x.StartDate).ThenBy(x => x.PromoSectionNid).ToArray();
+// var sortedBuyXGetY = allPromoSections.Where(x => x.IsBuyXGetY).OrderByDescending(x => x.QtyX).ThenByDescending(x => x.QtyY).ThenByDescending(x => x.StartDate).ThenBy(x => x.PromoSectionNid).ToArray()
 
 import Foundation
 import MobileDownload

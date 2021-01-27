@@ -17,7 +17,7 @@ class ItemPromoSections {
         self.activePromoSections = activePromoSections
     }
     
-    func GetAllPromoSectionsWithDiscountsForTheseItems(itemNids: [Int]) -> [DCPromoSection] {
+    func getAllPromoSectionsWithDiscountsForTheseItems(itemNids: [Int]) -> [DCPromoSection] {
         activePromoSections.filter { $0.isTarget(forAnyItemNid: itemNids) }
         
     }

@@ -9,7 +9,7 @@ struct FreebieTriggersAndTargets {
     let targets: [FreebieAccumulator]
     
     init(lines: [FreebieAccumulator]) {
-        // .sorted() needs a predicate that returns true if x should be ordered before y; otherwise, false.
+        // .sorted() needs a predicate that returns true if x should be ordered before y - otherwise, false.
 
         // Sort the targets of buy-x in the following way ... (*almost* the reverse of the triggers)
         let targets: [FreebieAccumulator] = lines.filter { $0.isTargetItem }

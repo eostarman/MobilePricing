@@ -12,6 +12,10 @@ class DCPromoSection {
     
     var isContractPromo: Bool { promoSectionRecord.isContractPromo }
     var isAdditionalFee: Bool { promoSectionRecord.promoPlan == .AdditionalFee }
+    var isTax: Bool { isAdditionalFee && promoSectionRecord.additionalFeePromo_IsTax }
+    
+    let promoTierSequence: Int?
+    let isTieredPromo: Bool?
     
     let hasExplicitTriggerItems: Bool
     
@@ -54,20 +58,25 @@ class DCPromoSection {
         let promoItems = promoSection.promoSectionRecord.getPromoItems()
         hasExplicitTriggerItems = promoItems.contains { $0.isExplicitTriggerItem }
         
+        let promoCode = mobileDownload.promoCodes[promoSection.promoSectionRecord.promoCodeNid]
+        
+        self.isTieredPromo = promoCode.isTieredPromo
+        self.promoTierSequence = promoCode.promoTierSeq
+        
         promoItemsByItemNid = Dictionary(uniqueKeysWithValues: promoSection.promoSectionRecord.getPromoItems().map{ ($0.itemNid, $0) })
       
-//        this.promoSection = promoSection;
-//        this.currencyConversionDate = currencyConversionDate;
+//        this.promoSection = promoSection
+//        this.currencyConversionDate = currencyConversionDate
 //
-//        this.databaseCache = databaseCache;
-//        this.transactionCurrencyNid = transactionCurrencyNid;
-//        this.promoCurrencyNid = databaseCache.GetCurrencyNidForPromoCode(promoSection.PromoCodeNid);
+//        this.databaseCache = databaseCache
+//        this.transactionCurrencyNid = transactionCurrencyNid
+//        this.promoCurrencyNid = databaseCache.GetCurrencyNidForPromoCode(promoSection.PromoCodeNid)
     }
     
     func resetTriggerQtys(_ triggerQtys: TriggerQtys) {
-//        this.triggerQtys = triggerQtys;
-//                    this.qtyOnOrderByItem = GetQtyOnOrderByItem();
-//                    this.qtyOnOrderInTotal = qtyOnOrderByItem.Values.Sum();
+//        this.triggerQtys = triggerQtys
+//                    this.qtyOnOrderByItem = GetQtyOnOrderByItem()
+//                    this.qtyOnOrderInTotal = qtyOnOrderByItem.Values.Sum()
     }
     
 }

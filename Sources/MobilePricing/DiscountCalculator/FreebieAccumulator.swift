@@ -21,7 +21,7 @@ class FreebieAccumulator
     var isTargetItem: Bool
     var triggerGroup: Int?
     
-    /// this is a working accumulator used when processing buy-x-get-y groups (I go through the requirements, recording this value; then, when the whole trigger is fired, I copy this into the QtyUsedAsTrigger)
+    /// this is a working accumulator used when processing buy-x-get-y groups (I go through the requirements, recording this value. Then, when the whole trigger is fired, I copy this into the QtyUsedAsTrigger)
     var qtyUsedThisPass: Int = 0
     
     /// when the trigger fires (causing the calculation of more QtyFree), I set this to reflect how much was consumed from this line in order to produce the new QtyFree
@@ -84,10 +84,10 @@ class FreebieAccumulator
             fatalError("This is not a clone")
         }
         
-        clonedFrom.qtyUsedAsTriggerThatMustBeFullPrice = qtyUsedAsTriggerThatMustBeFullPrice;
-        clonedFrom.qtyUsedAsTriggerThatMayBeDiscounted = qtyUsedAsTriggerThatMayBeDiscounted;
-        clonedFrom.qtyUsedAsTriggerWhenOnlyUnusedFreebiesWereEarned = qtyUsedAsTriggerWhenOnlyUnusedFreebiesWereEarned;
-        clonedFrom.qtyFree = qtyFree;
+        clonedFrom.qtyUsedAsTriggerThatMustBeFullPrice = qtyUsedAsTriggerThatMustBeFullPrice
+        clonedFrom.qtyUsedAsTriggerThatMayBeDiscounted = qtyUsedAsTriggerThatMayBeDiscounted
+        clonedFrom.qtyUsedAsTriggerWhenOnlyUnusedFreebiesWereEarned = qtyUsedAsTriggerWhenOnlyUnusedFreebiesWereEarned
+        clonedFrom.qtyFree = qtyFree
     }
     
     func setTriggerStatus(promoSection: PromoSection)

@@ -51,7 +51,7 @@ extension TriggerQtys {
         }
     }
     
-    /// A minimum requirement may be entered as a number of cases, and the order contains bottles; or, it may be in bottles and the order contains cases (or a mix of bottles and cases)
+    /// A minimum requirement may be entered as a number of cases, and the order contains bottles. Or, it may be in bottles and the order contains cases (or a mix of bottles and cases)
     /// Frank Liqour required this for liquor sales. This is not the same as adding two different items together - just adding the alt-packs and representing the total in
     /// terms of one of those alt-packs
     func getRollupQty(itemNid resultItemNid: Int) -> Double {

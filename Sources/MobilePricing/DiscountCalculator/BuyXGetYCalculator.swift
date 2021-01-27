@@ -150,8 +150,8 @@ struct BuyXGetYCalculator {
                 freebieTargets.append(FreebieTarget(item: target, qtyFreeHere: qtyFreeHere))
             }
             
-            let qtyFree = promoSection.qtyY - earnedQtyFree; // these free items are on the order
-            let unusedFreeQty = earnedQtyFree;    // these free items are not even on the order (UnusedFreebies)
+            let qtyFree = promoSection.qtyY - earnedQtyFree // these free items are on the order
+            let unusedFreeQty = earnedQtyFree    // these free items are not even on the order (UnusedFreebies)
             
             // I'm not expecting a bunch of freebie entries, but maybe a single entry produced multiple times (so, I think the freebies.Where() is okay without a Dictionary<>)
             let newFreebie = FreebieBundle(freebieTriggers: freebieTriggers, freebieTargets: freebieTargets, qtyFree: qtyFree, unusedFreeQty: unusedFreeQty)
@@ -346,7 +346,7 @@ struct BuyXGetYCalculator {
                         allFreebieBundles.append(newFreebie)
                     }
                     
-                    unusedFreebies += newFreebie.unusedFreeQty;
+                    unusedFreebies += newFreebie.unusedFreeQty
                 }
                 
                 if unusedFreebies > 0 {
@@ -364,7 +364,7 @@ struct BuyXGetYCalculator {
                 // mpr: bug - I've mixed the transactionCurrency with the promoCurrency
                 let promoDiscount =  PromoDiscount(dcOrderLine: b.item.dcOrderLine, qtyDiscounted: freebieBundle.nbrTimes * b.qtyFreeHere, unitDisc: b.item.frontlinePrice, rebateAmount: rebateAmount)
                 
-                allDiscounts.append(promoDiscount);
+                allDiscounts.append(promoDiscount)
             }
         }
         

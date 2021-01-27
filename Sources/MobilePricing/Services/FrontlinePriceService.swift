@@ -72,7 +72,7 @@ public struct FrontlinePriceService {
         return nil
     }
     
-    /// Get the lowest (best for the customer) frontline price for an item that's being sold to a customer on a date (based on the delivery date). If there's a special price for the customer then that'll be used; if not, then the price books will be checked. Otherwise, the default prices on the item record will be used.
+    /// Get the lowest (best for the customer) frontline price for an item that's being sold to a customer on a date (based on the delivery date). If there's a special price for the customer then that'll be used. If not, then the price books will be checked. Otherwise, the default prices on the item record will be used.
     /// - Parameter itemNid: the item (or alt pack) to get the price for. Note that split-case charges are not handled here
     /// - Returns: the price (with the currency set to the current transaction currency based on the exchange rates) or nil if there is *no* frontline price
     public func getPrice(_ item: ItemRecord) -> Money? {

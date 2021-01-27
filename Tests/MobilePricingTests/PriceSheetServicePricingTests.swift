@@ -125,7 +125,7 @@ class PriceSheetServicePricingTests: XCTestCase {
         let specialPriceSheet = mobileDownload.testPriceSheet()
         let hollandPriceSheet = mobileDownload.testPriceSheet()
 
-        // the price of beer bought from the Holland warehouse is 1.55; however, mike is on a special (higher) price of 1.83 because he has a nifty beer cooler
+        // the price of beer bought from the Holland warehouse is 1.55. However, mike is on a special (higher) price of 1.83 because he has a nifty beer cooler
         if true {
             specialPriceSheet.assignTo(mike, priceLevel: 1, canUseAutomaticColumns: false)
             specialPriceSheet.setNonAutoColumn(priceLevel: 1)
@@ -157,7 +157,7 @@ class PriceSheetServicePricingTests: XCTestCase {
         let specialPriceSheet = mobileDownload.testPriceSheet()
         let hollandPriceSheet = mobileDownload.testPriceSheet()
 
-        // the price of beer bought from the Holland warehouse is 1.55; however, mike is on a special (higher) price of 1.83 because he has a nifty beer cooler
+        // the price of beer bought from the Holland warehouse is 1.55 However, mike is on a special (higher) price of 1.83 because he has a nifty beer cooler
         if true {
             mikesPriceSheet.assignTo(mike, priceLevel: 1, canUseAutomaticColumns: false)
             mikesPriceSheet.setNonAutoColumn(priceLevel: 1)
