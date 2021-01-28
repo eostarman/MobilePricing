@@ -19,9 +19,13 @@ protocol IDCOrderLine {
     var totalOfAllUnitDiscounts: MoneyWithoutCurrency { get }
     var unitSplitCaseCharge: MoneyWithoutCurrency { get }
     
+    var qtyNotFree: Int { get }
+    var unitNetAfterDiscount: MoneyWithoutCurrency { get }
+    
     func getCokePromoTotal() -> MoneyWithoutCurrency
     
+    // mpr: note that this is different in DiscountCalculator.cs - I found the code that assigns the default promos to the orderLine very confusing (likely buggy)
     func clearAllPromoData()
-    func setPromoPlanData(promoPlan: ePromoPlan, unitDisc: MoneyWithoutCurrency, promoSectionNid: Int)
-    func setPromoData(promoSectionNid: Int, qtyDiscounted: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
+    func addFreeGoods(promoSectionNid: Int, qtyFree: Int)
+    func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, qtyDiscounted: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
 }
