@@ -30,7 +30,7 @@ class BuyXGeYCalculatorTests: XCTestCase {
         return bundles
     }
     
-    func testBuyXGetYNonMixAndMatch() throws {
+    func testBuy10Get1FreeNonMixAndMatch() throws {
         mobileDownload = MobileDownload()
         
         let promoSection = mobileDownload.testPromoSection()
@@ -96,7 +96,7 @@ class BuyXGeYCalculatorTests: XCTestCase {
         }
     }
     
-    func testBuyXGetYMixAndMatch() throws {
+    func testBuy10Get1FreeMixAndMatch() throws {
         mobileDownload = MobileDownload()
         
         let promoSection = mobileDownload.testPromoSection()
@@ -134,16 +134,74 @@ class BuyXGeYCalculatorTests: XCTestCase {
         }
         
         if true {
-            let bundles = getFreebieBundles(promoSection, orderLines: beerSale(8), wineSale(3))
+            let bundles = getFreebieBundles(promoSection, orderLines: beerSale(10), wineSale(1))
             
             XCTAssertEqual(bundles.count, 1)
             XCTAssertEqual(bundles[0].qtyFree, 1)
             XCTAssertEqual(bundles[0].unusedFreeQty, 0)
+            XCTAssertEqual(bundles[0].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[0].freebieTargets[0].item.itemNid, wine.recNid)
         }
         
+        if true {
+            let bundles = getFreebieBundles(promoSection, orderLines: wineSale(1), beerSale(10))
+            
+            XCTAssertEqual(bundles.count, 1)
+            XCTAssertEqual(bundles[0].qtyFree, 1)
+            XCTAssertEqual(bundles[0].unusedFreeQty, 0)
+            XCTAssertEqual(bundles[0].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[0].freebieTargets[0].item.itemNid, wine.recNid)
+        }
+        
+        if true {
+            let bundles = getFreebieBundles(promoSection, orderLines: wineSale(1), beerSale(21))
+            
+            XCTAssertEqual(bundles.count, 2)
+            
+            XCTAssertEqual(bundles[0].qtyFree, 1)
+            XCTAssertEqual(bundles[0].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[0].freebieTargets[0].item.itemNid, wine.recNid)
+            
+            XCTAssertEqual(bundles[1].qtyFree, 1)
+            XCTAssertEqual(bundles[1].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[1].freebieTargets[0].item.itemNid, beer.recNid)
+        }
+        
+        if true {
+            let preferredBeerSale = beerSale(21)
+            preferredBeerSale.isPreferredFreeGoodLine = true
+            let bundles = getFreebieBundles(promoSection, orderLines: wineSale(1), preferredBeerSale)
+            
+            XCTAssertEqual(bundles.count, 2)
+            
+            XCTAssertEqual(bundles[0].qtyFree, 1)
+            XCTAssertEqual(bundles[0].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[0].freebieTargets[0].item.itemNid, beer.recNid)
+            
+            XCTAssertEqual(bundles[1].qtyFree, 1)
+            XCTAssertEqual(bundles[1].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[1].freebieTargets[0].item.itemNid, beer.recNid)
+        }
+        
+        if true {
+            let preferredWineSale = wineSale(1)
+            preferredWineSale.isPreferredFreeGoodLine = true
+            let bundles = getFreebieBundles(promoSection, orderLines: preferredWineSale, beerSale(21))
+            
+            XCTAssertEqual(bundles.count, 2)
+            
+            XCTAssertEqual(bundles[0].qtyFree, 1)
+            XCTAssertEqual(bundles[0].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[0].freebieTargets[0].item.itemNid, wine.recNid)
+            
+            XCTAssertEqual(bundles[1].qtyFree, 1)
+            XCTAssertEqual(bundles[1].freebieTargets.count, 1)
+            XCTAssertEqual(bundles[1].freebieTargets[0].item.itemNid, beer.recNid)
+        }
     }
     
-    func testBuyXGetYMixAndMatchButMustBuyBeer() throws {
+    /// Buy X of one item to get free goods of a different item (an item not in the trigger group)
+    func testBuy10BeerGet1WineOrBeerFree() throws {
         mobileDownload = MobileDownload()
         
         let promoSection = mobileDownload.testPromoSection()
@@ -185,6 +243,22 @@ class BuyXGeYCalculatorTests: XCTestCase {
             XCTAssertEqual(bundles.count, 1)
             XCTAssertEqual(bundles[0].qtyFree, 1)
             XCTAssertEqual(bundles[0].unusedFreeQty, 0)
+        }
+        
+        // in this case for each 10 beers bought, the logic will provide a free wine. Thus you'll get 2 free wines when you buy 20 beers.
+        // if you choose to give free beer instead, then you'll only get 1 free beer and that's it: buy 10 beers, get 1
+        // beer free. But, now there are only 9 beers left to trigger the next free good and that's not
+        // enough. So the algorithm will prefer to produce free goods that are not part of the trigger requirements as well.
+        if true {
+            let bundles = getFreebieBundles(promoSection, orderLines: beerSale(20), wineSale(2))
+            
+            XCTAssertEqual(bundles.count, 2)
+            
+            XCTAssertEqual(bundles[0].qtyFree, 1)
+            XCTAssertEqual(bundles[0].freebieTargets[0].item.itemNid, wine.recNid)
+            
+            XCTAssertEqual(bundles[1].qtyFree, 1)
+            XCTAssertEqual(bundles[1].freebieTargets[0].item.itemNid, wine.recNid)
         }
         
     }
