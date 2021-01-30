@@ -5,7 +5,6 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 class DCPromoSection {
-    let promoSection: PromoSection
     let promoSectionRecord: PromoSectionRecord
     let transactionCurrency: Currency
     let promoPlan: ePromoPlanForMobileInvoice
@@ -20,6 +19,9 @@ class DCPromoSection {
     let hasExplicitTriggerItems: Bool
     
     let promoItemsByItemNid: [Int: PromoItem]
+    
+    // only for a mix-and-match promotion
+    let triggerRequirements: TriggerRequirements?
     
     /// if an item is a target, then it will get a discount when this promoSection is actually triggered (doesn't look at other alt-packs for this item)
     func isTarget(itemNid: Int) -> Bool {
@@ -48,22 +50,27 @@ class DCPromoSection {
         }
     }
     
-    init(promoSection: PromoSection, transactionCurrency: Currency)
+    init(promoSectionRecord: PromoSectionRecord, transactionCurrency: Currency)
     {
-        self.promoSection = promoSection
-        self.promoSectionRecord = promoSection.promoSectionRecord
+        self.promoSectionRecord = promoSectionRecord
         self.transactionCurrency = transactionCurrency
-        promoPlan = ePromoPlanForMobileInvoice(promoSection.promoSectionRecord.promoPlan)
+        promoPlan = ePromoPlanForMobileInvoice(promoSectionRecord.promoPlan)
         
-        let promoItems = promoSection.promoSectionRecord.getPromoItems()
+        let promoItems = promoSectionRecord.getPromoItems()
         hasExplicitTriggerItems = promoItems.contains { $0.isExplicitTriggerItem }
         
-        let promoCode = mobileDownload.promoCodes[promoSection.promoSectionRecord.promoCodeNid]
+        let promoCode = mobileDownload.promoCodes[promoSectionRecord.promoCodeNid]
         
         self.isTieredPromo = promoCode.isTieredPromo
         self.promoTierSequence = promoCode.promoTierSeq
         
-        promoItemsByItemNid = Dictionary(uniqueKeysWithValues: promoSection.promoSectionRecord.getPromoItems().map{ ($0.itemNid, $0) })
+        promoItemsByItemNid = Dictionary(uniqueKeysWithValues: promoSectionRecord.getPromoItems().map{ ($0.itemNid, $0) })
+        
+        if promoSectionRecord.isMixAndMatch {
+            triggerRequirements = promoSectionRecord.getMixAndMatchTriggerRequirements()
+        } else {
+            triggerRequirements = nil
+        }
       
 //        this.promoSection = promoSection
 //        this.currencyConversionDate = currencyConversionDate
@@ -79,4 +86,26 @@ class DCPromoSection {
 //                    this.qtyOnOrderInTotal = qtyOnOrderByItem.Values.Sum()
     }
     
+}
+
+extension DCPromoSection : PromoSection {
+    func isTriggerItemOrRelatedAltPack(itemNid: Int) -> Bool {
+        if let triggerRequirements = triggerRequirements {
+            return triggerRequirements.isTriggerItemOrRelatedAltPack(itemNid: itemNid)
+        } else {
+            return isTrigger(itemNid: itemNid)
+        }
+    }
+    
+    func hasDiscount(itemNid: Int) -> Bool {
+        isTarget(itemNid: itemNid)
+    }
+    
+    func getTriggerGroup(itemNid: Int) -> Int? {
+        if let triggerRequirements = triggerRequirements {
+            return triggerRequirements.getTriggerGroup(itemNid: itemNid)
+        } else {
+            return nil
+        }
+    }
 }

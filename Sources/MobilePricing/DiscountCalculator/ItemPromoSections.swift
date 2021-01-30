@@ -53,14 +53,13 @@ class ItemPromoSections {
         var additionalFees: [DCPromoSection] = []
 
         for dcPromoSection in dcPromoSectionsForOneItem {
-            let promoSection = dcPromoSection.promoSection
             
-            if promoSection.promoSectionRecord.promoPlan == .AdditionalFee {
+            if dcPromoSection.promoSectionRecord.promoPlan == .AdditionalFee {
                 additionalFees.append(dcPromoSection)
                 continue
             }
             
-            if promoSection.promoSectionRecord.isContractPromo {
+            if dcPromoSection.promoSectionRecord.isContractPromo {
                 contractPromoSections.append(dcPromoSection)
             }
         }

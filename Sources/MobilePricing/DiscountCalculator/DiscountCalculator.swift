@@ -28,7 +28,7 @@ class DiscountCalculator
     var unusedFreebies: [UnusedFreebie] = []
     
     
-    init(transactionCurrency: Currency, cusNid: Int, promoDate: Date, deliveryDate: Date, promoSections: [PromoSection], triggerQtys: TriggerQtys) {
+    init(transactionCurrency: Currency, cusNid: Int, promoDate: Date, deliveryDate: Date, promoSections: [PromoSectionRecord], triggerQtys: TriggerQtys) {
         self.transactionCurrency = transactionCurrency
         self.cusNid = cusNid
         self.promoDate = promoDate
@@ -41,7 +41,7 @@ class DiscountCalculator
         mayUseQtyOrderedForBuyXGetY = !mobileDownload.handheld.doNotUseQtyOrderedForBuyXGetY
         
         // round up all promotions that are available to the CusNid on the given PromoDate
-        activePromoSections = promoSections.map { DCPromoSection(promoSection: $0, transactionCurrency: transactionCurrency) }
+        activePromoSections = promoSections.map { DCPromoSection(promoSectionRecord: $0, transactionCurrency: transactionCurrency) }
             .filter({ $0.promoPlan != .Unsupported })
         
         itemPromoSections = ItemPromoSections(activePromoSections: activePromoSections)
@@ -49,8 +49,8 @@ class DiscountCalculator
         //We want to do default promos last so we know whether or not to adjust the front line price, based on the CMA promos (ie $20 price item with $15 CMA gets $5 disc max)
         activePromoPlans = activePromoSections.map({ $0.promoPlan }).unique().sorted()
         
-        let contractPromoSections = promoSections.filter { $0.promoSectionRecord.isContractPromo }
-        itemNidsCoveredByContractPromos = Set(contractPromoSections.flatMap({ $0.promoSectionRecord.getTargetItemNids()}))
+        let contractPromoSections = promoSections.filter { $0.isContractPromo }
+        itemNidsCoveredByContractPromos = Set(contractPromoSections.flatMap({ $0.getTargetItemNids()}))
         
         let nonContractTriggerQtys = triggerQtys.getNonContractTriggerQtys(itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
         let contractTriggerQtys = triggerQtys

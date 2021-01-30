@@ -27,11 +27,11 @@ struct NonBuyXGetYCalculator {
             }
         }
         
-        let promoService = PromoService(promoSections: [dcPromoSection.promoSection.promoSectionRecord])
+        let promoService = PromoService(promoSections: [dcPromoSection.promoSectionRecord])
         
         let earnedDiscounts = promoService.getEarnedDiscountPromoItems(triggerQtys: triggerQtys, itemNids: itemNids)
 
-        let targetItemNids = dcPromoSection.promoSection.promoSectionRecord.getTargetItemNids()
+        let targetItemNids = dcPromoSection.promoSectionRecord.getTargetItemNids()
         var orderLinesForItemNids: [FreebieAccumulator] = []
         for itemNid in targetItemNids {
             if let lines = orderLinesByItemNid[itemNid] {
@@ -99,7 +99,7 @@ struct NonBuyXGetYCalculator {
             
             let totalDisc = allDiscounts.map { $0.totalDisc }.reduce(.zero, +)
             
-            let promoDiscounts = PromoDiscounts(promoSection: dcPromoSection.promoSection, totalDisc: totalDisc, discounts: allDiscounts, unusedFreebies: [], freebieBundles: [])
+            let promoDiscounts = PromoDiscounts(promoSection: dcPromoSection, totalDisc: totalDisc, discounts: allDiscounts, unusedFreebies: [], freebieBundles: [])
             
             return promoDiscounts
         }

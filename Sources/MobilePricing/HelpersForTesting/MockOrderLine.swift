@@ -14,20 +14,20 @@ class MockOrderLine: IDCOrderLine {
     var discounts: [LinePromoOrFee] = []
     var fees: [LinePromoOrFee] = []
     
-    internal init(itemNid: Int, seq: Int, isPreferredFreeGoodLine: Bool, qtyOrdered: Int, qtyShipped: Int, basePricesAndPromosOnQtyOrdered: Bool, unitPrice: MoneyWithoutCurrency, unitSplitCaseCharge: MoneyWithoutCurrency) {
+    internal init(itemNid: Int, qtyOrdered: Int, unitPrice: MoneyWithoutCurrency) {
         self.itemNid = itemNid
-        self.seq = seq
-        self.isPreferredFreeGoodLine = isPreferredFreeGoodLine
+        self.seq = 0
+        self.isPreferredFreeGoodLine = false
         self.qtyOrdered = qtyOrdered
-        self.qtyShipped = qtyShipped
-        self.basePricesAndPromosOnQtyOrdered = basePricesAndPromosOnQtyOrdered
+        self.qtyShipped = qtyOrdered
+        self.basePricesAndPromosOnQtyOrdered = false
         self.unitPrice = unitPrice
-        self.unitSplitCaseCharge = unitSplitCaseCharge
+        self.unitSplitCaseCharge = .zero
     }
     
     let itemNid: Int
     
-    let seq: Int
+    var seq: Int
     
     var isPreferredFreeGoodLine: Bool
     

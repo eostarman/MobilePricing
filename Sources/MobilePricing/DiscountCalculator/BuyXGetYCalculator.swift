@@ -132,12 +132,11 @@ struct BuyXGetYCalculator {
              * target qty: 7
              * sorted lines: 7, 5, 4, 3, 12, 8 */
             
-            let possibilities = targets
             var earnedQtyFree = promoSection.qtyY
             
             var freebieTargets: [FreebieTarget] = []
             
-            for target in possibilities {
+            for target in targets {
                 if earnedQtyFree == 0 {
                     break
                 }
@@ -179,7 +178,7 @@ struct BuyXGetYCalculator {
     }
     
     static func getBuyXGetYPromos(allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> ([PromoTuple], [UnusedFreebie]) {
-        var buyXGetYPromos = allPromoSections.filter { $0.promoSection.promoSectionRecord.isBuyXGetY }
+        var buyXGetYPromos = allPromoSections.filter { $0.promoSectionRecord.isBuyXGetY }
         
         var promoTuples: [PromoTuple] = []
         var unusedFreebies: [UnusedFreebie] = []
@@ -196,7 +195,7 @@ struct BuyXGetYCalculator {
             for promoSection in buyXGetYPromos {
                 let clones = orderLines.map { $0.getClone() }
                 
-                let discounts = getPromoDiscounts(promoSection.promoSection, clones, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
+                let discounts = getPromoDiscounts(promoSection, clones, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
                 
                 // here's a promo section that doesn't do anything - if triggered, it will either give me real discounts, or it'll have "potential" discounts ("unused freebies").
                 if discounts.unusedFreebies.isEmpty && discounts.discounts.isEmpty {
@@ -283,6 +282,13 @@ struct BuyXGetYCalculator {
         }
     }
     
+    static func resetAccumulators(_ promoSection: PromoSection, _ orderLines : [FreebieAccumulator]) {
+        for line in orderLines {
+            line.qtyUsedThisPass = 0
+            line.setTriggerStatus(promoSection: promoSection)
+        }
+    }
+    
     static func getPromoDiscounts(_ promoSection: PromoSection, _ allOrderLines : [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoDiscounts {
         let orderLines: [FreebieAccumulator]
         
@@ -292,10 +298,7 @@ struct BuyXGetYCalculator {
             orderLines = allOrderLines
         }
         
-        for line in orderLines {
-            line.qtyUsedThisPass = 0
-            line.setTriggerStatus(promoSection: promoSection)
-        }
+        resetAccumulators(promoSection, orderLines)
         
         let triggersAndTargets = FreebieTriggersAndTargets(lines: orderLines)
         
