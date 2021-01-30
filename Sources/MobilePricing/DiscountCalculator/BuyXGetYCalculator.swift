@@ -142,6 +142,10 @@ struct BuyXGetYCalculator {
                 }
                 
                 let qtyFreeHere = min(earnedQtyFree, target.qtyAvailableToBeFreeGoods)
+                if qtyFreeHere == 0 {
+                    continue
+                }
+                
                 earnedQtyFree -= qtyFreeHere
                 
                 target.qtyFree += qtyFreeHere
@@ -152,8 +156,10 @@ struct BuyXGetYCalculator {
             let qtyFree = promoSection.qtyY - earnedQtyFree // these free items are on the order
             let unusedFreeQty = earnedQtyFree    // these free items are not even on the order (UnusedFreebies)
             
+            let itemNidsForUnusedFreeQty = unusedFreeQty > 0 ? promoSection.getTargetItemNids() : []
+            
             // I'm not expecting a bunch of freebie entries, but maybe a single entry produced multiple times (so, I think the freebies.Where() is okay without a Dictionary<>)
-            let newFreebie = FreebieBundle(freebieTriggers: freebieTriggers, freebieTargets: freebieTargets, qtyFree: qtyFree, unusedFreeQty: unusedFreeQty)
+            let newFreebie = FreebieBundle(freebieTriggers: freebieTriggers, freebieTargets: freebieTargets, qtyFree: qtyFree, unusedFreeQty: unusedFreeQty, itemNidsForUnusedFreeQty: itemNidsForUnusedFreeQty)
             
             resultingBundles.append(newFreebie)
             

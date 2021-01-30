@@ -9,15 +9,17 @@ class FreebieBundle {
     let freebieTargets: [FreebieTarget]
     let qtyFree: Int
     let unusedFreeQty: Int
+    let itemNidsForUnusedFreeQty: Set<Int>
     
     /// The number of times I computed one of these FreebieBundles (same items, same quantities, and same OrderLines)
     var nbrTimes: Int = 1
     
-    internal init(freebieTriggers: [FreebieTrigger], freebieTargets: [FreebieTarget], qtyFree: Int, unusedFreeQty: Int) {
+    internal init(freebieTriggers: [FreebieTrigger], freebieTargets: [FreebieTarget], qtyFree: Int, unusedFreeQty: Int, itemNidsForUnusedFreeQty: Set<Int>) {
         self.freebieTriggers = freebieTriggers
         self.freebieTargets = freebieTargets
         self.qtyFree = qtyFree
         self.unusedFreeQty = unusedFreeQty
+        self.itemNidsForUnusedFreeQty = itemNidsForUnusedFreeQty
     }
     
     /// close to "==" but matches against the orderLines used, the triggers and targets and the quantities - used to let us bump the nbrTimes counter
@@ -46,6 +48,11 @@ class FreebieBundle {
             if x.item.seq != y.item.seq || x.qtyFreeHere != y.qtyFreeHere {
                 return false
             }
+        }
+        
+        // the sets of item nids that can be chosen for the unusedFreeQty must match
+        if itemNidsForUnusedFreeQty != other.itemNidsForUnusedFreeQty {
+            return false
         }
         
         // don't compare the nbrTimes counter
