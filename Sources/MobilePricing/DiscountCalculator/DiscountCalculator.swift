@@ -24,10 +24,7 @@ class DiscountCalculator
     
     var discountPromoSectionsForItem: [Int: [DCPromoSection]] = [:]
     var triggerPromoSectionsForItem: [Int: [DCPromoSection]] = [:]
-    
-    var unusedFreebies: [UnusedFreebie] = []
-    
-    
+
     init(transactionCurrency: Currency, cusNid: Int, promoDate: Date, deliveryDate: Date, promoSections: [PromoSectionRecord], triggerQtys: TriggerQtys) {
         self.transactionCurrency = transactionCurrency
         self.cusNid = cusNid
@@ -60,8 +57,7 @@ class DiscountCalculator
         }
     }
     
-    func getPromoTuplesThatProvideDiscountsOrFreeGoodsAndAccumulateUnusedFreebies(dcOrderLines: [IDCOrderLine], promoPlan: ePromoPlan, processingTaxes: Bool) -> [PromoTuple]
-    {
+    func getPromoTuplesThatProvideDiscountsOrFreeGoodsAndAccumulateUnusedFreebies(dcOrderLines: [IDCOrderLine], promoPlan: ePromoPlan, processingTaxes: Bool) -> PromoSolution {
         // Default will get both "normal" promotions (pick the best one, or the Buy-X-Get-Y variety) and also the stackable promos and additional fees
         if (promoPlan == ePromoPlan.Stackable || promoPlan == ePromoPlan.AdditionalFee) {
             fatalError("Logic error")
@@ -96,17 +92,16 @@ class DiscountCalculator
         let allPromoSections = itemPromoSections.getAllPromoSectionsWithDiscountsForTheseItems(itemNids: itemNidsToScanOnPromos)
             .filter({x in doKeep(promoSection: x)})
         
-        var resultingPromoTuples: [PromoTuple] = []
+        var resultingSolution = PromoSolution()
         
         // First ask each promoSection to compute the discounts for this order.
         // Do the BuyXGetY promos first so that we can prevent applying discounts to the "free goods bundles"
         // for BuyX, it's important to put the largest (X) first (so, Buy5get3 and Buy2Get1 will work)
         // for standard promos it doesn't matter ... I'll compute all the ones that are triggered, then pick the deepest discount for each item
         
-        let (tuples, freebies) = BuyXGetYCalculator.getBuyXGetYPromos(allPromoSections: allPromoSections, orderLines: orderLines, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
+        let promoSolution = BuyXGetYCalculator.getBuyXGetYPromos(allPromoSections: allPromoSections, orderLines: orderLines, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
         
-        unusedFreebies.append(contentsOf: freebies)
-        resultingPromoTuples.append(contentsOf: tuples)
+        resultingSolution.append(promoSolution)
         
         // use the orderLine's Seq as the key
         var previousDiscounts: [Int: [PromoDiscount]] = [:]
@@ -135,7 +130,7 @@ class DiscountCalculator
                 
                 for promoDiscount in discountsOnThisOrder.discounts {
                     let promoTuple = PromoTuple(dcPromoSection: promoSection, promoDiscount: promoDiscount)
-                    resultingPromoTuples.append(promoTuple)
+                    resultingSolution.append(promoTuple)
                     
                     if var existing = currentTierDiscounts[promoDiscount.dcOrderLine.seq] {
                         existing.append(promoDiscount)
@@ -154,14 +149,19 @@ class DiscountCalculator
             }
         }
         
-        return resultingPromoTuples
+        return resultingSolution
     }
     
-    static func getBestStandardPromoAndAllStackablePromosAndAdditionalFeesForEachOrderLine(standardPromoTuples: [PromoTuple]) -> [PromoTuple]
-    {
+    static func getBestStandardPromoAndAllStackablePromosAndAdditionalFeesForEachOrderLine(_ allPromoTuples: [PromoTuple]) -> [PromoTuple] {
+        let standardPromoTuples = allPromoTuples.filter { !$0.dcPromoSection.promoSectionRecord.isBuyXGetY }
+        
+        if standardPromoTuples.isEmpty {
+            return []
+        }
+        
         var results: [PromoTuple] = []
         
-        let tuplesByOrderLine = Dictionary(grouping: standardPromoTuples) { $0.promoDiscount.dcOrderLine.seq }
+        let tuplesByOrderLine = Dictionary(grouping: standardPromoTuples) { $0.dcOrderLine.seq }
         
         for (_, tuples) in tuplesByOrderLine {
             // we're looking at a single orderLine here - if there's only one tuple, then use it. Otherwise, categorize and process the list of tuples
@@ -173,8 +173,8 @@ class DiscountCalculator
             let sortedDiscounts: [PromoTuple] = tuples
                 .sorted { x, y in
                     // largest discount first
-                    if x.promoDiscount.unitDisc != y.promoDiscount.unitDisc {
-                        return x.promoDiscount.unitDisc > y.promoDiscount.unitDisc
+                    if x.unitDisc != y.unitDisc {
+                        return x.unitDisc > y.unitDisc
                     }
                     
                     // if there are two sections with the largest discount, then the most-recently-started section is first
@@ -222,16 +222,15 @@ class DiscountCalculator
         return results
     }
     
-    
-    func computeDiscountsForOnePromoPlan(dcOrderLines: [IDCOrderLine], freebiesNeedingNewOrderLines: [FreebieNeedingNewOrderLine], promoPlan: ePromoPlan) {
-        let allPromoTuples = getPromoTuplesThatProvideDiscountsOrFreeGoodsAndAccumulateUnusedFreebies(dcOrderLines: dcOrderLines, promoPlan: promoPlan, processingTaxes: false)
+    func computeDiscountsForOnePromoPlan(dcOrderLines: [IDCOrderLine], freebiesNeedingNewOrderLines: [FreebieNeedingNewOrderLine], promoPlan: ePromoPlan) -> PromoSolution {
+        var promoSolution = getPromoTuplesThatProvideDiscountsOrFreeGoodsAndAccumulateUnusedFreebies(dcOrderLines: dcOrderLines, promoPlan: promoPlan, processingTaxes: false)
         
-        let allTaxPromoTuples: [PromoTuple]
         if (promoPlan == ePromoPlan.Default) {
-            allTaxPromoTuples = getPromoTuplesThatProvideDiscountsOrFreeGoodsAndAccumulateUnusedFreebies(dcOrderLines: dcOrderLines, promoPlan: ePromoPlan.Default, processingTaxes: true)
-        } else {
-            allTaxPromoTuples = []
+            let taxPromoSolution = getPromoTuplesThatProvideDiscountsOrFreeGoodsAndAccumulateUnusedFreebies(dcOrderLines: dcOrderLines, promoPlan: ePromoPlan.Default, processingTaxes: true)
+            promoSolution.append(taxPromoSolution)
         }
+        
+        let allPromoTuples = promoSolution.promoTuples
         
         let allBuyXGetYPromosSorted = allPromoTuples
             .filter({ $0.dcPromoSection.promoSectionRecord.isBuyXGetY})
@@ -241,54 +240,46 @@ class DiscountCalculator
                     return x.dcPromoSection.promoSectionRecord.qtyX > y.dcPromoSection.promoSectionRecord.qtyX
                 }
                 
-                return x.promoDiscount.dcOrderLine.seq < y.promoDiscount.dcOrderLine.seq
+                return x.dcOrderLine.seq < y.dcOrderLine.seq
             }
         
-        let buyXgetYPromos = Dictionary(grouping: allBuyXGetYPromosSorted) { $0.promoDiscount.dcOrderLine.seq }
+        let allStandardPromos = Self.getBestStandardPromoAndAllStackablePromosAndAdditionalFeesForEachOrderLine(allPromoTuples)
         
-        var standardPromoTuples = allPromoTuples.filter { !$0.dcPromoSection.promoSectionRecord.isBuyXGetY }
-        standardPromoTuples.append(contentsOf: allTaxPromoTuples)
+        var allResultTuples = allBuyXGetYPromosSorted
+        allResultTuples.append(contentsOf: allStandardPromos)
         
-        let nonBuyXGetYPromos = Dictionary(grouping: Self.getBestStandardPromoAndAllStackablePromosAndAdditionalFeesForEachOrderLine(standardPromoTuples: standardPromoTuples)) { $0.promoDiscount.dcOrderLine.seq }
+        let resultSolution = PromoSolution(allResultTuples, promoSolution.unusedFreebies)
+        return resultSolution
+    }
+    
+    static func applyPromoSolutionToOrderLines(promoSolution: PromoSolution, dcOrderLines: [IDCOrderLine]) {
+        let promosByOrderLine = Dictionary(grouping: promoSolution.promoTuples) { $0.dcOrderLine.seq }
         
-        switch promoPlan {
-        case .CCFOffInvoice, .CCFOnInvoice, .CMAOffInvoice, .CMAOnInvoice, .CTMOffInvoice, .CTMOnInvoice, .OffInvoiceAccrual:
-            for dcOrderLine in dcOrderLines {
-                if let promoTuples = nonBuyXGetYPromos[dcOrderLine.seq], let best = promoTuples.first {
-                    let promoSectionNid = best.dcPromoSection.promoSectionRecord.recNid
-                    dcOrderLine.addDiscountOrFee(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: best.promoDiscount.qtyDiscounted, unitDisc: best.promoDiscount.unitDisc, rebateAmount: best.promoDiscount.rebateAmount)
-                }
+        for dcOrderLine in dcOrderLines {
+            guard let promoTuples = promosByOrderLine[dcOrderLine.seq] else {
+                continue
             }
             
-        case .Default, .Stackable, .AdditionalFee:
-            for dcOrderLine in dcOrderLines {
-                if let freeGoods = buyXgetYPromos[dcOrderLine.seq] {
-                    for freeGood in freeGoods {
-                        let promoSectionNid = freeGood.dcPromoSection.promoSectionRecord.recNid
-                        let qtyFree = freeGood.promoDiscount.qtyDiscounted
-                        dcOrderLine.addFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree)
-                    }
-                }
+            for promoTuple in promoTuples {
                 
-                if let promoTuples = nonBuyXGetYPromos[dcOrderLine.seq] {
+                if promoTuple.isFromBuyXGetYFreePromo {
+                    let promoSectionNid = promoTuple.dcPromoSection.promoSectionRecord.recNid
+                    let qtyFree = promoTuple.qtyDiscounted
+                    dcOrderLine.addFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree)
+                } else {
+                    let promoPlan = promoTuple.dcPromoSection.promoSectionRecord.promoPlan
                     
-                    for promoTuple in promoTuples {
-                        let promoSectionNid = promoTuple.dcPromoSection.promoSectionRecord.recNid
-                        
-                        let qtyDiscounted = dcOrderLine.qtyNotFree
-                        //let netPrice = dcOrderLine.totalOfAllUnitDiscounts
-                        let unitDisc = promoTuple.promoDiscount.unitDisc
-                        let rebateAmount = promoTuple.promoDiscount.rebateAmount
-                        
-                        dcOrderLine.addDiscountOrFee(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: qtyDiscounted, unitDisc: unitDisc, rebateAmount: rebateAmount)
-                    }
+                    let promoSectionNid = promoTuple.dcPromoSection.promoSectionRecord.recNid
                     
+                    let qtyDiscounted = dcOrderLine.qtyNotFree
+                    //let netPrice = dcOrderLine.totalOfAllUnitDiscounts
+                    let unitDisc = promoTuple.unitDisc
+                    let rebateAmount = promoTuple.rebateAmount
+                    
+                    dcOrderLine.addDiscountOrFee(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: qtyDiscounted, unitDisc: unitDisc, rebateAmount: rebateAmount)
                 }
             }
-            
-            break
         }
-        
     }
 
 }

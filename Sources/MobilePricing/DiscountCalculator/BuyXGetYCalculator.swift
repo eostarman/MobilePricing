@@ -6,7 +6,14 @@ import MoneyAndExchangeRates
 
 struct BuyXGetYCalculator {
     
-    static func getFreebieBundles(promoSection: PromoSectionRecord, triggers: [FreebieAccumulator], targets:[FreebieAccumulator]) -> [FreebieBundle] {
+    /// Compute a collection of zero or more FreebieBundles. A FreebieBundle describe the earned free-goods - some may be on the order and some may not be on the order yet. The orderLines are wrapped in FreebieAccumulator
+    /// objects - this is so we can track how many items were used to produce free goods so we don't discount them unless that's allowed.
+    /// - Parameters:
+    ///   - promoSection: the buy-x-get-y free promotion
+    ///   - triggers: triggers from the orderLines on the order
+    ///   - targets: targets for the orderLines on the order
+    /// - Returns: a collection of zero or more FreebieBundles (these describe the earned free-goods - some may be on the order
+    private static func getFreebieBundles(promoSection: PromoSectionRecord, triggers: [FreebieAccumulator], targets:[FreebieAccumulator]) -> [FreebieBundle] {
         if triggers.isEmpty {
             return []
         }
@@ -183,7 +190,7 @@ struct BuyXGetYCalculator {
         return resultingBundles
     }
     
-    static func getBuyXGetYPromos(allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> ([PromoTuple], [UnusedFreebie]) {
+    static func getBuyXGetYPromos(allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoSolution {
         var buyXGetYPromos = allPromoSections.filter { $0.promoSectionRecord.isBuyXGetY }
         
         var promoTuples: [PromoTuple] = []
@@ -275,7 +282,7 @@ struct BuyXGetYCalculator {
             }
         }
         
-        return (promoTuples, unusedFreebies)
+        return PromoSolution(promoTuples, unusedFreebies)
     }
     
     fileprivate struct DiscountAndRebate : Hashable {
@@ -288,14 +295,14 @@ struct BuyXGetYCalculator {
         }
     }
     
-    static func resetAccumulators(_ promoSection: PromoSection, _ orderLines : [FreebieAccumulator]) {
+    private static func resetAccumulators(_ promoSection: PromoSection, _ orderLines : [FreebieAccumulator]) {
         for line in orderLines {
             line.qtyUsedThisPass = 0
             line.setTriggerStatus(promoSection: promoSection)
         }
     }
     
-    static func getPromoDiscounts(_ promoSection: PromoSection, _ allOrderLines : [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoDiscounts {
+    private static func getPromoDiscounts(_ promoSection: PromoSection, _ allOrderLines : [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoDiscounts {
         let orderLines: [FreebieAccumulator]
         
         if !promoSection.promoSectionRecord.isContractPromo && !itemNidsCoveredByContractPromos.isEmpty {
@@ -380,8 +387,6 @@ struct BuyXGetYCalculator {
         
         let promoDiscounts = PromoDiscounts(promoSection: promoSection, totalDisc: totalDisc, discounts: allDiscounts, unusedFreebies: allUnusedFreebies, freebieBundles: allFreebieBundles)
         
-        
         return promoDiscounts
-        
     }
 }
