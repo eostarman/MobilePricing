@@ -281,7 +281,6 @@ struct BuyXGetYCalculator {
             unitDisc = promoDiscount.unitDisc
             rebateAmount = promoDiscount.rebateAmount
         }
-        
     }
     
     static func getPromoDiscounts(_ promoSection: PromoSection, _ allOrderLines : [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoDiscounts {
@@ -302,7 +301,7 @@ struct BuyXGetYCalculator {
         
         
         // if *this order* doesn't have any valid trigger items, then don't try to compute any free goods
-        if (!triggersAndTargets.triggers.isEmpty)
+        if (triggersAndTargets.triggers.isEmpty)
         {
             return PromoDiscounts(promoSection: promoSection, totalDisc: .zero, discounts: [], unusedFreebies: [], freebieBundles: [])
         }

@@ -256,7 +256,7 @@ class DiscountCalculator
             for dcOrderLine in dcOrderLines {
                 if let promoTuples = nonBuyXGetYPromos[dcOrderLine.seq], let best = promoTuples.first {
                     let promoSectionNid = best.dcPromoSection.promoSectionRecord.recNid
-                    dcOrderLine.addDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: best.promoDiscount.qtyDiscounted, unitDisc: best.promoDiscount.unitDisc, rebateAmount: best.promoDiscount.rebateAmount)
+                    dcOrderLine.addDiscountOrFee(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: best.promoDiscount.qtyDiscounted, unitDisc: best.promoDiscount.unitDisc, rebateAmount: best.promoDiscount.rebateAmount)
                 }
             }
             
@@ -280,7 +280,7 @@ class DiscountCalculator
                         let unitDisc = promoTuple.promoDiscount.unitDisc
                         let rebateAmount = promoTuple.promoDiscount.rebateAmount
                         
-                        dcOrderLine.addDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: qtyDiscounted, unitDisc: unitDisc, rebateAmount: rebateAmount)
+                        dcOrderLine.addDiscountOrFee(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: qtyDiscounted, unitDisc: unitDisc, rebateAmount: rebateAmount)
                     }
                     
                 }

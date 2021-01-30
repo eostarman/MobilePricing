@@ -11,12 +11,14 @@ import MobileDownload
 protocol IDCOrderLine {
     var itemNid: Int { get }
     var seq: Int { get }
-    var IsPreferredFreeGoodLine: Bool { get }
+    var isPreferredFreeGoodLine: Bool { get }
     var qtyOrdered: Int { get }
     var qtyShipped: Int { get }
     var basePricesAndPromosOnQtyOrdered: Bool { get }
     var unitPrice: MoneyWithoutCurrency { get }
-    var totalOfAllUnitDiscounts: MoneyWithoutCurrency { get }
+    
+    var unitDiscountTotal: MoneyWithoutCurrency { get }
+    var unitFeeTotal: MoneyWithoutCurrency { get }
     var unitSplitCaseCharge: MoneyWithoutCurrency { get }
     
     var qtyNotFree: Int { get }
@@ -27,5 +29,5 @@ protocol IDCOrderLine {
     // mpr: note that this is different in DiscountCalculator.cs - I found the code that assigns the default promos to the orderLine very confusing (likely buggy)
     func clearAllPromoData()
     func addFreeGoods(promoSectionNid: Int, qtyFree: Int)
-    func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, qtyDiscounted: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
+    func addDiscountOrFee(promoPlan: ePromoPlan, promoSectionNid: Int, qtyDiscounted: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
 }

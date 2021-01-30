@@ -58,7 +58,7 @@ class FreebieAccumulator
         self.dcOrderLine = dcOrderLine
         
         self.itemNid = dcOrderLine.itemNid
-        self.isPreferredFreeGoodLine = dcOrderLine.IsPreferredFreeGoodLine
+        self.isPreferredFreeGoodLine = dcOrderLine.isPreferredFreeGoodLine
         self.frontlinePrice = dcOrderLine.unitPrice
         
         self.originalQty = mayUseQtyOrderedForBuyXGetY && (useQtyOrderedForPricingAndPromos || dcOrderLine.basePricesAndPromosOnQtyOrdered)
