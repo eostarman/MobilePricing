@@ -190,7 +190,7 @@ struct BuyXGetYCalculator {
         return resultingBundles
     }
     
-    static func getBuyXGetYPromos(allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoSolution {
+    static func getBuyXGetYPromos(transactionCurrency: Currency, allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoSolution {
         var buyXGetYPromos = allPromoSections.filter { $0.promoSectionRecord.isBuyXGetY }
         
         var promoTuples: [PromoTuple] = []

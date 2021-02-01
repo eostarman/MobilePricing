@@ -7,7 +7,9 @@ import MoneyAndExchangeRates
 class DCPromoSection {
     let promoSectionRecord: PromoSectionRecord
     let transactionCurrency: Currency
-    let promoPlan: ePromoPlanForMobileInvoice
+    var promoPlan: ePromoPlan {
+        promoSectionRecord.promoPlan
+    }
     
     var isContractPromo: Bool { promoSectionRecord.isContractPromo }
     var isAdditionalFee: Bool { promoSectionRecord.promoPlan == .AdditionalFee }
@@ -54,7 +56,6 @@ class DCPromoSection {
     {
         self.promoSectionRecord = promoSectionRecord
         self.transactionCurrency = transactionCurrency
-        promoPlan = ePromoPlanForMobileInvoice(promoSectionRecord.promoPlan)
         
         let promoItems = promoSectionRecord.getPromoItems()
         hasExplicitTriggerItems = promoItems.contains { $0.isExplicitTriggerItem }
@@ -71,21 +72,7 @@ class DCPromoSection {
         } else {
             triggerRequirements = nil
         }
-      
-//        this.promoSection = promoSection
-//        this.currencyConversionDate = currencyConversionDate
-//
-//        this.databaseCache = databaseCache
-//        this.transactionCurrencyNid = transactionCurrencyNid
-//        this.promoCurrencyNid = databaseCache.GetCurrencyNidForPromoCode(promoSection.PromoCodeNid)
     }
-    
-    func resetTriggerQtys(_ triggerQtys: TriggerQtys) {
-//        this.triggerQtys = triggerQtys
-//                    this.qtyOnOrderByItem = GetQtyOnOrderByItem()
-//                    this.qtyOnOrderInTotal = qtyOnOrderByItem.Values.Sum()
-    }
-    
 }
 
 extension DCPromoSection : PromoSection {
