@@ -22,6 +22,9 @@ public final class PriceSheetService {
     public var priceSheetsFromRules: [PriceSheetLink] = []
     /// price sheets that are assigned to the warehouse (used only if the item isn't listed in a customer-assigned price book, or one based on rules
     public var priceSheetsForWarehouse: [PriceSheetLink] = []
+    
+    /// price sheets that are not restricted to either specific warehouses or specific customers
+    public var genericPriceSheets: [PriceSheetLink] = []
 
     public var isEmpty: Bool {
         priceSheetsForCustomer.isEmpty && priceSheetsFromRules.isEmpty && priceSheetsForWarehouse.isEmpty
@@ -68,6 +71,11 @@ public final class PriceSheetService {
         }
 
         if let price = getPrice(priceSheetsForWarehouse, item, triggerQuantities: triggerQuantities, transactionCurrency: transactionCurrency) {
+            return price
+        }
+                
+        // mpr: I need to re-check the pricing logic in c# to see how it handled the "generic" (non-specific) price sheets
+        if let price = getPrice(genericPriceSheets, item, triggerQuantities: triggerQuantities, transactionCurrency: transactionCurrency) {
             return price
         }
 
@@ -169,6 +177,12 @@ public final class PriceSheetService {
         }
 
         for priceSheet in activePriceSheets {
+            
+            if priceSheet.warehouses.isEmpty && priceSheet.customers.isEmpty {
+                let link = PriceSheetLink(priceSheet: priceSheet, priceLevel: 0, canUseAutomaticColumns: false)
+                genericPriceSheets.append(link)
+                continue
+            }
 
             if let warehouseLink = priceSheet.warehouses[shipFrom.recNid] {
                 let link = PriceSheetLink(priceSheet: priceSheet, priceLevel: warehouseLink.priceLevel, canUseAutomaticColumns: warehouseLink.canUseAutomaticColumns)

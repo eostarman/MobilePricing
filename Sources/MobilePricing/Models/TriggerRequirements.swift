@@ -87,12 +87,23 @@ extension TriggerRequirements {
     }
     
     func isTriggered(_ triggerQtys: TriggerQtys) -> Bool {
+        
+        // special case: if this is a trigger that is not a case rollup (or based on weight) and it's triggered by a quantity (1), then the order can contain quantity (0)
+        // and we still want to show the discount
+        if isQuantityOne {
+            return true
+        }
+        
         for groupRequirement in groupRequirements {
-            if !groupRequirement.isTriggered(triggerQtys) {
+            if !groupRequirement.isTriggeredByQuantity(triggerQtys) {
                 return false
             }
         }
         
+        return isTriggeredByQuantity(triggerQtys)
+    }
+    
+    private func isTriggeredByQuantity(_ triggerQtys: TriggerQtys) -> Bool {
         switch basis {
         case .itemWeight:
             let totalQty = triggerItemNids.map { triggerQtys.getWeight(itemNid: $0) }.reduce(0, +)

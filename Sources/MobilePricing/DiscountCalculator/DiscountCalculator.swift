@@ -339,6 +339,7 @@ public class DiscountCalculator
         for seq in 0 ..< dcOrderLines.count {
             dcOrderLines[seq].seq = seq
         }
+        
         if itemNidsCoveredByContractPromos.isEmpty {
             return computeDiscounts(Tiers(nonContractPromoSections), dcOrderLines)
         } else {
