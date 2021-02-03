@@ -26,13 +26,13 @@ class MockOrderLine: IDCOrderLine {
     
     var isPreferredFreeGoodLine: Bool
     
-    var qtyOrdered: Int
+    var qtyOrdered: Int?
     
-    var qtyShipped: Int
+    var qtyShipped: Int?
     
     var basePricesAndPromosOnQtyOrdered: Bool
     
-    var unitPrice: MoneyWithoutCurrency
+    var unitPrice: MoneyWithoutCurrency?
     
     var unitSplitCaseCharge: MoneyWithoutCurrency
     
@@ -49,7 +49,7 @@ class MockOrderLine: IDCOrderLine {
     }
     
     var unitNetAfterDiscount: MoneyWithoutCurrency {
-        unitPrice - totalDiscount + unitSplitCaseCharge
+        (unitPrice ?? .zero) - totalDiscount + unitSplitCaseCharge
     }
     
     func getCokePromoTotal() -> MoneyWithoutCurrency {

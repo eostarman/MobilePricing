@@ -7,7 +7,7 @@ import MoneyAndExchangeRates
 /// <summary>
 /// Class to compute promotions (discounts and rebates) for an order
 /// </summary>
-class DiscountCalculator
+public class DiscountCalculator
 {
     let transactionCurrency: Currency
     
@@ -53,7 +53,7 @@ class DiscountCalculator
         return allPromoSections
     }
     
-    init(transactionCurrency: Currency, promoSections: [PromoSectionRecord]) {
+    public init(transactionCurrency: Currency, promoSections: [PromoSectionRecord]) {
         self.transactionCurrency = transactionCurrency
         
         // round up all promotions that are available to the CusNid on the given PromoDate
@@ -335,7 +335,7 @@ class DiscountCalculator
     /// Compute the discount from all promotions. Update the orderLines with the results, and also return the results as a single promoSolution
     /// - Parameter dcOrderLines: the lines to be discounted - these will be updated with the computed free-goods, discounts, fees and taxes. Note that the 'seq' property of the orderLines will be reset to a value from 0 ..< count (to make them unique and to determine the order of assignment of (e.g.) free goods)
     /// - Returns: the promoSolution (which contains unusedFreebies) that has been applied to the order
-    func computeDiscounts(_ dcOrderLines: [IDCOrderLine]) -> PromoSolution {
+    public func computeDiscounts(_ dcOrderLines: [IDCOrderLine]) -> PromoSolution {
         for seq in 0 ..< dcOrderLines.count {
             dcOrderLines[seq].seq = seq
         }

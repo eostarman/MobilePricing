@@ -3,7 +3,7 @@
 import Foundation
 import MoneyAndExchangeRates
 
-struct PromoSolution {
+public struct PromoSolution {
     var promoTuples: [PromoTuple] = []
     var unusedFreebies: [UnusedFreebie] = []
     
