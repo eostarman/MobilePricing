@@ -2,6 +2,7 @@
 
 import Foundation
 import MobileDownload
+import MoneyAndExchangeRates
 
 fileprivate var numberOfTestRecordsCreated = 0
 
@@ -27,6 +28,49 @@ extension MobileDownload {
     func testCustomer() -> CustomerRecord { customers.add(testRecord()) }
     func testPriceSheet() -> PriceSheetRecord { priceSheets.add(testRecord()) }
     func testPriceRule() -> PriceRuleRecord { priceRules.add(testRecord())}
-    func testPromoCode() -> PromoCodeRecord { promoCodes.add(testRecord())}
-    func testPromoSection() -> PromoSectionRecord { promoSections.add(testRecord())}
+    
+    func testPromoCode(_ currency: Currency, _ customers: CustomerRecord ...) -> PromoCodeRecord {
+        let promoCode = promoCodes.add(testRecord())
+        promoCode.currency = currency
+        promoCode.promoCustomers = Set(customers.map { $0.recNid })
+        return promoCode
+    }
+    
+    func testPromoCode(_ currency: Currency, _ customer: CustomerRecord?) -> PromoCodeRecord {
+        let promoCode = promoCodes.add(testRecord())
+        promoCode.currency = currency
+        
+        if let customer = customer {
+            promoCode.promoCustomers = Set([customer.recNid])
+        }
+        return promoCode
+    }
+    
+    func testPromoSection(promoCode: PromoCodeRecord? = nil, isMixAndMatch: Bool = true, _ promoItems: PromoItem ...) -> PromoSectionRecord {
+        let promoSection = promoSections.add(testRecord())
+        promoSection.isMixAndMatch = isMixAndMatch
+        promoSection.setPromoItems(promoItems)
+        
+        if let promoCode = promoCode {
+            promoSection.promoCodeNid = promoCode.recNid
+        } else {
+            let newPromoCode = testPromoCode(.USD)
+            promoSection.promoCodeNid = newPromoCode.recNid
+        }
+        return promoSection
+    }
+    
+    @discardableResult
+    func testPromoSection(customer: CustomerRecord, currency: Currency = .USD, _ promoItems: PromoItem ...) -> PromoSectionRecord {
+
+        let promoCode = mobileDownload.testPromoCode(currency, customer)
+        
+        let promoSection = mobileDownload.testPromoSection()
+        promoSection.promoCodeNid = promoCode.recNid
+        
+        promoSection.promoPlan = .Default
+        promoSection.setPromoItems(promoItems)
+
+        return promoSection
+    }
 }

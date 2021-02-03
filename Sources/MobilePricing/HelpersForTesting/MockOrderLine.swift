@@ -1,9 +1,4 @@
-//
-//  File.swift
-//  
-//
 //  Created by Michael Rutherford on 1/29/21.
-//
 
 import Foundation
 import MoneyAndExchangeRates
@@ -39,28 +34,26 @@ class MockOrderLine: IDCOrderLine {
     
     var unitPrice: MoneyWithoutCurrency
     
-    var unitFeeTotal: MoneyWithoutCurrency {
-        fees.map({ $0.qtyDiscounted * $0.unitDisc }).reduce(.zero, +)
-    }
-
-    
-    var unitDiscountTotal: MoneyWithoutCurrency {
-        discounts.map({ $0.qtyDiscounted * $0.unitDisc }).reduce(.zero, +)
-    }
-    
     var unitSplitCaseCharge: MoneyWithoutCurrency
     
-    var qtyNotFree: Int {
-        let qtyOrderedOrShipped = basePricesAndPromosOnQtyOrdered ? qtyOrdered : qtyShipped
-        return qtyOrderedOrShipped - freeGoods.map({ $0.qtyFree}).reduce(0, +)
+    var unitFeeTotal: MoneyWithoutCurrency {
+        fees.map({ $0.unitDisc }).reduce(.zero, +)
+    }
+    
+    var totalDiscount: MoneyWithoutCurrency {
+        discounts.map({ $0.unitDisc }).reduce(.zero, +)
+    }
+    
+    var qtyFree: Int {
+        freeGoods.map({ $0.qtyFree}).reduce(0, +)
     }
     
     var unitNetAfterDiscount: MoneyWithoutCurrency {
-        unitPrice - unitDiscountTotal
+        unitPrice - totalDiscount + unitSplitCaseCharge
     }
     
     func getCokePromoTotal() -> MoneyWithoutCurrency {
-        return .zero
+        discounts.filter({ $0.promoPlan.isCokePromo }).map({ $0.unitDisc }).reduce(.zero, +)
     }
     
     func clearAllPromoData() {
@@ -72,9 +65,9 @@ class MockOrderLine: IDCOrderLine {
         freeGoods.append(LineFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree))
     }
     
-    func addDiscountOrFee(promoPlan: ePromoPlan, promoSectionNid: Int, qtyDiscounted: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
-        let x = LinePromoOrFee(promoPlan: promoPlan, promoSectionNid: promoSectionNid, qtyDiscounted: qtyDiscounted, unitDisc: unitDisc, rebateAmount: rebateAmount)
-        if x.isFee {
+    func addDiscountOrFee(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
+        let x = LinePromoOrFee(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount)
+        if x.promoPlan == .AdditionalFee {
             fees.append(x)
         } else {
             discounts.append(x)
@@ -82,19 +75,17 @@ class MockOrderLine: IDCOrderLine {
     }
 }
 
-struct LineFreeGoods {
-    let promoSectionNid: Int
-    let qtyFree: Int
-}
-
-struct LinePromoOrFee {
-    let promoPlan: ePromoPlan
-    let promoSectionNid: Int
-    let qtyDiscounted: Int
-    let unitDisc: MoneyWithoutCurrency
-    let rebateAmount: MoneyWithoutCurrency
+extension MockOrderLine {
     
-    var isFee: Bool {
-        promoPlan == .AdditionalFee
+    struct LineFreeGoods {
+        let promoSectionNid: Int
+        let qtyFree: Int
+    }
+    
+    struct LinePromoOrFee {
+        let promoPlan: ePromoPlan
+        let promoSectionNid: Int
+        let unitDisc: MoneyWithoutCurrency
+        let rebateAmount: MoneyWithoutCurrency
     }
 }

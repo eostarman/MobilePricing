@@ -80,17 +80,8 @@ public struct FrontlinePriceService {
             return nil
         }
         
-        let price = frontlinePrice.price
-        
-        if price.currency != transactionCurrency {
-            guard let convertedPrice = mobileDownload.exchange(price, to: transactionCurrency) else {
-                return nil
-            }
-            
-            let roundedPrice = convertedPrice.withDecimals(numberOfDecimals)
-            return roundedPrice
-        }
-        
+        let price = frontlinePrice.price.converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+
         return price
     }
 }

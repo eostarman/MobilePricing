@@ -15,8 +15,7 @@ class DCPromoSection {
     var isAdditionalFee: Bool { promoSectionRecord.promoPlan == .AdditionalFee }
     var isTax: Bool { isAdditionalFee && promoSectionRecord.additionalFeePromo_IsTax }
     
-    let promoTierSequence: Int?
-    let isTieredPromo: Bool?
+    let promoTierSequence: Int
     
     let hasExplicitTriggerItems: Bool
     
@@ -62,8 +61,18 @@ class DCPromoSection {
         
         let promoCode = mobileDownload.promoCodes[promoSectionRecord.promoCodeNid]
         
-        self.isTieredPromo = promoCode.isTieredPromo
-        self.promoTierSequence = promoCode.promoTierSeq
+        // We don't support a tiered promotion for buy-x-get-y-free promotions - these are always evaluated before the standard promotions.
+        // mpr: here's the problem I'm avoiding: on any given orderLine, there are free goods and there are zero or more discounts. The discounts are on the items
+        // (within the orderLine) that are not free. If we allow buy-x-get-y-free promos to be tiered, then a tier-1 promotion could provide 1 free, a tier-2
+        // promotion could provide $1.00 off on the 4 non-free items, then a tier-3 promotion could provide 2 more free items and finally tier-4 could provide an
+        // additional $.50 off on the remaining item. This is confusing to work with - it's much simpler to say that on a single orderLine x of the items are free
+        // and the remainder of the items are discounted.
+        
+        if promoSectionRecord.isBuyXGetY || !promoCode.isTieredPromo {
+            self.promoTierSequence = -1
+        } else {
+            self.promoTierSequence = promoCode.promoTierSeq
+        }
         
         promoItemsByItemNid = Dictionary(uniqueKeysWithValues: promoSectionRecord.getPromoItems().map{ ($0.itemNid, $0) })
         

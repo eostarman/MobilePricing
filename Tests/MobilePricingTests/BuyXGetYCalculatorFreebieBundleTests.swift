@@ -10,37 +10,34 @@ import XCTest
 import MobileDownload
 import MoneyAndExchangeRates
 
-class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
+struct PromoTestSolution {
+    let promoTuples: [PromoTuple]
+    let unusedFreebies: [UnusedFreebie]
+    let sale: MockOrderLine
+    let sales: [MockOrderLine]
     
-    struct Solution {
-        let promoTuples: [PromoTuple]
-        let unusedFreebies: [UnusedFreebie]
-        let sale: MockOrderLine
-        let sales: [MockOrderLine]
-        
-        init(promoSolution: PromoSolution, orderLines: [MockOrderLine]) {
-            promoTuples = promoSolution.promoTuples
-            unusedFreebies = promoSolution.unusedFreebies
-            sale = orderLines.first!
-            sales = orderLines
-        }
+    init(promoSolution: PromoSolution, orderLines: [MockOrderLine]) {
+        promoTuples = promoSolution.promoTuples
+        unusedFreebies = promoSolution.unusedFreebies
+        sale = orderLines.first!
+        sales = orderLines
     }
-    
-    func getPromoSolution(_ promoSection: PromoSectionRecord, _ orderLines: MockOrderLine ...) -> Solution {
+}
 
-        for seq in 0 ..< orderLines.count {
-            orderLines[seq].seq = seq
-        }
-        
-        let discountCalculator = DiscountCalculator(transactionCurrency: .USD, promoSections: [promoSection])
-        
-        let promoSolution = discountCalculator.computeDiscounts(orderLines)
-        
-        let solutionForTest = Solution(promoSolution: promoSolution, orderLines: orderLines)
-        
-        return solutionForTest
-    }
+
+func getPromoTestSolution(transactionCurrency: Currency = .USD, _ promoSection: PromoSectionRecord, _ orderLines: MockOrderLine ...) -> PromoTestSolution {
+
+    let discountCalculator = DiscountCalculator(transactionCurrency: transactionCurrency, promoSections: [promoSection])
     
+    let promoSolution = discountCalculator.computeDiscounts(orderLines)
+    
+    let solutionForTest = PromoTestSolution(promoSolution: promoSolution, orderLines: orderLines)
+    
+    return solutionForTest
+}
+
+class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
+
     func testBuy10Get1FreeNonMixAndMatch() throws {
         mobileDownload = MobileDownload()
         
@@ -60,13 +57,13 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(9))
+            let solution = getPromoTestSolution(promoSection, beerSale(9))
             
-            XCTAssertEqual(solution.sale.unitDiscountTotal, .zero)
+            XCTAssertEqual(solution.sale.totalDiscount, .zero)
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(10))
+            let solution = getPromoTestSolution(promoSection, beerSale(10))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
             XCTAssertEqual(solution.unusedFreebies.count, 1)
@@ -74,7 +71,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(11))
+            let solution = getPromoTestSolution(promoSection, beerSale(11))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.unusedFreebies.count, 0)
@@ -83,7 +80,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(21))
+            let solution = getPromoTestSolution(promoSection, beerSale(21))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.unusedFreebies.count, 1)
@@ -93,7 +90,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(32))
+            let solution = getPromoTestSolution(promoSection, beerSale(32))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.unusedFreebies.count, 1)
@@ -127,7 +124,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, wineSale(1), beerSale(21))
+            let solution = getPromoTestSolution(promoSection, wineSale(1), beerSale(21))
             
             XCTAssertEqual(solution.promoTuples.count, 2)
             XCTAssertEqual(solution.unusedFreebies.count, 0)
@@ -138,20 +135,20 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(8), wineSale(1))
+            let solution = getPromoTestSolution(promoSection, beerSale(8), wineSale(1))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(8), wineSale(2))
+            let solution = getPromoTestSolution(promoSection, beerSale(8), wineSale(2))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
             XCTAssertEqual(solution.unusedFreebies.count, 1)
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(10), wineSale(1))
+            let solution = getPromoTestSolution(promoSection, beerSale(10), wineSale(1))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.unusedFreebies.count, 0)
@@ -159,7 +156,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, wineSale(1), beerSale(10))
+            let solution = getPromoTestSolution(promoSection, wineSale(1), beerSale(10))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.unusedFreebies.count, 0)
@@ -169,7 +166,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         if true {
             let preferredBeerSale = beerSale(21)
             preferredBeerSale.isPreferredFreeGoodLine = true
-            let solution = getPromoSolution(promoSection, wineSale(1), preferredBeerSale)
+            let solution = getPromoTestSolution(promoSection, wineSale(1), preferredBeerSale)
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.unusedFreebies.count, 0)
@@ -180,7 +177,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         if true {
             let preferredWineSale = wineSale(1)
             preferredWineSale.isPreferredFreeGoodLine = true
-            let solution = getPromoSolution(promoSection, preferredWineSale, beerSale(21))
+            let solution = getPromoTestSolution(promoSection, preferredWineSale, beerSale(21))
             
             XCTAssertEqual(solution.promoTuples.count, 2)
             XCTAssertEqual(solution.unusedFreebies.count, 0)
@@ -217,19 +214,19 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(8), wineSale(1))
+            let solution = getPromoTestSolution(promoSection, beerSale(8), wineSale(1))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(8), wineSale(2))
+            let solution = getPromoTestSolution(promoSection, beerSale(8), wineSale(2))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
         }
         
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(10), wineSale(1))
+            let solution = getPromoTestSolution(promoSection, beerSale(10), wineSale(1))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.promoTuples[0].dcOrderLine.itemNid, wine.recNid)
@@ -241,7 +238,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         // beer free. But, now there are only 9 beers left to trigger the next free good and that's not
         // enough. So the algorithm will prefer to produce free goods that are not part of the trigger requirements as well.
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(20), wineSale(2))
+            let solution = getPromoTestSolution(promoSection, beerSale(20), wineSale(2))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.promoTuples[0].dcOrderLine.itemNid, wine.recNid)
@@ -275,21 +272,21 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         
         // not enough beer to get free wine
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(8), wineSale(1))
+            let solution = getPromoTestSolution(promoSection, beerSale(8), wineSale(1))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
         }
         
         // still not enough beer to get free wine
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(8), wineSale(2))
+            let solution = getPromoTestSolution(promoSection, beerSale(8), wineSale(2))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
         }
         
         // buy 10 beers, get 1 wine free
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(10), wineSale(1))
+            let solution = getPromoTestSolution(promoSection, beerSale(10), wineSale(1))
             
             XCTAssertEqual(solution.promoTuples.count, 1)
             XCTAssertEqual(solution.promoTuples[0].dcOrderLine.itemNid, wine.recNid)
@@ -298,7 +295,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         
         // buy 10 beers, get 1 wine free (but there's no wine on the order)
         if true {
-            let solution = getPromoSolution(promoSection, beerSale(10))
+            let solution = getPromoTestSolution(promoSection, beerSale(10))
             
             XCTAssertEqual(solution.promoTuples.count, 0)
             XCTAssertEqual(solution.unusedFreebies.count, 1)

@@ -19,14 +19,14 @@ class PromoServiceTests: XCTestCase {
         let beer = mobileDownload.testItem()
 
         let amountOff = PromoItem(beer, amountOff: 1.74)
-        mobileDownload.testPromotion(customer: mike, amountOff)
+        mobileDownload.testPromoSection(customer: mike, amountOff)
 
         let promoService = PromoService(mike, christmasDay)
         
         XCTAssertFalse(promoService.isEmpty)
 
-        let amountOffSavings = amountOff.getAmountOff(unitPrice: Money(10.00, .EUR))
-        XCTAssertEqual(amountOffSavings, Money(1.74, .EUR))
+        let amountOffSavings = amountOff.getAmountOff(unitPrice: Money(10.00, .USD))
+        XCTAssertEqual(amountOffSavings, Money(1.74, .USD))
     }
 
     func testSingleAmountOffPromo() throws {
@@ -35,15 +35,15 @@ class PromoServiceTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
 
-        mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.74))
+        mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
 
         let promoService = PromoService(mike, christmasDay)
 
-        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .EUR))
+        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .USD))
 
         promoService.computeDiscounts(beerSale)
         
-        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .EUR))
+        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .USD))
     }
     
     func testPromoInWrongCurrency() throws {
@@ -52,11 +52,11 @@ class PromoServiceTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
 
-        mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.74))
+        mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
 
         let promoService = PromoService(mike, christmasDay)
 
-        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .USD))
+        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .EUR))
 
         promoService.computeDiscounts(beerSale)
         
@@ -72,15 +72,15 @@ class PromoServiceTests: XCTestCase {
         let exchange = ExchangeRatesService(ExchangeRate(from: .EUR, to: .USD, date: .distantPast, rate: 2.0))
         mobileDownload.handheld.exchangeRates = exchange
         
-        mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.74))
+        mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
 
         let promoService = PromoService(mike, christmasDay)
 
-        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .USD))
+        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 2, unitPrice: Money(10.00, .USD))
 
         promoService.computeDiscounts(beerSale)
         
-        XCTAssertEqual(beerSale.unitDisc, Money(2 * 1.74, .USD))
+        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .USD))
     }
     
     func testTriggeredAmountOffPromo() throws {
@@ -89,18 +89,18 @@ class PromoServiceTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
 
-        let promoSection = mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.74))
+        let promoSection = mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
         promoSection.caseMinimum = 10
         
         let promoService = PromoService(mike, christmasDay)
         
-        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .EUR))
-        let moreBeerSales = SaleLine(id: 2, itemNid: beer.recNid, qtyOrdered: 9, unitPrice: Money(10.00, .EUR))
+        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .USD))
+        let moreBeerSales = SaleLine(id: 2, itemNid: beer.recNid, qtyOrdered: 9, unitPrice: Money(10.00, .USD))
         
         
         // the discount is triggered at 10 cases
         promoService.computeDiscounts(beerSale, moreBeerSales)
-        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .EUR))
+        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .USD))
         
         
         // buying 1 case of beer isn't enough for the discount
@@ -114,8 +114,8 @@ class PromoServiceTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
 
-        mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.74))
-        mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.55))
+        mobileDownload.testPromoSection(customer: mike, currency: .EUR, PromoItem(beer, amountOff: 1.74))
+        mobileDownload.testPromoSection(customer: mike, currency: .EUR, PromoItem(beer, amountOff: 1.55))
   
         let promoService = PromoService(mike, christmasDay)
 
@@ -132,16 +132,16 @@ class PromoServiceTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
 
-        mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.55))
-        mobileDownload.testPromotion(customer: mike, PromoItem(beer, amountOff: 1.74))
+        mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.55))
+        mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
   
         let promoService = PromoService(mike, christmasDay)
 
-        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .EUR))
+        let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 1, unitPrice: Money(10.00, .USD))
 
         promoService.computeDiscounts(beerSale)
         
-        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .EUR))
+        XCTAssertEqual(beerSale.unitDisc, Money(1.74, .USD))
     }
     
     func testMixAndMatchTriggeredAmountOffPromo() throws {
@@ -151,9 +151,7 @@ class PromoServiceTests: XCTestCase {
         let beer = mobileDownload.testItem()
         let darkBeer = mobileDownload.testItem()
 
-        let promoSection = mobileDownload.testPromotion(customer: mike,
-                                                        PromoItem(beer, amountOff: 1.74),
-                                                        PromoItem(darkBeer, amountOff: 1.55))
+        let promoSection = mobileDownload.testPromoSection(customer: mike, currency: .EUR, PromoItem(beer, amountOff: 1.74), PromoItem(darkBeer, amountOff: 1.55))
         promoSection.caseMinimum = 10
         promoSection.isMixAndMatch = true
         
@@ -181,9 +179,7 @@ class PromoServiceTests: XCTestCase {
         let beer = mobileDownload.testItem()
         let darkBeer = mobileDownload.testItem()
 
-        let promoSection = mobileDownload.testPromotion(customer: mike,
-                                                        PromoItem(beer, amountOff: 1.74),
-                                                        PromoItem(darkBeer, amountOff: 1.55))
+        let promoSection = mobileDownload.testPromoSection(customer: mike, currency: .EUR, PromoItem(beer, amountOff: 1.74), PromoItem(darkBeer, amountOff: 1.55))
         promoSection.caseMinimum = 10
         promoSection.isMixAndMatch = false
         
@@ -192,34 +188,9 @@ class PromoServiceTests: XCTestCase {
         let beerSale = SaleLine(id: 1, itemNid: beer.recNid, qtyOrdered: 10, unitPrice: Money(10.00, .EUR))
         let darkBeerSale = SaleLine(id: 2, itemNid: darkBeer.recNid, qtyOrdered: 9, unitPrice: Money(10.00, .EUR))
         
-        
         // the discount is triggered at 10 cases
         promoService.computeDiscounts(beerSale, darkBeerSale)
         XCTAssertEqual(beerSale.unitDisc, Money(1.74, .EUR))
         XCTAssertNil(darkBeerSale.unitDisc)
-    }
-}
-
-//MARK helpers for testing
-
-fileprivate extension MobileDownload {
-    @discardableResult
-    func testPromotion(customer: CustomerRecord, _ promoItems: PromoItem ...) -> PromoSectionRecord {
-        let promoSection = mobileDownload.testPromoSection()
-        let promoCode = mobileDownload.testPromoCode()
-        
-        promoCode.promoCustomers = [ customer.recNid ]
-        promoCode.currency = .EUR
-        
-        promoSection.promoCodeNid = promoCode.recNid
-        promoSection.isMixAndMatch = true
-        promoSection.promoPlan = .Default
-        promoSection.setPromoItems(promoItems)
-        
-        for promoItem in promoItems {
-            promoItem.promoSectionNid = promoSection.recNid
-        }
-        
-        return promoSection
     }
 }

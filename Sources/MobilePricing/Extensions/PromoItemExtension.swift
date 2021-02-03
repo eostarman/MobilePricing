@@ -21,6 +21,10 @@ extension PromoItem {
     }
     
     public func getUnitDisc(promoCurrency: Currency, unitPrice: Money, nbrPriceDecimals: Int, unitSplitCaseCharge: Money? = nil) -> Money? {
+        guard unitPrice.isPositive else {
+            return nil
+        }
+        
         if promoRateType == .percentOff {
             // KJQ 2/26/12 ... if a split case charge is involved it has already been rolled into the unitPrice
             // it seems unreasonable for a customer to get a %off a split case charge, so unless it is really a FREE good (e.g. from freebies promo)
@@ -53,7 +57,9 @@ extension PromoItem {
                 unitPriceLessSplitCaseCharge -= unitSplitCaseCharge
             }
 
-            let promoPrice = getPromoPrice(currency: promoCurrency)
+            guard let promoPrice = getPromoPrice(currency: promoCurrency).converted(to: unitPrice.currency, withDecimals: nbrPriceDecimals) else {
+                return nil
+            }
 
             if promoPrice > unitPriceLessSplitCaseCharge {
                 return nil
@@ -63,7 +69,7 @@ extension PromoItem {
 
             return discount
         } else if promoRateType == .amountOff {
-            let amountOff = getAmountOff(currency: promoCurrency)
+            let amountOff = getAmountOff(currency: promoCurrency).converted(to: unitPrice.currency, withDecimals: nbrPriceDecimals)
             return amountOff
         } else {
             return nil
