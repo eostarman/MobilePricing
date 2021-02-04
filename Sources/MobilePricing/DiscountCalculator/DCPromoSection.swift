@@ -51,12 +51,12 @@ class DCPromoSection {
         }
     }
     
-    init(promoSectionRecord: PromoSectionRecord, transactionCurrency: Currency)
+    init(promoSectionRecord: PromoSectionRecord, transactionCurrency: Currency, promoDate: Date)
     {
         self.promoSectionRecord = promoSectionRecord
         self.transactionCurrency = transactionCurrency
         
-        let promoItems = promoSectionRecord.getPromoItems()
+        let promoItems = promoSectionRecord.getPromoItems(promoDate: promoDate)
         hasExplicitTriggerItems = promoItems.contains { $0.isExplicitTriggerItem }
         
         let promoCode = mobileDownload.promoCodes[promoSectionRecord.promoCodeNid]
@@ -74,10 +74,12 @@ class DCPromoSection {
             self.promoTierSequence = promoCode.promoTierSeq
         }
         
-        promoItemsByItemNid = Dictionary(uniqueKeysWithValues: promoSectionRecord.getPromoItems().map{ ($0.itemNid, $0) })
+        let zzz = promoItems.filter { $0.itemNid == 2581 }
+        
+        promoItemsByItemNid = Dictionary(uniqueKeysWithValues: promoItems.map{ ($0.itemNid, $0) })
         
         if promoSectionRecord.isMixAndMatch {
-            triggerRequirements = promoSectionRecord.getMixAndMatchTriggerRequirements()
+            triggerRequirements = promoSectionRecord.getMixAndMatchTriggerRequirements(promoDate: promoDate)
         } else {
             triggerRequirements = nil
         }

@@ -27,7 +27,7 @@ struct PromoTestSolution {
 
 func getPromoTestSolution(transactionCurrency: Currency = .USD, _ promoSection: PromoSectionRecord, _ orderLines: MockOrderLine ...) -> PromoTestSolution {
 
-    let discountCalculator = DiscountCalculator(transactionCurrency: transactionCurrency, promoSections: [promoSection])
+    let discountCalculator = DiscountCalculator(transactionCurrency: transactionCurrency, promoSections: [promoSection], promoDate: christmasDay)
     
     let promoSolution = discountCalculator.computeDiscounts(orderLines)
     

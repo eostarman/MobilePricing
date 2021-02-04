@@ -33,13 +33,13 @@ public class StandardPerItemPromoSection {
         discountsByItemNid[itemNid]
     }
 
-    public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord) {
+    public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord, promoDate: Date) {
         self.promoSectionRecord = promoSection
         
         currency = promoCode.currency
         note = promoSection.getNote()
                 
-        let promoItemsProvidingDiscounts = promoSection.getPromoItems().filter { $0.hasDiscount }
+        let promoItemsProvidingDiscounts = promoSection.getPromoItems(promoDate: promoDate).filter { $0.hasDiscount }
 
         discountsByItemNid = Dictionary(uniqueKeysWithValues: promoItemsProvidingDiscounts.map { ($0.itemNid, $0) })
     }

@@ -79,12 +79,12 @@ extension BuyXGetYPerItemPromoSection {
 }
 
 extension PromoSectionRecord {
-    func getBuyXGetYPerItemPromo() -> BuyXGetYPerItemPromoSection? {
+    func getBuyXGetYPerItemPromo(promoDate: Date) -> BuyXGetYPerItemPromoSection? {
         guard isBuyXGetY && !isMixAndMatch && qtyX > 0 && qtyY > 0 else {
             return nil
         }
         
-        let itemNids = getTriggerItemNids()
+        let itemNids = getTriggerItemNids(promoDate: promoDate)
         
         return BuyXGetYPerItemPromoSection(promoSectionRecord: self, itemNids: itemNids, qtyX: qtyX, qtyY: qtyY)        
     }

@@ -76,8 +76,8 @@ class BuyXGetYPerItemPromoTests: XCTestCase {
         promoSection.qtyY = 1
         
         promoSection.setPromoItems([ PromoItem(beer, percentOff: 100) ])
-                
-        let buyXGetYPromo = promoSection.getBuyXGetYPerItemPromo()
+        
+        let buyXGetYPromo = promoSection.getBuyXGetYPerItemPromo(promoDate: christmasDay)
         
         XCTAssertEqual(buyXGetYPromo?.qtyX, 10)
         XCTAssertEqual(buyXGetYPromo?.qtyY, 1)

@@ -10,6 +10,7 @@ import MoneyAndExchangeRates
 public class DiscountCalculator
 {
     let transactionCurrency: Currency
+    let promoDate: Date
     
     let nonContractPromoSections: [DCPromoSection]
     let contractPromoSections: [DCPromoSection]
@@ -36,7 +37,7 @@ public class DiscountCalculator
                 return false
             }
             
-            if promoSection.getTargetItemNids().isEmpty {
+            if promoSection.getTargetItemNids(promoDate: promoDate).isEmpty {
                 return false
             }
             
@@ -53,11 +54,12 @@ public class DiscountCalculator
         return allPromoSections
     }
     
-    public init(transactionCurrency: Currency, promoSections: [PromoSectionRecord]) {
+    public init(transactionCurrency: Currency, promoSections: [PromoSectionRecord], promoDate: Date) {
         self.transactionCurrency = transactionCurrency
+        self.promoDate = promoDate
         
         // round up all promotions that are available to the CusNid on the given PromoDate
-        let allActivePromoSections = promoSections.map { DCPromoSection(promoSectionRecord: $0, transactionCurrency: transactionCurrency) }
+        let allActivePromoSections = promoSections.map { DCPromoSection(promoSectionRecord: $0, transactionCurrency: transactionCurrency, promoDate: promoDate) }
         
         let allContractPromoSections = allActivePromoSections.filter { $0.isContractPromo }
         
@@ -68,7 +70,7 @@ public class DiscountCalculator
         } else {
             nonContractPromoSections = allActivePromoSections.filter { !$0.isContractPromo }
             contractPromoSections = allContractPromoSections
-            itemNidsCoveredByContractPromos = Set(allContractPromoSections.flatMap({ $0.promoSectionRecord.getTargetItemNids()}))
+            itemNidsCoveredByContractPromos = Set(allContractPromoSections.flatMap({ $0.promoSectionRecord.getTargetItemNids(promoDate: promoDate)}))
         }
         
     }
@@ -130,7 +132,7 @@ public class DiscountCalculator
         // now, scan all standard promos (cents-off, percent-off) and apply to the items not covered by the buy-x-get-y promos above
         for promoSection in nonBuyXGetYPromoSections {
             
-            guard let discountsOnThisOrder = NonBuyXGetYCalculator.computeNonBuyXGetYDiscountsOnThisOrder(transactionCurrency: transactionCurrency,
+            guard let discountsOnThisOrder = NonBuyXGetYCalculator.computeNonBuyXGetYDiscountsOnThisOrder(transactionCurrency: transactionCurrency, promoDate: promoDate,
                                                                                                           dcPromoSection: promoSection,
                                                                                                           orderLinesByItemNid: orderLinesByItemNid,
                                                                                                           nbrPriceDecimals: numberOfDecimalsInLineItemPrices,
@@ -236,7 +238,7 @@ public class DiscountCalculator
     private func getBuyXGetYPromoSolution(_ promoSections: [DCPromoSection], _ dcOrderLines: [IDCOrderLine]) -> PromoSolution {
         let freebieAccumulators = getFreebieAccumulators(dcOrderLines)
         
-        let buyXgetYSolution = BuyXGetYCalculator.getBuyXGetYPromos(transactionCurrency: transactionCurrency, allPromoSections: promoSections, orderLines: freebieAccumulators, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
+        let buyXgetYSolution = BuyXGetYCalculator.getBuyXGetYPromos(transactionCurrency: transactionCurrency, promoDate: promoDate, allPromoSections: promoSections, orderLines: freebieAccumulators, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
         
         let allBuyXGetYPromosSorted = buyXgetYSolution.promoTuples
             //.filter({ $0.dcPromoSection.promoSectionRecord.isBuyXGetY})

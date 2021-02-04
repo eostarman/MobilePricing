@@ -13,7 +13,7 @@ struct BuyXGetYCalculator {
     ///   - triggers: triggers from the orderLines on the order
     ///   - targets: targets for the orderLines on the order
     /// - Returns: a collection of zero or more FreebieBundles (these describe the earned free-goods - some may be on the order
-    private static func getFreebieBundles(promoSection: PromoSectionRecord, triggers: [FreebieAccumulator], targets:[FreebieAccumulator]) -> [FreebieBundle] {
+    private static func getFreebieBundles(promoSection: PromoSectionRecord, promoDate: Date, triggers: [FreebieAccumulator], targets:[FreebieAccumulator]) -> [FreebieBundle] {
         if triggers.isEmpty {
             return []
         }
@@ -163,7 +163,7 @@ struct BuyXGetYCalculator {
             let qtyFree = promoSection.qtyY - earnedQtyFree // these free items are on the order
             let unusedFreeQty = earnedQtyFree    // these free items are not even on the order (UnusedFreebies)
             
-            let itemNidsForUnusedFreeQty = unusedFreeQty > 0 ? promoSection.getTargetItemNids() : []
+            let itemNidsForUnusedFreeQty = unusedFreeQty > 0 ? promoSection.getTargetItemNids(promoDate: promoDate) : []
             
             // I'm not expecting a bunch of freebie entries, but maybe a single entry produced multiple times (so, I think the freebies.Where() is okay without a Dictionary<>)
             let newFreebie = FreebieBundle(freebieTriggers: freebieTriggers, freebieTargets: freebieTargets, qtyFree: qtyFree, unusedFreeQty: unusedFreeQty, itemNidsForUnusedFreeQty: itemNidsForUnusedFreeQty)
@@ -190,7 +190,7 @@ struct BuyXGetYCalculator {
         return resultingBundles
     }
     
-    static func getBuyXGetYPromos(transactionCurrency: Currency, allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoSolution {
+    static func getBuyXGetYPromos(transactionCurrency: Currency, promoDate: Date, allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoSolution {
         var buyXGetYPromos = allPromoSections.filter { $0.promoSectionRecord.isBuyXGetY }
         
         var promoTuples: [PromoTuple] = []
@@ -208,7 +208,7 @@ struct BuyXGetYCalculator {
             for promoSection in buyXGetYPromos {
                 let clones = orderLines.map { $0.getClone() }
                 
-                let discounts = getPromoDiscounts(promoSection, clones, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
+                let discounts = getPromoDiscounts(promoSection, promoDate: promoDate, clones, itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos)
                 
                 // here's a promo section that doesn't do anything - if triggered, it will either give me real discounts, or it'll have "potential" discounts ("unused freebies").
                 if discounts.unusedFreebies.isEmpty && discounts.discounts.isEmpty {
@@ -302,7 +302,7 @@ struct BuyXGetYCalculator {
         }
     }
     
-    private static func getPromoDiscounts(_ promoSection: PromoSection, _ allOrderLines : [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoDiscounts {
+    private static func getPromoDiscounts(_ promoSection: PromoSection, promoDate: Date, _ allOrderLines : [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoDiscounts {
         let orderLines: [FreebieAccumulator]
         
         if !promoSection.promoSectionRecord.isContractPromo && !itemNidsCoveredByContractPromos.isEmpty {
@@ -315,7 +315,6 @@ struct BuyXGetYCalculator {
         
         let triggersAndTargets = FreebieTriggersAndTargets(lines: orderLines)
         
-        
         // if *this order* doesn't have any valid trigger items, then don't try to compute any free goods
         if (triggersAndTargets.triggers.isEmpty)
         {
@@ -326,7 +325,7 @@ struct BuyXGetYCalculator {
         var allFreebieBundles: [FreebieBundle] = []
         
         if promoSection.promoSectionRecord.isMixAndMatch {
-            for newFreebie in getFreebieBundles(promoSection: promoSection.promoSectionRecord, triggers: triggersAndTargets.triggers, targets: triggersAndTargets.targets) {
+            for newFreebie in getFreebieBundles(promoSection: promoSection.promoSectionRecord, promoDate: promoDate, triggers: triggersAndTargets.triggers, targets: triggersAndTargets.targets) {
                 if let oldFreebie = allFreebieBundles.filter({ newFreebie.matches(other: $0) }).first {
                     oldFreebie.nbrTimes += 1
                 } else {
@@ -336,7 +335,7 @@ struct BuyXGetYCalculator {
                 let totalUnusedFreeQty = allFreebieBundles.map({ $0.unusedFreeQty * $0.nbrTimes }).reduce(0, +)
                 
                 if totalUnusedFreeQty > 0 {
-                    let freeItemNids = promoSection.promoSectionRecord.getFreeItemNids()
+                    let freeItemNids = promoSection.promoSectionRecord.getFreeItemNids(promoDate: promoDate)
                     allUnusedFreebies.append(UnusedFreebie(promoSection: promoSection.promoSectionRecord, qtyFree: totalUnusedFreeQty, itemNids: freeItemNids))
                 }
             }
@@ -352,7 +351,7 @@ struct BuyXGetYCalculator {
                 let triggers = triggersByItemNid[itemNid] ?? []
                 let targets = targetsByItemNid[itemNid] ?? []
                 
-                let freebieBundles = getFreebieBundles(promoSection: promoSection.promoSectionRecord, triggers: triggers, targets: targets)
+                let freebieBundles = getFreebieBundles(promoSection: promoSection.promoSectionRecord, promoDate: promoDate, triggers: triggers, targets: targets)
                 
                 for newFreebie in freebieBundles {
                     if let oldFreebie = allFreebieBundles.filter({ newFreebie.matches(other: $0) }).first {
@@ -375,7 +374,10 @@ struct BuyXGetYCalculator {
         
         for freebieBundle in allFreebieBundles {
             for b in freebieBundle.freebieTargets.filter({ $0.qtyFreeHere > 0 }) {
-                let rebateAmount = promoSection.promoSectionRecord.getPromoItems().filter({ $0.itemNid == b.item.itemNid }).first?.unitRebate ?? .zero
+                
+                // mpr: I think this is wrong in c# - we need to get the promoItem for the particular date (for Odom's usage where they multiple promoItems per item)
+                let rebateAmount = promoSection.promoSectionRecord.getPromoItem(promoDate: promoDate, itemNid: b.item.itemNid)?.unitRebate ?? .zero
+                
                 // mpr: bug - I've mixed the transactionCurrency with the promoCurrency
                 let promoDiscount =  PromoDiscount(dcOrderLine: b.item.dcOrderLine, qtyDiscounted: freebieBundle.nbrTimes * b.qtyFreeHere, unitDisc: b.item.frontlinePrice, rebateAmount: rebateAmount)
                 

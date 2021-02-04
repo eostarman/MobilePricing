@@ -20,7 +20,7 @@ public struct PromoService {
     }
     
     /// Initialize from a pre-filtered list of applicable promoSections (ignoring any buy-x-get-y promotions)
-    public init(promoSections: [PromoSectionRecord]) {
+    public init(promoSections: [PromoSectionRecord], promoDate: Date) {
         for promoSection in promoSections {
 
             if promoSection.isBuyXGetY {
@@ -30,24 +30,24 @@ public struct PromoService {
             let promoCode = mobileDownload.promoCodes[promoSection.promoCodeNid]
             
             if promoSection.isMixAndMatch {
-                mixAndMatchPromos.append(StandardMixAndMatchPromoSection(promoCode, promoSection))
+                mixAndMatchPromos.append(StandardMixAndMatchPromoSection(promoCode, promoSection, promoDate: promoDate))
             } else {
-                nonMixAndMatchPromos.append(StandardPerItemPromoSection(promoCode, promoSection))
+                nonMixAndMatchPromos.append(StandardPerItemPromoSection(promoCode, promoSection, promoDate: promoDate))
             }
         }
     }
     
     /// Gather all promotions (not buy-x-get-y) from the mobileDownload for this customer that are active on the given date
-    public init(_ customer: CustomerRecord, _ date: Date) {
+    public init(_ customer: CustomerRecord, _ promoDate: Date) {
         
         let promoCodesForThisCustomer = mobileDownload.promoCodes.getAll().filter({ $0.isCustomerSelected(customer) }).map { $0.recNid }
 
         let promoSections = mobileDownload.promoSections.getAll()
             .filter { promoSection in
-                promoCodesForThisCustomer.contains(promoSection.promoCodeNid) && promoSection.isActiveOnDate(date)
+                promoCodesForThisCustomer.contains(promoSection.promoCodeNid) && promoSection.isActiveOnDate(promoDate)
             }
         
-        self.init(promoSections: promoSections)
+        self.init(promoSections: promoSections, promoDate: promoDate)
     }
     
     /// Get the "earned" discounts (the triggered discounts) as a colletion of PromoItem entries

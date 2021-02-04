@@ -27,14 +27,14 @@ public class StandardMixAndMatchPromoSection {
         discountsByItemNid[itemNid]
     }
 
-    public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord) {
+    public init(_ promoCode: PromoCodeRecord, _ promoSection: PromoSectionRecord, promoDate: Date) {
         self.promoSectionRecord = promoSection
         
         currency = promoCode.currency
         note = promoSection.getNote()
-        triggerRequirements = promoSection.getMixAndMatchTriggerRequirements()
+        triggerRequirements = promoSection.getMixAndMatchTriggerRequirements(promoDate: promoDate)
                 
-        let promoItemsProvidingDiscounts = promoSection.getPromoItems().filter { $0.hasDiscount }
+        let promoItemsProvidingDiscounts = promoSection.getPromoItems(promoDate: promoDate).filter { $0.hasDiscount }
 
         discountsByItemNid = Dictionary(uniqueKeysWithValues: promoItemsProvidingDiscounts.map { ($0.itemNid, $0) })
     }

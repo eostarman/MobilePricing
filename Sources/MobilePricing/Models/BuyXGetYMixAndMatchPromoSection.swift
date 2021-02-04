@@ -47,23 +47,23 @@ extension BuyXGetYMixAndMatchPromoSection : PromoSection {
 }
 
 extension PromoSectionRecord {
-    func getBuyXGetYMixAndMatchPromo() -> BuyXGetYMixAndMatchPromoSection? {
+    func getBuyXGetYMixAndMatchPromo(promoDate: Date) -> BuyXGetYMixAndMatchPromoSection? {
         guard isBuyXGetY && isMixAndMatch && qtyX > 0 && qtyY > 0 else {
             return nil
         }
         
-        let triggerRequirements = getMixAndMatchTriggerRequirements()
-        let freeItemNids = getFreeItemNids()
+        let triggerRequirements = getMixAndMatchTriggerRequirements(promoDate: promoDate)
+        let freeItemNids = getFreeItemNids(promoDate: promoDate)
         
         let promo = BuyXGetYMixAndMatchPromoSection(self, triggerRequirements, freeItemNids: freeItemNids, qtyX: qtyX, qtyY: qtyY)
         
         return promo
     }
     
-    func getFreeItemNids() -> Set<Int> {
+    func getFreeItemNids(promoDate: Date) -> Set<Int> {
         var freeItems: Set<Int> = []
         
-        for item in getPromoItems() {
+        for item in getPromoItems(promoDate: promoDate) {
             if item.is100PercentOff {
                 freeItems.insert(item.itemNid)
             }

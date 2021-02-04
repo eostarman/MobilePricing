@@ -9,6 +9,7 @@ struct NonBuyXGetYCalculator {
     /// Get discounts generated for the current order
     static func computeNonBuyXGetYDiscountsOnThisOrder(
         transactionCurrency: Currency,
+        promoDate: Date,
         dcPromoSection: DCPromoSection,
         orderLinesByItemNid: [Int: [FreebieAccumulator]],
         nbrPriceDecimals: Int,
@@ -27,11 +28,11 @@ struct NonBuyXGetYCalculator {
             }
         }
         
-        let promoService = PromoService(promoSections: [dcPromoSection.promoSectionRecord])
+        let promoService = PromoService(promoSections: [dcPromoSection.promoSectionRecord], promoDate: promoDate)
         
         let earnedDiscounts = promoService.getEarnedDiscountPromoItems(triggerQtys: triggerQtys, itemNids: itemNids)
 
-        let targetItemNids = dcPromoSection.promoSectionRecord.getTargetItemNids()
+        let targetItemNids = dcPromoSection.promoSectionRecord.getTargetItemNids(promoDate: promoDate)
         var orderLinesForItemNids: [FreebieAccumulator] = []
         for itemNid in targetItemNids {
             if let lines = orderLinesByItemNid[itemNid] {

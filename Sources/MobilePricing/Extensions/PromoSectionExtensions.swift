@@ -31,9 +31,9 @@ extension PromoSectionRecord {
     }
     
     /// Get the trigger requirements for a mix-and-match promotion to get applied to an order (i.e. certain items *must* be on an order before this promo section is triggered)
-    func getMixAndMatchTriggerRequirements() -> TriggerRequirements {
+    func getMixAndMatchTriggerRequirements(promoDate: Date) -> TriggerRequirements {
 
-        let triggerItemNids = getTriggerItemNids()
+        let triggerItemNids = getTriggerItemNids(promoDate: promoDate)
 
         
 //        // this is a special case. If all items are trigger items and the minimum quantity you have to order is (1) then there is no
@@ -43,19 +43,19 @@ extension PromoSectionRecord {
 //            return nil
 //        }
         
-        let groupRequirements = getTriggerGroupRequirements()
+        let groupRequirements = getTriggerGroupRequirements(promoDate: promoDate)
         
         let requirements = TriggerRequirements(basis: isCaseRollupPromo ? .caseRollup : .qty, minimum: caseMinimum, triggerItemNids: triggerItemNids, groupRequirements: groupRequirements)
         
         return requirements
     }
     
-    private func getTriggerGroupRequirements() -> [TriggerRequirements] {
+    private func getTriggerGroupRequirements(promoDate: Date) -> [TriggerRequirements] {
         var groupRequirements: [TriggerRequirements] = []
         
         for triggerGroup in triggerGroupsWithNonZeroMinimums {
             let minimum = getTriggerGroupMinimum(triggerGroup: triggerGroup)
-            let itemNids = getTriggerGroupItemNids(triggerGroup: triggerGroup)
+            let itemNids = getTriggerGroupItemNids(triggerGroup: triggerGroup, promoDate: promoDate)
             
             let requirement = TriggerRequirements(triggerGroup: triggerGroup, basis: isCaseRollupPromo ? .caseRollup : .qty, minimum: minimum, triggerItemNids: itemNids, groupRequirements: [])
             
@@ -91,24 +91,24 @@ extension PromoSectionRecord {
         }
     }
     
-    private func getTriggerGroupItemNids(triggerGroup: Int) -> Set<Int> {
-        Set(getPromoItems().filter { $0.triggerGroup == triggerGroup }.map { $0.itemNid })
+    private func getTriggerGroupItemNids(triggerGroup: Int, promoDate: Date) -> Set<Int> {
+        Set(getPromoItems(promoDate: promoDate).filter { $0.triggerGroup == triggerGroup }.map { $0.itemNid })
     }
     
     /// For a mix-and-match promotion return the trigger items. A promotion can be "triggered" by buying enough of certain items. If the trigger is based on
     /// certain explicit itemNids, then those are returned. Otherwise, all itemNids (discounted or not) are returned
     /// - Returns: itemNids
-    func getTriggerItemNids() -> Set<Int> {
-        let explicitItemNids = Set(getPromoItems().filter { $0.isExplicitTriggerItem }.map {$0.itemNid })
+    func getTriggerItemNids(promoDate: Date) -> Set<Int> {
+        let explicitItemNids = Set(getPromoItems(promoDate: promoDate).filter { $0.isExplicitTriggerItem }.map {$0.itemNid })
         if !explicitItemNids.isEmpty {
             return explicitItemNids
         } else {
-            return Set(getPromoItems().map {$0.itemNid })
+            return Set(getPromoItems(promoDate: promoDate).map {$0.itemNid })
         }
     }
     
-    func getTargetItemNids() -> Set<Int> {
-        Set(getPromoItems().filter({ $0.hasDiscount }).map({ $0.itemNid }))
+    func getTargetItemNids(promoDate: Date) -> Set<Int> {
+        Set(getPromoItems(promoDate: promoDate).filter({ $0.hasDiscount }).map({ $0.itemNid }))
     }
 }
 
