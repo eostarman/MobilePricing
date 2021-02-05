@@ -14,7 +14,7 @@ struct NonBuyXGetYCalculator {
         orderLinesByItemNid: [Int: [FreebieAccumulator]],
         nbrPriceDecimals: Int,
         itemNidsCoveredByContractPromos: Set<Int>,
-        earlierTierDiscountsByOrderLine: [Int: [PromoDiscount]]) -> PromoDiscounts? {
+        earlierTierDiscountsByOrderLine: [Int: [PromoDiscount]]) -> [PromoDiscount] {
         
         let promoCurrency = mobileDownload.promoCodes[dcPromoSection.promoSectionRecord.promoCodeNid].currency
         
@@ -31,7 +31,7 @@ struct NonBuyXGetYCalculator {
         let promoService = PromoService(promoSections: [dcPromoSection.promoSectionRecord], promoDate: promoDate)
         
         let earnedDiscounts = promoService.getEarnedDiscountPromoItems(triggerQtys: triggerQtys, itemNids: itemNids)
-
+        
         let targetItemNids = dcPromoSection.promoSectionRecord.getTargetItemNids(promoDate: promoDate)
         var orderLinesForItemNids: [FreebieAccumulator] = []
         for itemNid in targetItemNids {
@@ -44,7 +44,7 @@ struct NonBuyXGetYCalculator {
         
         //  there is a promotion where when we give (e.g.) $1.00 off, this amount is pro-rated over all targets. I'm not sure about this implementation
         let qtyOnOrderInTotal = dcPromoSection.promoSectionRecord.isProratedAmount ? availableOrderLines.map({$0.qtyAvailableForStandardPromos}).reduce(0, +) : 0
-
+        
         var allDiscounts: [PromoDiscount] = []
         
         // Now for the triggered (earned) PromoItems, match the earnedDiscounts to the actual items on this order
@@ -56,7 +56,7 @@ struct NonBuyXGetYCalculator {
             guard let orderLinesForThisItem = orderLinesByItemNid[itemNid] else {
                 continue
             }
-
+            
             // if this is not a contract promo, then don't apply it to items that are covered by a contract promo.
             if !dcPromoSection.isContractPromo && !dcPromoSection.isAdditionalFee && itemNidsCoveredByContractPromos.contains(itemNid) {
                 continue
@@ -67,7 +67,7 @@ struct NonBuyXGetYCalculator {
             {
                 let earlierTierDiscounts = earlierTierDiscountsByOrderLine[orderLine.seq] ?? []
                 let earlierDiscounts = earlierTierDiscounts.map { $0.unitDisc }.reduce(MoneyWithoutCurrency.zero, +)
-
+                
                 var unitPriceToUse = orderLine.frontlinePrice - earlierDiscounts
                 
                 if dcPromoSection.promoPlan == .OffInvoiceAccrual && dcPromoSection.promoSectionRecord.isPercentOff {
@@ -86,28 +86,19 @@ struct NonBuyXGetYCalculator {
                     let proratedDiscount = Money(rawProrated, transactionCurrency, numberOfDecimals: nbrPriceDecimals)
                     unitDiscount = proratedDiscount
                 }
-
+                
                 if (dcPromoSection.isAdditionalFee) {
                     unitDiscount = -unitDiscount
                 }
                 
                 let unitDiscountWithoutCurrency = unitDiscount.withoutCurrency()
-
+                
                 let promoDiscount = PromoDiscount(dcOrderLine: orderLine.dcOrderLine, qtyDiscounted: orderLine.qtyAvailableForStandardPromos, unitDisc: unitDiscountWithoutCurrency, rebateAmount: promoItem.unitRebate)
                 
                 allDiscounts.append(promoDiscount)
             }
-            
-            let totalDisc = allDiscounts.map { $0.totalDisc }.reduce(.zero, +)
-            
-            let promoDiscounts = PromoDiscounts(promoSection: dcPromoSection, totalDisc: totalDisc, discounts: allDiscounts, unusedFreebies: [], freebieBundles: [])
-            
-            return promoDiscounts
         }
         
-        
-        
-        
-        return nil
+        return allDiscounts
     }
 }

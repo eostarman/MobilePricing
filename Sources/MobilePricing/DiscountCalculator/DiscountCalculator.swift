@@ -115,11 +115,15 @@ public class DiscountCalculator
     
     private func getPromoTuplesThatProvideDiscounts(_ promoSections: [DCPromoSection], _ dcOrderLines: [IDCOrderLine], _ promoPlan: ePromoPlan, processingTaxes: Bool) -> PromoSolution {
         
+        var promoSolution = PromoSolution()
+        
         let orderLines = getFreebieAccumulators(dcOrderLines)
         
         let nonBuyXGetYPromoSections = getNonBuyXGetYPromoSections(promoSections, dcOrderLines, promoPlan, processingTaxes: processingTaxes)
         
-        var promoSolution = PromoSolution()
+        if nonBuyXGetYPromoSections.isEmpty {
+            return promoSolution
+        }
        
         var previousDiscountsByOrderLine: [Int: [PromoDiscount]] = [:] // use the orderLine's Seq as the key
         
@@ -132,17 +136,14 @@ public class DiscountCalculator
         // now, scan all standard promos (cents-off, percent-off) and apply to the items not covered by the buy-x-get-y promos above
         for promoSection in nonBuyXGetYPromoSections {
             
-            guard let discountsOnThisOrder = NonBuyXGetYCalculator.computeNonBuyXGetYDiscountsOnThisOrder(transactionCurrency: transactionCurrency, promoDate: promoDate,
+            let discountsOnThisOrder = NonBuyXGetYCalculator.computeNonBuyXGetYDiscountsOnThisOrder(transactionCurrency: transactionCurrency, promoDate: promoDate,
                                                                                                           dcPromoSection: promoSection,
                                                                                                           orderLinesByItemNid: orderLinesByItemNid,
                                                                                                           nbrPriceDecimals: numberOfDecimalsInLineItemPrices,
                                                                                                           itemNidsCoveredByContractPromos: itemNidsCoveredByContractPromos,
                                                                                                           earlierTierDiscountsByOrderLine: previousDiscountsByOrderLine)
-            else {
-                continue
-            }
             
-            for promoDiscount in discountsOnThisOrder.discounts {
+            for promoDiscount in discountsOnThisOrder {
                 let promoTuple = PromoTuple(dcPromoSection: promoSection, promoDiscount: promoDiscount)
                 promoSolution.append(promoTuple)
                 
@@ -256,7 +257,7 @@ public class DiscountCalculator
     
     private func getPromoSolutionForOnePromoPlan(_ promoSections: [DCPromoSection], _ dcOrderLines: [IDCOrderLine], _ promoPlan: ePromoPlan, processingTaxes: Bool = false) -> PromoSolution {
         
-        let promoSolution = getPromoTuplesThatProvideDiscounts(promoSections, dcOrderLines, promoPlan, processingTaxes: false)
+        let promoSolution = getPromoTuplesThatProvideDiscounts(promoSections, dcOrderLines, promoPlan, processingTaxes: processingTaxes)
         
         let bestPromoTuples = Self.getBestStandardPromoAndAllStackablePromosAndAdditionalFeesForEachOrderLine(promoSolution.promoTuples)
         
@@ -264,6 +265,10 @@ public class DiscountCalculator
     }
     
     private func applyPromoSolutionToOrderLines(_ promoSolution: PromoSolution, _ dcOrderLines: [IDCOrderLine]) {
+        if promoSolution.promoTuples.isEmpty {
+            return
+        }
+        
         let promosByOrderLine = Dictionary(grouping: promoSolution.promoTuples) { $0.dcOrderLine.seq }
         
         for dcOrderLine in dcOrderLines {
@@ -340,6 +345,7 @@ public class DiscountCalculator
     public func computeDiscounts(_ dcOrderLines: [IDCOrderLine]) -> PromoSolution {
         for seq in 0 ..< dcOrderLines.count {
             dcOrderLines[seq].seq = seq
+            dcOrderLines[seq].clearAllPromoData()
         }
         
         if itemNidsCoveredByContractPromos.isEmpty {

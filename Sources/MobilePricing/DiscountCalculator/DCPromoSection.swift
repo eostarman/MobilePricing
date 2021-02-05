@@ -74,8 +74,6 @@ class DCPromoSection {
             self.promoTierSequence = promoCode.promoTierSeq
         }
         
-        let zzz = promoItems.filter { $0.itemNid == 2581 }
-        
         promoItemsByItemNid = Dictionary(uniqueKeysWithValues: promoItems.map{ ($0.itemNid, $0) })
         
         if promoSectionRecord.isMixAndMatch {

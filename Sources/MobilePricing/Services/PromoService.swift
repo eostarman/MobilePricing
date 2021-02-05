@@ -58,7 +58,7 @@ public struct PromoService {
         let triggeredMixAndMatchPromos = mixAndMatchPromos.filter { $0.isTriggered(triggerQtys: triggerQtys) }
         
         for itemNid in itemNids {
-            
+          
             for promo in triggeredMixAndMatchPromos {
                 if let promoItem = promo.getDiscount(itemNid) {
                     promoItems.append(promoItem)
