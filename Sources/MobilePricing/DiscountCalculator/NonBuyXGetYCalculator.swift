@@ -71,7 +71,7 @@ struct NonBuyXGetYCalculator {
                 var unitPriceToUse = orderLine.frontlinePrice - earlierDiscounts
                 
                 if dcPromoSection.promoPlan == .OffInvoiceAccrual && dcPromoSection.promoSectionRecord.isPercentOff {
-                    unitPriceToUse = (orderLine.dcOrderLine.unitPrice ?? .zero) - orderLine.dcOrderLine.totalDiscount
+                    unitPriceToUse = (orderLine.dcOrderLine.unitPrice ?? .zero) - orderLine.dcOrderLine.unitDiscount
                 }
                 
                 let unitPrice = unitPriceToUse.withCurrency(transactionCurrency)

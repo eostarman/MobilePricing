@@ -59,7 +59,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
         if true {
             let solution = getPromoTestSolution(promoSection, beerSale(9))
             
-            XCTAssertEqual(solution.sale.totalDiscount, .zero)
+            XCTAssertEqual(solution.sale.unitDiscount, .zero)
         }
         
         if true {

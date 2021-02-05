@@ -40,7 +40,7 @@ class MockOrderLine: IDCOrderLine {
         fees.map({ $0.unitDisc }).reduce(.zero, +)
     }
     
-    var totalDiscount: MoneyWithoutCurrency {
+    var unitDiscount: MoneyWithoutCurrency {
         discounts.map({ $0.unitDisc }).reduce(.zero, +)
     }
     
@@ -49,7 +49,7 @@ class MockOrderLine: IDCOrderLine {
     }
     
     var unitNetAfterDiscount: MoneyWithoutCurrency {
-        (unitPrice ?? .zero) - totalDiscount + unitSplitCaseCharge
+        (unitPrice ?? .zero) - unitDiscount + unitSplitCaseCharge
     }
     
     func getCokePromoTotal() -> MoneyWithoutCurrency {

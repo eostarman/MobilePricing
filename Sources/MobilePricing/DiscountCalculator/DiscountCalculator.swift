@@ -54,6 +54,13 @@ public class DiscountCalculator
         return allPromoSections
     }
     
+    /// for creating unit tests
+    public convenience init(_ customer: CustomerRecord, _ promoDate: Date, transactionCurrency: Currency = .USD) {
+        let promoSections = Self.getPromoSectionRecords(cusNid: customer.recNid, promoDate: promoDate, deliveryDate: promoDate)
+
+        self.init(transactionCurrency: transactionCurrency, promoSections: promoSections, promoDate: promoDate)
+    }
+    
     public init(transactionCurrency: Currency, promoSections: [PromoSectionRecord], promoDate: Date) {
         self.transactionCurrency = transactionCurrency
         self.promoDate = promoDate
@@ -337,6 +344,12 @@ public class DiscountCalculator
         
         let solution = PromoSolution(buyXGetYSolution, allDefaultDiscounts, feesAndTaxes)
         return solution
+    }
+    
+    
+    @discardableResult
+    public func computeDiscounts(_ dcOrderLines: IDCOrderLine ...) -> PromoSolution {
+        computeDiscounts(dcOrderLines)
     }
     
     /// Compute the discount from all promotions. Update the orderLines with the results, and also return the results as a single promoSolution

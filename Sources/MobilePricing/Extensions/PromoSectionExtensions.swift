@@ -11,6 +11,18 @@ import MobileDownload
 //MARK: getTriggerRequirements
 extension PromoSectionRecord {
     
+    func getFreeItemNids(promoDate: Date) -> Set<Int> {
+          var freeItems: Set<Int> = []
+          
+          for item in getPromoItems(promoDate: promoDate) {
+              if item.is100PercentOff {
+                  freeItems.insert(item.itemNid)
+              }
+          }
+          
+          return freeItems
+      }
+    
     /// In a non-mix-and-match promotion each item "stands by itself" - e.g. buy 10 of item 12 and get 5% off
     /// - Parameter itemNid: The item that is being ordered
     /// - Returns: nil if there's no minimum requirement

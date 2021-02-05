@@ -16,7 +16,7 @@ public protocol IDCOrderLine: AnyObject {
     var basePricesAndPromosOnQtyOrdered: Bool { get }
     var unitPrice: MoneyWithoutCurrency? { get }
     
-    var totalDiscount: MoneyWithoutCurrency { get }
+    var unitDiscount: MoneyWithoutCurrency { get }
     var unitFeeTotal: MoneyWithoutCurrency { get }
     var unitSplitCaseCharge: MoneyWithoutCurrency { get }
     

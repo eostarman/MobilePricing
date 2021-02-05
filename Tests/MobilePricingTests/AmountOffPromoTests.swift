@@ -26,7 +26,7 @@ class AmountOffPromoTests: XCTestCase {
         if true {
             let solution = getPromoTestSolution(promoSection, beerSale(3))
             
-            XCTAssertEqual(solution.sale.totalDiscount, 1.00)
+            XCTAssertEqual(solution.sale.unitDiscount, 1.00)
         }
     }
     
@@ -46,7 +46,7 @@ class AmountOffPromoTests: XCTestCase {
         if true {
             let solution = getPromoTestSolution(transactionCurrency: .EUR, promoSection, beerSale(3))
             
-            XCTAssertEqual(solution.sale.totalDiscount, 2.00)
+            XCTAssertEqual(solution.sale.unitDiscount, 2.00)
         }
     }
 }
