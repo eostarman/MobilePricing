@@ -13,8 +13,6 @@ struct PromoTuple {
     let unitDisc: MoneyWithoutCurrency
     let rebateAmount: MoneyWithoutCurrency
     
-    var totalDisc: MoneyWithoutCurrency { qtyDiscounted * unitDisc }
-    
     var isFromBuyXGetYFreePromo: Bool {
         dcPromoSection.promoSectionRecord.isBuyXGetY
     }

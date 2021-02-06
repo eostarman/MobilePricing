@@ -12,9 +12,7 @@ struct NonBuyXGetYCalculator {
         promoDate: Date,
         dcPromoSection: DCPromoSection,
         orderLinesByItemNid: [Int: [FreebieAccumulator]],
-        nbrPriceDecimals: Int,
-        itemNidsCoveredByContractPromos: Set<Int>,
-        earlierTierDiscountsByOrderLine: [Int: [PromoDiscount]]) -> [PromoDiscount] {
+        nbrPriceDecimals: Int) -> [PromoDiscount] {
         
         let promoCurrency = mobileDownload.promoCodes[dcPromoSection.promoSectionRecord.promoCodeNid].currency
         
@@ -56,28 +54,19 @@ struct NonBuyXGetYCalculator {
             guard let orderLinesForThisItem = orderLinesByItemNid[itemNid] else {
                 continue
             }
-            
-            // if this is not a contract promo, then don't apply it to items that are covered by a contract promo.
-            if !dcPromoSection.isContractPromo && !dcPromoSection.isAdditionalFee && itemNidsCoveredByContractPromos.contains(itemNid) {
-                continue
-            }
-            
+
             // compute cents-off discounts (eg) on lines that were not totally used as BuyXGetY promos (as free goods or trigger items). But, keep lines that came in as zero-quantity lines (just to return the case-1 discount)
             for orderLine in orderLinesForThisItem.filter({x in x.qtyAvailableForStandardPromos > 0 || x.qtyAvailableToDiscount == 0 })
             {
-                let earlierTierDiscounts = earlierTierDiscountsByOrderLine[orderLine.seq] ?? []
-                let earlierDiscounts = earlierTierDiscounts.map { $0.unitDisc }.reduce(MoneyWithoutCurrency.zero, +)
+                let unitPriceToUse = orderLine.frontlinePrice
                 
-                var unitPriceToUse = orderLine.frontlinePrice - earlierDiscounts
-                
-                if dcPromoSection.promoPlan == .OffInvoiceAccrual && dcPromoSection.promoSectionRecord.isPercentOff {
-                    unitPriceToUse = (orderLine.dcOrderLine.unitPrice ?? .zero) - orderLine.dcOrderLine.unitDiscount
-                }
+//                if dcPromoSection.promoPlan == .OffInvoiceAccrual && dcPromoSection.promoSectionRecord.isPercentOff {
+//                    unitPriceToUse = (orderLine.dcOrderLine.unitPrice ?? .zero) - orderLine.dcOrderLine.unitDiscount
+//                }
                 
                 let unitPrice = unitPriceToUse.withCurrency(transactionCurrency)
-                let unitSplitCaseCharge = orderLine.dcOrderLine.unitSplitCaseCharge.withCurrency(transactionCurrency)
                 
-                guard var unitDiscount = promoItem.getUnitDisc(promoCurrency: promoCurrency, unitPrice: unitPrice, nbrPriceDecimals: nbrPriceDecimals, unitSplitCaseCharge: unitSplitCaseCharge) else {
+                guard var unitDiscount = promoItem.getUnitDisc(promoCurrency: promoCurrency, unitPrice: unitPrice, nbrPriceDecimals: nbrPriceDecimals) else {
                     continue
                 }
                 
@@ -87,9 +76,10 @@ struct NonBuyXGetYCalculator {
                     unitDiscount = proratedDiscount
                 }
                 
-                if (dcPromoSection.isAdditionalFee) {
-                    unitDiscount = -unitDiscount
-                }
+                // note: in c# we negated the discount for a fee - we no longer need to do this since fees are tracked separately on the order lines
+                // if (dcPromoSection.isAdditionalFee) {
+                //     unitDiscount = -unitDiscount
+                // }
                 
                 let unitDiscountWithoutCurrency = unitDiscount.withoutCurrency()
                 

@@ -20,7 +20,7 @@ extension PromoItem {
         return amountOff ?? unitPrice.currency.zero
     }
     
-    public func getUnitDisc(promoCurrency: Currency, unitPrice: Money, nbrPriceDecimals: Int, unitSplitCaseCharge: Money? = nil) -> Money? {
+    public func getUnitDisc(promoCurrency: Currency, unitPrice: Money, nbrPriceDecimals: Int) -> Money? {
         guard unitPrice.isPositive else {
             return nil
         }
@@ -36,12 +36,7 @@ extension PromoItem {
                 return unitPrice
             }
 
-            var unitPriceLessSplitCaseCharge = unitPrice.withDecimals(nbrPriceDecimals)
-            if let unitSplitCaseCharge = unitSplitCaseCharge {
-                unitPriceLessSplitCaseCharge -= unitSplitCaseCharge
-            }
-
-            let discount = unitPriceLessSplitCaseCharge * (percentOff / 100)
+            let discount = unitPrice * (percentOff / 100)
 
             return discount
         } else if promoRateType == .promoPrice {
@@ -52,20 +47,15 @@ extension PromoItem {
                 return unitPrice
             }
 
-            var unitPriceLessSplitCaseCharge = unitPrice.withDecimals(nbrPriceDecimals)
-            if let unitSplitCaseCharge = unitSplitCaseCharge {
-                unitPriceLessSplitCaseCharge -= unitSplitCaseCharge
-            }
-
             guard let promoPrice = getPromoPrice(currency: promoCurrency).converted(to: unitPrice.currency, withDecimals: nbrPriceDecimals) else {
                 return nil
             }
 
-            if promoPrice > unitPriceLessSplitCaseCharge {
+            if promoPrice > unitPrice {
                 return nil
             }
 
-            let discount = unitPriceLessSplitCaseCharge - promoPrice
+            let discount = unitPrice - promoPrice
 
             return discount
         } else if promoRateType == .amountOff {

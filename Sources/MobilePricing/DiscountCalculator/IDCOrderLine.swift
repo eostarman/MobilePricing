@@ -11,16 +11,23 @@ import MobileDownload
 public protocol IDCOrderLine: AnyObject {
     var itemNid: Int { get }
     var isPreferredFreeGoodLine: Bool { get }
-    var qtyOrdered: Int? { get }
-    var qtyShipped: Int? { get }
     var basePricesAndPromosOnQtyOrdered: Bool { get }
+    
+    var qtyOrdered: Int? { get }
+    var qtyShipped: Int { get }
     var unitPrice: MoneyWithoutCurrency? { get }
     
     var unitDiscount: MoneyWithoutCurrency { get }
-    var unitFeeTotal: MoneyWithoutCurrency { get }
-    var unitSplitCaseCharge: MoneyWithoutCurrency { get }
+    var unitFee: MoneyWithoutCurrency { get }
+    var unitTax: MoneyWithoutCurrency { get }
     
+    var unitSplitCaseCharge: MoneyWithoutCurrency { get set }
+    
+    /// how many of the qtyShipped will be free due to buy-x-get-y promos
     var qtyFree: Int { get }
+    /// now many of the qtyShipped have a discount (zero if there is no unitDisc)
+    var qtyDiscounted: Int { get }
+    
     var unitNetAfterDiscount: MoneyWithoutCurrency { get }
     
     func getCokePromoTotal() -> MoneyWithoutCurrency
@@ -29,6 +36,8 @@ public protocol IDCOrderLine: AnyObject {
     
     // mpr: note that this is different in DiscountCalculator.cs - I found the code that assigns the default promos to the orderLine very confusing (likely buggy)
     func clearAllPromoData()
-    func addFreeGoods(promoSectionNid: Int, qtyFree: Int)
-    func addDiscountOrFee(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
+    func addFreeGoods(promoSectionNid: Int, qtyFree: Int, rebateAmount: MoneyWithoutCurrency)
+    func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
+    func addFee(promoSectionNid: Int, unitFee: MoneyWithoutCurrency)
+    func addTax(promoSectionNid: Int, unitTax: MoneyWithoutCurrency)
 }

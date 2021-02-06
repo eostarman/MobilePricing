@@ -11,7 +11,10 @@ class FreebieAccumulator
     let dcOrderLine: IDCOrderLine
     let itemNid: Int
     let isPreferredFreeGoodLine: Bool
-    let frontlinePrice: MoneyWithoutCurrency
+    var frontlinePrice: MoneyWithoutCurrency {
+        dcOrderLine.unitNetAfterDiscount
+    }
+    
     let originalQty: Int
     let qtyAvailableToDiscount: Int
     let seq: Int
@@ -37,7 +40,6 @@ class FreebieAccumulator
         dcOrderLine = cloneFrom.dcOrderLine
         itemNid = cloneFrom.itemNid
         isPreferredFreeGoodLine = cloneFrom.isPreferredFreeGoodLine
-        frontlinePrice = cloneFrom.frontlinePrice
         originalQty = cloneFrom.originalQty
         qtyAvailableToDiscount = cloneFrom.qtyAvailableToDiscount
         seq = cloneFrom.seq
@@ -59,13 +61,12 @@ class FreebieAccumulator
         
         self.itemNid = dcOrderLine.itemNid
         self.isPreferredFreeGoodLine = dcOrderLine.isPreferredFreeGoodLine
-        self.frontlinePrice = dcOrderLine.unitPrice ?? .zero
         
         self.originalQty = mayUseQtyOrderedForBuyXGetY && (useQtyOrderedForPricingAndPromos || dcOrderLine.basePricesAndPromosOnQtyOrdered)
-            ? max(dcOrderLine.qtyOrdered ?? 0, dcOrderLine.qtyShipped ?? 0)
-            : dcOrderLine.qtyShipped ?? 0
+            ? max(dcOrderLine.qtyOrdered ?? 0, dcOrderLine.qtyShipped)
+            : dcOrderLine.qtyShipped
         
-        qtyAvailableToDiscount = dcOrderLine.qtyShipped ?? 0
+        qtyAvailableToDiscount = dcOrderLine.qtyShipped
         
         seq = dcOrderLine.seq
         

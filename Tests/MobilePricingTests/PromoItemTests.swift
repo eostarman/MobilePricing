@@ -32,7 +32,7 @@ class PromoItemTests: XCTestCase {
         let beer = mobileDownload.testItem()
         
         let amountOff = PromoItem(beer, amountOff: 1.74)
-        let amountOffSavings = amountOff.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2, unitSplitCaseCharge: nil)
+        let amountOffSavings = amountOff.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2)
         XCTAssertEqual(amountOffSavings, Money(1.74, .EUR))
     }
     
@@ -41,7 +41,7 @@ class PromoItemTests: XCTestCase {
         let beer = mobileDownload.testItem()
         
         let percentOff = PromoItem(beer, percentOff: 30)
-        let percentOffSavings = percentOff.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2, unitSplitCaseCharge: nil)
+        let percentOffSavings = percentOff.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2)
         XCTAssertEqual(percentOffSavings, Money(3.00, .EUR))
     }
     
@@ -50,7 +50,7 @@ class PromoItemTests: XCTestCase {
         let beer = mobileDownload.testItem()
         
         let promoPrice = PromoItem(beer, promotedPrice: 2.33)
-        let promoPriceSavings = promoPrice.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2, unitSplitCaseCharge: nil)
+        let promoPriceSavings = promoPrice.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2)
         XCTAssertEqual(promoPriceSavings, Money(7.67, .EUR))
     }
 }
