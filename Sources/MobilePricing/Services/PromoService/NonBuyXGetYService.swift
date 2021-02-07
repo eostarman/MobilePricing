@@ -4,7 +4,7 @@ import Foundation
 import MoneyAndExchangeRates
 import MobileDownload
 
-struct NonBuyXGetYCalculator {
+struct NonBuyXGetYService {
     
     /// Get discounts generated for the current order
     static func computeNonBuyXGetYDiscountsOnThisOrder(
@@ -26,9 +26,7 @@ struct NonBuyXGetYCalculator {
             }
         }
         
-        let promoService = PromoService(promoSections: [dcPromoSection.promoSectionRecord], promoDate: promoDate)
-        
-        let earnedDiscounts = promoService.getEarnedDiscountPromoItems(triggerQtys: triggerQtys, itemNids: itemNids)
+        let earnedDiscounts = Self.getEarnedDiscountPromoItems(promoSections: [dcPromoSection.promoSectionRecord], promoDate: promoDate, triggerQtys: triggerQtys, itemNids: itemNids)
         
         let targetItemNids = dcPromoSection.promoSectionRecord.getTargetItemNids(promoDate: promoDate)
         var orderLinesForItemNids: [FreebieAccumulator] = []
@@ -54,15 +52,15 @@ struct NonBuyXGetYCalculator {
             guard let orderLinesForThisItem = orderLinesByItemNid[itemNid] else {
                 continue
             }
-
+            
             // compute cents-off discounts (eg) on lines that were not totally used as BuyXGetY promos (as free goods or trigger items). But, keep lines that came in as zero-quantity lines (just to return the case-1 discount)
             for orderLine in orderLinesForThisItem.filter({x in x.qtyAvailableForStandardPromos > 0 || x.qtyAvailableToDiscount == 0 })
             {
                 let unitPriceToUse = orderLine.frontlinePrice
                 
-//                if dcPromoSection.promoPlan == .OffInvoiceAccrual && dcPromoSection.promoSectionRecord.isPercentOff {
-//                    unitPriceToUse = (orderLine.dcOrderLine.unitPrice ?? .zero) - orderLine.dcOrderLine.unitDiscount
-//                }
+                //                if dcPromoSection.promoPlan == .OffInvoiceAccrual && dcPromoSection.promoSectionRecord.isPercentOff {
+                //                    unitPriceToUse = (orderLine.dcOrderLine.unitPrice ?? .zero) - orderLine.dcOrderLine.unitDiscount
+                //                }
                 
                 let unitPrice = unitPriceToUse.withCurrency(transactionCurrency)
                 
@@ -90,5 +88,50 @@ struct NonBuyXGetYCalculator {
         }
         
         return allDiscounts
+    }
+    
+    /// Get the "earned" discounts (the triggered discounts) as a colletion of PromoItem entries
+    private static func getEarnedDiscountPromoItems(promoSections: [PromoSectionRecord], promoDate: Date, triggerQtys: TriggerQtys, itemNids: [Int]) -> [PromoItem] {
+        
+        var mixAndMatchPromos: [StandardMixAndMatchPromoSection] = []
+        var nonMixAndMatchPromos: [StandardPerItemPromoSection] = []
+        
+        for promoSection in promoSections {
+            
+            if promoSection.isBuyXGetY {
+                continue
+            }
+            
+            let promoCode = mobileDownload.promoCodes[promoSection.promoCodeNid]
+            
+            if promoSection.isMixAndMatch {
+                mixAndMatchPromos.append(StandardMixAndMatchPromoSection(promoCode, promoSection, promoDate: promoDate))
+            } else {
+                nonMixAndMatchPromos.append(StandardPerItemPromoSection(promoCode, promoSection, promoDate: promoDate))
+            }
+        }
+        
+        var promoItems: [PromoItem] = []
+        
+        let triggeredMixAndMatchPromos = mixAndMatchPromos.filter { $0.isTriggered(triggerQtys: triggerQtys) }
+        
+        for itemNid in itemNids {
+            
+            for promo in triggeredMixAndMatchPromos {
+                if let promoItem = promo.getDiscount(itemNid) {
+                    promoItems.append(promoItem)
+                }
+            }
+            
+            let triggeredNonMixAndMatchPromos = nonMixAndMatchPromos.filter { $0.isTriggered(itemNid: itemNid, triggerQtys: triggerQtys) }
+            
+            for promo in triggeredNonMixAndMatchPromos {
+                if let promoItem = promo.getDiscount(itemNid) {
+                    promoItems.append(promoItem)
+                }
+            }
+        }
+        
+        return promoItems
     }
 }

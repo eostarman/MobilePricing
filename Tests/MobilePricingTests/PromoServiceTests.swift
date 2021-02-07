@@ -21,10 +21,6 @@ class PromoServiceTests: XCTestCase {
         let amountOff = PromoItem(beer, amountOff: 1.74)
         mobileDownload.testPromoSection(customer: mike, amountOff)
 
-        let promoService = PromoService(mike, christmasDay)
-        
-        XCTAssertFalse(promoService.isEmpty)
-
         let amountOffSavings = amountOff.getAmountOff(unitPrice: Money(10.00, .USD))
         XCTAssertEqual(amountOffSavings, Money(1.74, .USD))
     }
@@ -37,7 +33,7 @@ class PromoServiceTests: XCTestCase {
 
         mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
 
-        let promoService = DiscountCalculator(mike, christmasDay)
+        let promoService = PromoService(mike, christmasDay)
         
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 1, unitPrice: 10.00)
 
@@ -54,7 +50,7 @@ class PromoServiceTests: XCTestCase {
 
         mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
 
-        let promoService = DiscountCalculator(mike, christmasDay, transactionCurrency: .EUR)
+        let promoService = PromoService(mike, christmasDay, transactionCurrency: .EUR)
 
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 1, unitPrice: 10.00)
 
@@ -74,7 +70,7 @@ class PromoServiceTests: XCTestCase {
         
         mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
 
-        let promoService = DiscountCalculator(mike, christmasDay)
+        let promoService = PromoService(mike, christmasDay)
 
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 2, unitPrice: 10.00)
 
@@ -92,7 +88,7 @@ class PromoServiceTests: XCTestCase {
         let promoSection = mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
         promoSection.caseMinimum = 10
         
-        let promoService = DiscountCalculator(mike, christmasDay)
+        let promoService = PromoService(mike, christmasDay)
         
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 1, unitPrice: 10.00)
         let moreBeerSales = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 9, unitPrice: 10.00)
@@ -117,7 +113,7 @@ class PromoServiceTests: XCTestCase {
         mobileDownload.testPromoSection(customer: mike, currency: .EUR, PromoItem(beer, amountOff: 1.74))
         mobileDownload.testPromoSection(customer: mike, currency: .EUR, PromoItem(beer, amountOff: 1.55))
   
-        let promoService = DiscountCalculator(mike, christmasDay, transactionCurrency: .EUR)
+        let promoService = PromoService(mike, christmasDay, transactionCurrency: .EUR)
 
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 1, unitPrice: 10.00)
 
@@ -135,7 +131,7 @@ class PromoServiceTests: XCTestCase {
         mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.55))
         mobileDownload.testPromoSection(customer: mike, PromoItem(beer, amountOff: 1.74))
   
-        let promoService = DiscountCalculator(mike, christmasDay)
+        let promoService = PromoService(mike, christmasDay)
 
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 1, unitPrice: 10.00)
 
@@ -155,7 +151,7 @@ class PromoServiceTests: XCTestCase {
         promoSection.caseMinimum = 10
         promoSection.isMixAndMatch = true
         
-        let promoService = DiscountCalculator(mike, christmasDay, transactionCurrency: .EUR)
+        let promoService = PromoService(mike, christmasDay, transactionCurrency: .EUR)
         
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 1, unitPrice: 10.00)
         let darkBeerSale = MockOrderLine(itemNid: darkBeer.recNid, qtyOrdered: 9, unitPrice: 10.00)
@@ -183,7 +179,7 @@ class PromoServiceTests: XCTestCase {
         promoSection.caseMinimum = 10
         promoSection.isMixAndMatch = false
         
-        let promoService = DiscountCalculator(mike, christmasDay, transactionCurrency: .EUR)
+        let promoService = PromoService(mike, christmasDay, transactionCurrency: .EUR)
         
         let beerSale = MockOrderLine(itemNid: beer.recNid, qtyOrdered: 10, unitPrice: 10.00)
         let darkBeerSale = MockOrderLine(itemNid: darkBeer.recNid, qtyOrdered: 9, unitPrice: 10.00)

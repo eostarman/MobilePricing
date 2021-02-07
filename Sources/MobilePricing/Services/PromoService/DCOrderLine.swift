@@ -8,12 +8,12 @@ import MobileDownload
 // amounts on the order. If I used Money, then I'd need to keep checking to make sure when I add two amounts that the currencies were the same.
 
 /// In c# this is an interface to the orderLine data needed in the DiscountCalculator
-public protocol IDCOrderLine: AnyObject {
+public protocol DCOrderLine: AnyObject {
     var itemNid: Int { get }
     var isPreferredFreeGoodLine: Bool { get }
     var basePricesAndPromosOnQtyOrdered: Bool { get }
     
-    var qtyOrdered: Int? { get }
+    var qtyOrdered: Int { get }
     var qtyShipped: Int { get }
     var unitPrice: MoneyWithoutCurrency? { get }
     

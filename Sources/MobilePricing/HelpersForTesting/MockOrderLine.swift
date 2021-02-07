@@ -4,7 +4,7 @@ import Foundation
 import MoneyAndExchangeRates
 import MobileDownload
 
-class MockOrderLine: IDCOrderLine {
+class MockOrderLine: DCOrderLine {
 
     var freeGoods: [LineFreeGoods] = []
     var discounts: [LineDiscount] = []
@@ -30,7 +30,7 @@ class MockOrderLine: IDCOrderLine {
     
     var basePricesAndPromosOnQtyOrdered: Bool
     
-    var qtyOrdered: Int?
+    var qtyOrdered: Int
     
     var qtyShipped: Int
     

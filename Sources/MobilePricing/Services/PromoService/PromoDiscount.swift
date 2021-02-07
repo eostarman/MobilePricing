@@ -4,7 +4,7 @@ import Foundation
 import MoneyAndExchangeRates
 
 struct PromoDiscount {
-    let dcOrderLine: IDCOrderLine
+    let dcOrderLine: DCOrderLine
     
     let qtyDiscounted: Int
     let unitDisc: MoneyWithoutCurrency

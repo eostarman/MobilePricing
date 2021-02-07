@@ -100,7 +100,11 @@ extension TriggerRequirements {
             }
         }
         
-        return isTriggeredByQuantity(triggerQtys)
+        if !isTriggeredByQuantity(triggerQtys) {
+            return false
+        }
+        
+        return true
     }
     
     private func isTriggeredByQuantity(_ triggerQtys: TriggerQtys) -> Bool {

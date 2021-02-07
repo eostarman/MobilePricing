@@ -8,7 +8,7 @@ import MoneyAndExchangeRates
 /// (these promos shouldn't apply to an item that produced a free-good)
 class FreebieAccumulator
 {
-    let dcOrderLine: IDCOrderLine
+    let dcOrderLine: DCOrderLine
     let itemNid: Int
     let isPreferredFreeGoodLine: Bool
     var frontlinePrice: MoneyWithoutCurrency {
@@ -55,7 +55,7 @@ class FreebieAccumulator
         self.clonedFrom = cloneFrom
     }
     
-    init(dcOrderLine: IDCOrderLine, useQtyOrderedForPricingAndPromos: Bool, mayUseQtyOrderedForBuyXGetY: Bool)
+    init(dcOrderLine: DCOrderLine, useQtyOrderedForPricingAndPromos: Bool, mayUseQtyOrderedForBuyXGetY: Bool)
     {
         self.dcOrderLine = dcOrderLine
         
@@ -63,7 +63,7 @@ class FreebieAccumulator
         self.isPreferredFreeGoodLine = dcOrderLine.isPreferredFreeGoodLine
         
         self.originalQty = mayUseQtyOrderedForBuyXGetY && (useQtyOrderedForPricingAndPromos || dcOrderLine.basePricesAndPromosOnQtyOrdered)
-            ? max(dcOrderLine.qtyOrdered ?? 0, dcOrderLine.qtyShipped)
+            ? max(dcOrderLine.qtyOrdered, dcOrderLine.qtyShipped)
             : dcOrderLine.qtyShipped
         
         qtyAvailableToDiscount = dcOrderLine.qtyShipped

@@ -7,7 +7,7 @@ import MoneyAndExchangeRates
 struct PromoTuple {
     let dcPromoSection: DCPromoSection
     
-    let dcOrderLine: IDCOrderLine
+    let dcOrderLine: DCOrderLine
     
     let qtyDiscounted: Int
     let unitDisc: MoneyWithoutCurrency

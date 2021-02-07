@@ -4,7 +4,7 @@ import Foundation
 import MobileDownload
 import MoneyAndExchangeRates
 
-struct BuyXGetYCalculator {
+struct BuyXGetYService {
     
     /// Compute a collection of zero or more FreebieBundles. A FreebieBundle describe the earned free-goods - some may be on the order and some may not be on the order yet. The orderLines are wrapped in FreebieAccumulator
     /// objects - this is so we can track how many items were used to produce free goods so we don't discount them unless that's allowed.

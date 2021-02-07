@@ -31,7 +31,7 @@ func getPromoTestSolution(transactionCurrency: Currency = .USD, _ promoSection: 
 
 func getPromoTestSolution(transactionCurrency: Currency = .USD, _ promoSections: [PromoSectionRecord], _ orderLines: [MockOrderLine]) -> PromoTestSolution {
 
-    let discountCalculator = DiscountCalculator(transactionCurrency: transactionCurrency, promoSections: promoSections, promoDate: christmasDay)
+    let discountCalculator = PromoService(transactionCurrency: transactionCurrency, promoSections: promoSections, promoDate: christmasDay)
     
     let promoSolution = discountCalculator.computeDiscounts(orderLines)
     
