@@ -4,29 +4,17 @@ import Foundation
 import MoneyAndExchangeRates
 
 public struct PromoSolution {
-    var promoTuples: [PromoTuple] = []
-    var unusedFreebies: [UnusedFreebie] = []
+    public var unusedFreebies: [UnusedFreebie] = []
     
     init() {
     }
     
-    init(_ promoSolutions: PromoSolution ...) {
-        for promoSolution in promoSolutions {
-            self.append(contentsOf: promoSolution)
-        }
+    init(_ buyXGetYSolution: BuyXGetYSolution, _ nonBuyXGetYSolution: NonBuyXGetYSolution) {
+        unusedFreebies = buyXGetYSolution.unusedFreebies
     }
     
-    init(_ promoTuples: [PromoTuple], _ unusedFreebies: [UnusedFreebie] ) {
-        self.promoTuples = promoTuples
-        self.unusedFreebies = unusedFreebies
-    }
-    
-    mutating func append(_ promoTuple: PromoTuple) {
-        self.promoTuples.append(promoTuple)
-    }
-    
-    mutating func append(contentsOf promoSolution: PromoSolution) {
-        self.promoTuples.append(contentsOf: promoSolution.promoTuples)
-        self.unusedFreebies.append(contentsOf: promoSolution.unusedFreebies)
+    init(contractSolution: PromoSolution, nonContractSolution: PromoSolution) {
+        unusedFreebies = contractSolution.unusedFreebies
+        unusedFreebies.append(contentsOf: nonContractSolution.unusedFreebies)
     }
 }

@@ -2,26 +2,24 @@
 
 import Foundation
 import MoneyAndExchangeRates
+import MobileDownload
 
 /// track the DCPromoSection and the PromoDiscount it produced
-struct PromoTuple {
-    let dcPromoSection: DCPromoSection
+public struct PromoTuple {
+    let promoSectionRecord: PromoSectionRecord
+    let promoDiscount: PromoDiscount
     
-    let dcOrderLine: DCOrderLine
-    
-    let qtyDiscounted: Int
-    let unitDisc: MoneyWithoutCurrency
-    let rebateAmount: MoneyWithoutCurrency
+    var dcOrderLine: DCOrderLine { promoDiscount.dcOrderLine }
+    var qtyDiscounted: Int { promoDiscount.qtyDiscounted }
+    var unitDisc: MoneyWithoutCurrency { promoDiscount.unitDisc }
+    var rebateAmount: MoneyWithoutCurrency { promoDiscount.rebateAmount }
     
     var isFromBuyXGetYFreePromo: Bool {
-        dcPromoSection.promoSectionRecord.isBuyXGetY
+        promoSectionRecord.isBuyXGetY
     }
     
-    init(dcPromoSection: DCPromoSection, promoDiscount: PromoDiscount) {
-        self.dcPromoSection = dcPromoSection
-        self.dcOrderLine = promoDiscount.dcOrderLine
-        self.qtyDiscounted = promoDiscount.qtyDiscounted
-        self.unitDisc = promoDiscount.unitDisc
-        self.rebateAmount = promoDiscount.rebateAmount
+    init(promoSectionRecord: PromoSectionRecord, promoDiscount: PromoDiscount) {
+        self.promoSectionRecord = promoSectionRecord
+        self.promoDiscount = promoDiscount
     }
 }

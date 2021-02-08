@@ -40,4 +40,5 @@ public protocol DCOrderLine: AnyObject {
     func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
     func addFee(promoSectionNid: Int, unitFee: MoneyWithoutCurrency)
     func addTax(promoSectionNid: Int, unitTax: MoneyWithoutCurrency)
+    func addPotentialDiscount(promoTuple: PromoTuple)
 }

@@ -22,9 +22,8 @@ public class StandardPerItemPromoSection {
             return false
         }
         
-        guard let triggerRequirements = promoSectionRecord.getNonMixAndMatchTriggerRequirements(itemNid: itemNid) else {
-            return true
-        }
+        let triggerRequirements = promoSectionRecord.getNonMixAndMatchTriggerRequirements(itemNid: itemNid)
+        
         return triggerRequirements.isTriggered(triggerQtys)
     }
 

@@ -29,20 +29,10 @@ extension MobileDownload {
     func testPriceSheet() -> PriceSheetRecord { priceSheets.add(testRecord()) }
     func testPriceRule() -> PriceRuleRecord { priceRules.add(testRecord())}
     
-    func testPromoCode(_ currency: Currency, _ customers: CustomerRecord ...) -> PromoCodeRecord {
+    func testPromoCode(customers: CustomerRecord ..., currency: Currency = .USD) -> PromoCodeRecord {
         let promoCode = promoCodes.add(testRecord())
         promoCode.currency = currency
         promoCode.promoCustomers = Set(customers.map { $0.recNid })
-        return promoCode
-    }
-    
-    func testPromoCode(_ currency: Currency, _ customer: CustomerRecord?) -> PromoCodeRecord {
-        let promoCode = promoCodes.add(testRecord())
-        promoCode.currency = currency
-        
-        if let customer = customer {
-            promoCode.promoCustomers = Set([customer.recNid])
-        }
         return promoCode
     }
     
@@ -54,7 +44,7 @@ extension MobileDownload {
         if let promoCode = promoCode {
             promoSection.promoCodeNid = promoCode.recNid
         } else {
-            let newPromoCode = testPromoCode(.USD)
+            let newPromoCode = testPromoCode(currency: .USD)
             promoSection.promoCodeNid = newPromoCode.recNid
         }
         return promoSection
@@ -63,7 +53,7 @@ extension MobileDownload {
     @discardableResult
     func testPromoSection(customer: CustomerRecord, currency: Currency = .USD, _ promoItems: PromoItem ...) -> PromoSectionRecord {
 
-        let promoCode = mobileDownload.testPromoCode(currency, customer)
+        let promoCode = mobileDownload.testPromoCode(customers: customer, currency: currency)
         
         let promoSection = mobileDownload.testPromoSection()
         promoSection.promoCodeNid = promoCode.recNid

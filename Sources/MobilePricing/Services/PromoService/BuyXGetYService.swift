@@ -6,8 +6,7 @@ import MoneyAndExchangeRates
 
 struct BuyXGetYService {
     
-    /// Compute a collection of zero or more FreebieBundles. A FreebieBundle describe the earned free-goods - some may be on the order and some may not be on the order yet. The orderLines are wrapped in FreebieAccumulator
-    /// objects - this is so we can track how many items were used to produce free goods so we don't discount them unless that's allowed.
+    /// Compute a collection of zero or more FreebieBundles. A FreebieBundle describe the earned free-goods - some may be on the order and some may not be on the order yet. The orderLines are wrapped in FreebieAccumulator objects - this is so we can track how many items were used to produce free goods so we don't discount them unless that's allowed.
     /// - Parameters:
     ///   - promoSection: the buy-x-get-y free promotion
     ///   - triggers: triggers from the orderLines on the order
@@ -190,7 +189,7 @@ struct BuyXGetYService {
         return resultingBundles
     }
     
-    static func getBuyXGetYPromos(transactionCurrency: Currency, promoDate: Date, allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> PromoSolution {
+    static func getBuyXGetYPromos(transactionCurrency: Currency, promoDate: Date, allPromoSections: [DCPromoSection], orderLines: [FreebieAccumulator], itemNidsCoveredByContractPromos: Set<Int>) -> BuyXGetYSolution {
         var buyXGetYPromos = allPromoSections.filter { $0.promoSectionRecord.isBuyXGetY }
         
         var promoTuples: [PromoTuple] = []
@@ -266,9 +265,9 @@ struct BuyXGetYService {
                     let totalQtyDiscount = discountsByAmount.map {$0.qtyDiscounted }.reduce(0, +)
                     let first = discountsByAmount.first!
                     
-                    let promoDiscount = PromoDiscount(dcOrderLine: first.dcOrderLine, qtyDiscounted: totalQtyDiscount, unitDisc: first.unitDisc, rebateAmount: first.rebateAmount)
+                    let promoDiscount = PromoDiscount(dcOrderLine: first.dcOrderLine, potentialPromoItem: first.potentialPromoItem, qtyDiscounted: totalQtyDiscount, unitDisc: first.unitDisc, rebateAmount: first.rebateAmount)
                     
-                    let promoTuple = PromoTuple(dcPromoSection: dcPromoSection, promoDiscount: promoDiscount)
+                    let promoTuple = PromoTuple(promoSectionRecord: dcPromoSection.promoSectionRecord, promoDiscount: promoDiscount)
                     promoTuples.append(promoTuple)
                 }
             }
@@ -282,7 +281,7 @@ struct BuyXGetYService {
             }
         }
         
-        return PromoSolution(promoTuples, unusedFreebies)
+        return BuyXGetYSolution(promoTuples, unusedFreebies)
     }
     
     fileprivate struct DiscountAndRebate : Hashable {
@@ -379,7 +378,7 @@ struct BuyXGetYService {
                 let rebateAmount = promoSection.promoSectionRecord.getPromoItem(promoDate: promoDate, itemNid: b.item.itemNid)?.unitRebate ?? .zero
                 
                 // mpr: bug - I've mixed the transactionCurrency with the promoCurrency
-                let promoDiscount =  PromoDiscount(dcOrderLine: b.item.dcOrderLine, qtyDiscounted: freebieBundle.nbrTimes * b.qtyFreeHere, unitDisc: b.item.frontlinePrice, rebateAmount: rebateAmount)
+                let promoDiscount =  PromoDiscount(dcOrderLine: b.item.dcOrderLine, potentialPromoItem: nil, qtyDiscounted: freebieBundle.nbrTimes * b.qtyFreeHere, unitDisc: b.item.frontlinePrice, rebateAmount: rebateAmount)
                 
                 allDiscounts.append(promoDiscount)
             }

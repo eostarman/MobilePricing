@@ -12,7 +12,8 @@ struct NonBuyXGetYService {
         promoDate: Date,
         dcPromoSection: DCPromoSection,
         orderLinesByItemNid: [Int: [FreebieAccumulator]],
-        nbrPriceDecimals: Int) -> [PromoDiscount] {
+        nbrPriceDecimals: Int,
+        triggeredFlag: Bool) -> [PromoDiscount] {
         
         let promoCurrency = mobileDownload.promoCodes[dcPromoSection.promoSectionRecord.promoCodeNid].currency
         
@@ -26,7 +27,7 @@ struct NonBuyXGetYService {
             }
         }
         
-        let earnedDiscounts = Self.getEarnedDiscountPromoItems(promoSections: [dcPromoSection.promoSectionRecord], promoDate: promoDate, triggerQtys: triggerQtys, itemNids: itemNids)
+        let earnedDiscounts = Self.getPotentialPromoItems(promoSections: [dcPromoSection.promoSectionRecord], promoDate: promoDate, triggerQtys: triggerQtys, itemNids: itemNids, triggeredFlag: triggeredFlag)
         
         let targetItemNids = dcPromoSection.promoSectionRecord.getTargetItemNids(promoDate: promoDate)
         var orderLinesForItemNids: [FreebieAccumulator] = []
@@ -45,7 +46,7 @@ struct NonBuyXGetYService {
         
         // Now for the triggered (earned) PromoItems, match the earnedDiscounts to the actual items on this order
         for promoItem in earnedDiscounts {
-            let itemNid = promoItem.itemNid
+            let itemNid = promoItem.promoItem.itemNid
             
             // I have an earned discount, but the item isn't even on the order
             
@@ -57,31 +58,22 @@ struct NonBuyXGetYService {
             for orderLine in orderLinesForThisItem.filter({x in x.qtyAvailableForStandardPromos > 0 || x.qtyAvailableToDiscount == 0 })
             {
                 let unitPriceToUse = orderLine.frontlinePrice
-                
-                //                if dcPromoSection.promoPlan == .OffInvoiceAccrual && dcPromoSection.promoSectionRecord.isPercentOff {
-                //                    unitPriceToUse = (orderLine.dcOrderLine.unitPrice ?? .zero) - orderLine.dcOrderLine.unitDiscount
-                //                }
-                
+   
                 let unitPrice = unitPriceToUse.withCurrency(transactionCurrency)
                 
-                guard var unitDiscount = promoItem.getUnitDisc(promoCurrency: promoCurrency, unitPrice: unitPrice, nbrPriceDecimals: nbrPriceDecimals) else {
+                guard var unitDiscount = promoItem.promoItem.getUnitDisc(promoCurrency: promoCurrency, unitPrice: unitPrice, nbrPriceDecimals: nbrPriceDecimals) else {
                     continue
                 }
                 
-                if promoItem.promoRateType == .amountOff && qtyOnOrderInTotal > 0 {
+                if promoItem.promoItem.promoRateType == .amountOff && qtyOnOrderInTotal > 0 {
                     let rawProrated = unitDiscount.decimalValue / Decimal(qtyOnOrderInTotal)
                     let proratedDiscount = Money(rawProrated, transactionCurrency, numberOfDecimals: nbrPriceDecimals)
                     unitDiscount = proratedDiscount
                 }
-                
-                // note: in c# we negated the discount for a fee - we no longer need to do this since fees are tracked separately on the order lines
-                // if (dcPromoSection.isAdditionalFee) {
-                //     unitDiscount = -unitDiscount
-                // }
-                
+               
                 let unitDiscountWithoutCurrency = unitDiscount.withoutCurrency()
                 
-                let promoDiscount = PromoDiscount(dcOrderLine: orderLine.dcOrderLine, qtyDiscounted: orderLine.qtyAvailableForStandardPromos, unitDisc: unitDiscountWithoutCurrency, rebateAmount: promoItem.unitRebate)
+                let promoDiscount = PromoDiscount(dcOrderLine: orderLine.dcOrderLine, potentialPromoItem: promoItem, qtyDiscounted: orderLine.qtyAvailableForStandardPromos, unitDisc: unitDiscountWithoutCurrency, rebateAmount: promoItem.promoItem.unitRebate)
                 
                 allDiscounts.append(promoDiscount)
             }
@@ -90,48 +82,60 @@ struct NonBuyXGetYService {
         return allDiscounts
     }
     
+    
     /// Get the "earned" discounts (the triggered discounts) as a colletion of PromoItem entries
-    private static func getEarnedDiscountPromoItems(promoSections: [PromoSectionRecord], promoDate: Date, triggerQtys: TriggerQtys, itemNids: [Int]) -> [PromoItem] {
+    private static func getPotentialPromoItems(promoSections: [PromoSectionRecord], promoDate: Date, triggerQtys: TriggerQtys, itemNids: [Int], triggeredFlag: Bool) -> [PotentialPromoItem] {
         
-        var mixAndMatchPromos: [StandardMixAndMatchPromoSection] = []
-        var nonMixAndMatchPromos: [StandardPerItemPromoSection] = []
+        var potentials: [PotentialPromoItem] = []
         
-        for promoSection in promoSections {
-            
-            if promoSection.isBuyXGetY {
+        let mixAndMatchPromoSections = promoSections.filter { !$0.isBuyXGetY && $0.isMixAndMatch }
+        
+        for promoSection in mixAndMatchPromoSections {
+            let triggerRequirements = promoSection.getMixAndMatchTriggerRequirements(promoDate: promoDate)
+            let isTriggered = triggerRequirements.isTriggered(triggerQtys)
+            if isTriggered != triggeredFlag {
                 continue
             }
             
-            let promoCode = mobileDownload.promoCodes[promoSection.promoCodeNid]
-            
-            if promoSection.isMixAndMatch {
-                mixAndMatchPromos.append(StandardMixAndMatchPromoSection(promoCode, promoSection, promoDate: promoDate))
-            } else {
-                nonMixAndMatchPromos.append(StandardPerItemPromoSection(promoCode, promoSection, promoDate: promoDate))
+            for itemNid in itemNids {
+                guard let promoItem = promoSection.getPromoItem(promoDate: promoDate, itemNid: itemNid) else {
+                    continue
+                }
+                
+                let potential = PotentialPromoItem(promoSection: promoSection, triggerRequirements: triggerRequirements, triggerQtys: triggerQtys, promoItem: promoItem)
+                potentials.append(potential)
             }
         }
         
-        var promoItems: [PromoItem] = []
+        let nonMixAndMatchPromoSections = promoSections.filter { !$0.isBuyXGetY && !$0.isMixAndMatch }
         
-        let triggeredMixAndMatchPromos = mixAndMatchPromos.filter { $0.isTriggered(triggerQtys: triggerQtys) }
-        
-        for itemNid in itemNids {
+        for promoSection in nonMixAndMatchPromoSections {
             
-            for promo in triggeredMixAndMatchPromos {
-                if let promoItem = promo.getDiscount(itemNid) {
-                    promoItems.append(promoItem)
+            for itemNid in itemNids {
+                guard let promoItem = promoSection.getPromoItem(promoDate: promoDate, itemNid: itemNid) else {
+                    continue
                 }
-            }
-            
-            let triggeredNonMixAndMatchPromos = nonMixAndMatchPromos.filter { $0.isTriggered(itemNid: itemNid, triggerQtys: triggerQtys) }
-            
-            for promo in triggeredNonMixAndMatchPromos {
-                if let promoItem = promo.getDiscount(itemNid) {
-                    promoItems.append(promoItem)
+                
+                let triggerRequirements = promoSection.getNonMixAndMatchTriggerRequirements(itemNid: itemNid)
+                
+                let isTriggered = triggerRequirements.isTriggered(triggerQtys)
+                if isTriggered != triggeredFlag {
+                    continue
                 }
+                
+                let potential = PotentialPromoItem(promoSection: promoSection, triggerRequirements: triggerRequirements, triggerQtys: triggerQtys, promoItem: promoItem)
+                potentials.append(potential)
             }
         }
-        
-        return promoItems
+        return potentials
+    }
+    
+    /// Get the "earned" discounts (the triggered discounts) as a colletion of PromoItem entries
+    private static func getEarnedDiscountPromoItems(promoSections: [PromoSectionRecord], promoDate: Date, triggerQtys: TriggerQtys, itemNids: [Int], triggeredFlag: Bool) -> [PromoItem] {
+
+        let zzz = getPotentialPromoItems(promoSections: promoSections, promoDate: promoDate, triggerQtys: triggerQtys, itemNids: itemNids, triggeredFlag: triggeredFlag)
+        let mmm = zzz.map { $0.promoItem }
+        return mmm
+    
     }
 }

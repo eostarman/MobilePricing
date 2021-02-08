@@ -11,7 +11,7 @@ import MobileDownload
 /// The discounts on promotions (and the front-line price levels) can be "triggered" based on the items on the order (and on how many of each are bought).
 /// Triggers can be based on a total of which a certain amount must be bought from sub-groups. They only make sense in mix-and-match promotions and
 /// price sheets.
-struct TriggerRequirements {
+public struct TriggerRequirements {
 
     var triggerGroup: Int? = nil
     private var basis: Basis = .qty

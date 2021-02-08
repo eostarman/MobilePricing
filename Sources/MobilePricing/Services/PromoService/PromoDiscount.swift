@@ -5,10 +5,11 @@ import MoneyAndExchangeRates
 
 struct PromoDiscount {
     let dcOrderLine: DCOrderLine
+    let potentialPromoItem: PotentialPromoItem?
     
     let qtyDiscounted: Int
     let unitDisc: MoneyWithoutCurrency
-    let rebateAmount: MoneyWithoutCurrency
+    var rebateAmount: MoneyWithoutCurrency
     
     var totalDisc: MoneyWithoutCurrency { qtyDiscounted * unitDisc }
 }

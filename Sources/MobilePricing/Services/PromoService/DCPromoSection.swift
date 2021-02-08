@@ -14,6 +14,7 @@ class DCPromoSection {
     var isContractPromo: Bool { promoSectionRecord.isContractPromo }
     var isAdditionalFee: Bool { promoSectionRecord.promoPlan == .AdditionalFee }
     var isTax: Bool { isAdditionalFee && promoSectionRecord.additionalFeePromo_IsTax }
+    var isBuyXGetY: Bool { promoSectionRecord.isBuyXGetY }
     
     let promoTierSequence: Int
     

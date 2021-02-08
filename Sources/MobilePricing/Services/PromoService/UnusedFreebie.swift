@@ -3,7 +3,7 @@
 import Foundation
 import MobileDownload
 
-struct UnusedFreebie {
+public struct UnusedFreebie {
     let promoSection: PromoSectionRecord
     let qtyFree: Int
     

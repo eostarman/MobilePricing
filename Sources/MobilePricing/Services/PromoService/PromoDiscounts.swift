@@ -3,18 +3,18 @@
 import Foundation
 import MoneyAndExchangeRates
 
-struct PromoDiscounts {
-    let promoSection: PromoSection
-    
-    let totalDisc: MoneyWithoutCurrency
-    
-    let discounts: [PromoDiscount]
-    let unusedFreebies: [UnusedFreebie]
-    let freebieBundles: [FreebieBundle]
-    
-    var nbrUnusedFreebies: Int { unusedFreebies.count }
-    
-    var totalQtyDiscounted: Int {
-        discounts.map { $0.qtyDiscounted }.reduce(0, +)        
+extension BuyXGetYService {
+    struct PromoDiscounts {
+        let promoSection: PromoSection
+        
+        let totalDisc: MoneyWithoutCurrency
+        
+        let discounts: [PromoDiscount]
+        let unusedFreebies: [UnusedFreebie]
+        let freebieBundles: [FreebieBundle]
+        
+        var totalQtyDiscounted: Int {
+            discounts.map { $0.qtyDiscounted }.reduce(0, +)
+        }
     }
 }

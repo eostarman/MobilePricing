@@ -24,12 +24,12 @@ class TieredPromoTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
         
-        let promoCode = mobileDownload.testPromoCode(.USD)
+        let promoCode = mobileDownload.testPromoCode()
         promoCode.isTieredPromo = false
         let promoSection = mobileDownload.testPromoSection(promoCode: promoCode, PromoItem(beer, amountOff: 1.00))
         
         
-        let tier1PromoCode = mobileDownload.testPromoCode(.USD)
+        let tier1PromoCode = mobileDownload.testPromoCode()
         tier1PromoCode.isTieredPromo = true
         tier1PromoCode.promoTierSeq = 1
         let tier1PromoSection = mobileDownload.testPromoSection(promoCode: tier1PromoCode, PromoItem(beer, amountOff: 0.50))
@@ -51,12 +51,12 @@ class TieredPromoTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
         
-        let promoCode = mobileDownload.testPromoCode(.USD)
+        let promoCode = mobileDownload.testPromoCode()
         promoCode.isTieredPromo = false
         let promoSection = mobileDownload.testPromoSection(promoCode: promoCode, PromoItem(beer, amountOff: 2.00))
         
         
-        let tier1PromoCode = mobileDownload.testPromoCode(.USD)
+        let tier1PromoCode = mobileDownload.testPromoCode()
         tier1PromoCode.isTieredPromo = true
         tier1PromoCode.promoTierSeq = 1
         let tier1PromoSection = mobileDownload.testPromoSection(promoCode: tier1PromoCode, PromoItem(beer, percentOff: 10.0))

@@ -20,7 +20,7 @@ class FeeTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
         
-        let promoCode = mobileDownload.testPromoCode(.USD)
+        let promoCode = mobileDownload.testPromoCode()
         promoCode.isTieredPromo = false
 
         let promoSection = mobileDownload.testPromoSection(promoCode: promoCode, PromoItem(beer, amountOff: 1.00))
@@ -44,12 +44,12 @@ class FeeTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
         
-        let promoCodeForDiscount = mobileDownload.testPromoCode(.USD)
+        let promoCodeForDiscount = mobileDownload.testPromoCode()
         promoCodeForDiscount.isTieredPromo = false
         let discountPromoSection = mobileDownload.testPromoSection(promoCode: promoCodeForDiscount, PromoItem(beer, amountOff: 2.00))
         
         
-        let promoCodeForFee = mobileDownload.testPromoCode(.USD)
+        let promoCodeForFee = mobileDownload.testPromoCode()
         promoCodeForFee.isTieredPromo = true
         promoCodeForFee.promoTierSeq = 1
         
@@ -76,10 +76,10 @@ class FeeTests: XCTestCase {
         
         let beer = mobileDownload.testItem()
         
-        let promoCodeForDiscount = mobileDownload.testPromoCode(.USD)
+        let promoCodeForDiscount = mobileDownload.testPromoCode()
         let discountPromoSection = mobileDownload.testPromoSection(promoCode: promoCodeForDiscount, PromoItem(beer, amountOff: 2.00))
         
-        let promoCodeForFee = mobileDownload.testPromoCode(.USD)
+        let promoCodeForFee = mobileDownload.testPromoCode()
 
         let feePromoSection = mobileDownload.testPromoSection(promoCode: promoCodeForFee, PromoItem(beer, percentOff: 10.0))
         feePromoSection.promoPlan = .AdditionalFee

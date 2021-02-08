@@ -26,17 +26,8 @@ extension PromoSectionRecord {
     /// In a non-mix-and-match promotion each item "stands by itself" - e.g. buy 10 of item 12 and get 5% off
     /// - Parameter itemNid: The item that is being ordered
     /// - Returns: nil if there's no minimum requirement
-    func getNonMixAndMatchTriggerRequirements(itemNid: Int) -> TriggerRequirements? {
-        if caseMinimum == 0 {
-            return nil
-        }
-  
-        // this is a special case. If all you have to order is (1) then there is no
-        // real trigger requirement. Note that this won't work for a "case-rollup" promotion.
-        if caseMinimum == 1, !isCaseRollupPromo {
-            return nil
-        }
-        
+    func getNonMixAndMatchTriggerRequirements(itemNid: Int) -> TriggerRequirements {
+
         let requirements = TriggerRequirements(basis: isCaseRollupPromo ? .caseRollup : .qty, minimum: caseMinimum, triggerItemNids: [itemNid], groupRequirements: [])
         
         return requirements

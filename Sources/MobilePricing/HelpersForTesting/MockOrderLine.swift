@@ -5,11 +5,16 @@ import MoneyAndExchangeRates
 import MobileDownload
 
 class MockOrderLine: DCOrderLine {
-
+ 
     var freeGoods: [LineFreeGoods] = []
     var discounts: [LineDiscount] = []
     var fees: [LineFee] = []
     var taxes: [LineTax] = []
+    var potentialDiscounts: [PromoTuple] = []
+    
+    convenience init(_ item: ItemRecord, _ qtyOrdered: Int, _ unitPrice: MoneyWithoutCurrency = 10.00) {
+        self.init(itemNid: item.recNid, qtyOrdered: qtyOrdered, unitPrice: unitPrice)
+    }
     
     internal init(itemNid: Int, qtyOrdered: Int, unitPrice: MoneyWithoutCurrency) {
         self.itemNid = itemNid
@@ -72,6 +77,7 @@ class MockOrderLine: DCOrderLine {
         discounts = []
         fees = []
         taxes = []
+        potentialDiscounts = []
     }
     
     func addFreeGoods(promoSectionNid: Int, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
@@ -88,6 +94,10 @@ class MockOrderLine: DCOrderLine {
     
     func addTax(promoSectionNid: Int, unitTax: MoneyWithoutCurrency) {
         taxes.append(LineTax(promoSectionNid: promoSectionNid, unitTax: unitTax))
+    }
+    
+    public func addPotentialDiscount(promoTuple: PromoTuple) {
+        potentialDiscounts.append(promoTuple)
     }
 }
 
