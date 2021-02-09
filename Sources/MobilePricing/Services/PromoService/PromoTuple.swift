@@ -11,7 +11,7 @@ public struct PromoTuple {
     
     var dcOrderLine: DCOrderLine { promoDiscount.dcOrderLine }
     var qtyDiscounted: Int { promoDiscount.qtyDiscounted }
-    var unitDisc: MoneyWithoutCurrency { promoDiscount.unitDisc }
+    public var unitDisc: MoneyWithoutCurrency { promoDiscount.unitDisc }
     var rebateAmount: MoneyWithoutCurrency { promoDiscount.rebateAmount }
     
     var isFromBuyXGetYFreePromo: Bool {

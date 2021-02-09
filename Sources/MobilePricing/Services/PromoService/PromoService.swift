@@ -315,7 +315,13 @@ public class PromoService
                         continue
                     }
                     
-                    dcOrderLine.addPotentialDiscount(promoTuple: promoTuple)
+                    guard let potentialPromoItem = promoTuple.promoDiscount.potentialPromoItem else {
+                        continue
+                    }
+                    
+                    let potentialDiscount = PotentialDiscount(promoSection: potentialPromoItem.promoSection, triggerRequirements: potentialPromoItem.triggerRequirements, triggerQtys: potentialPromoItem.triggerQtys, promoItem: potentialPromoItem.promoItem, unitDiscount: promoTuple.unitDisc)
+                    
+                    dcOrderLine.addPotentialDiscount(potentialDiscount: potentialDiscount)
                 }
                 continue
             }

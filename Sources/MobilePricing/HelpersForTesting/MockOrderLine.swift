@@ -10,7 +10,7 @@ class MockOrderLine: DCOrderLine {
     var discounts: [LineDiscount] = []
     var fees: [LineFee] = []
     var taxes: [LineTax] = []
-    var potentialDiscounts: [PromoTuple] = []
+    var potentialDiscounts: [PotentialDiscount] = []
     
     convenience init(_ item: ItemRecord, _ qtyOrdered: Int, _ unitPrice: MoneyWithoutCurrency = 10.00) {
         self.init(itemNid: item.recNid, qtyOrdered: qtyOrdered, unitPrice: unitPrice)
@@ -96,8 +96,8 @@ class MockOrderLine: DCOrderLine {
         taxes.append(LineTax(promoSectionNid: promoSectionNid, unitTax: unitTax))
     }
     
-    public func addPotentialDiscount(promoTuple: PromoTuple) {
-        potentialDiscounts.append(promoTuple)
+    public func addPotentialDiscount(potentialDiscount: PotentialDiscount) {
+        potentialDiscounts.append(potentialDiscount)
     }
 }
 

@@ -18,13 +18,13 @@ class PromoItemTests: XCTestCase {
         let beer = mobileDownload.testItem()
         
         let amountOff = PromoItem(beer, amountOff: 1.74)
-        XCTAssertEqual(amountOff.getAmountOff(currency: .USD), Money(1.74, .USD))
+        XCTAssertEqual(amountOff.getAmountOff(), 1.74)
         
         let percentOff = PromoItem(beer, percentOff: 30)
         XCTAssertEqual(percentOff.getPercentOff(), 30)
         
         let promoPrice = PromoItem(beer, promotedPrice: 2.33)
-        XCTAssertEqual(promoPrice.getPromoPrice(currency: .ZAR), Money(2.33, .ZAR))
+        XCTAssertEqual(promoPrice.getPromoPrice(), 2.33)
     }
     
     func testAmountOffPromotion() {
@@ -32,8 +32,8 @@ class PromoItemTests: XCTestCase {
         let beer = mobileDownload.testItem()
         
         let amountOff = PromoItem(beer, amountOff: 1.74)
-        let amountOffSavings = amountOff.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2)
-        XCTAssertEqual(amountOffSavings, Money(1.74, .EUR))
+        let amountOffSavings = amountOff.getUnitDisc(promoCurrency: .EUR, transactionCurrency: .EUR, frontlinePrice: 10.00, nbrPriceDecimals: 2)
+        XCTAssertEqual(amountOffSavings, 1.74)
     }
     
     func testPercentoffPromotion() {
@@ -41,8 +41,8 @@ class PromoItemTests: XCTestCase {
         let beer = mobileDownload.testItem()
         
         let percentOff = PromoItem(beer, percentOff: 30)
-        let percentOffSavings = percentOff.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2)
-        XCTAssertEqual(percentOffSavings, Money(3.00, .EUR))
+        let percentOffSavings = percentOff.getUnitDisc(promoCurrency: .EUR, transactionCurrency: .EUR, frontlinePrice: 10.00, nbrPriceDecimals: 2)
+        XCTAssertEqual(percentOffSavings, 3.00)
     }
     
     func testPromoPricePromotion() {
@@ -50,7 +50,7 @@ class PromoItemTests: XCTestCase {
         let beer = mobileDownload.testItem()
         
         let promoPrice = PromoItem(beer, promotedPrice: 2.33)
-        let promoPriceSavings = promoPrice.getUnitDisc(promoCurrency: .EUR, unitPrice: Money(10.00, .EUR), nbrPriceDecimals: 2)
-        XCTAssertEqual(promoPriceSavings, Money(7.67, .EUR))
+        let promoPriceSavings = promoPrice.getUnitDisc(promoCurrency: .EUR, transactionCurrency: .EUR, frontlinePrice: 10.00, nbrPriceDecimals: 2)
+        XCTAssertEqual(promoPriceSavings, 7.67)
     }
 }

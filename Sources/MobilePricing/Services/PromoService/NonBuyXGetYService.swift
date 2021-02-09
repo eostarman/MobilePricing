@@ -57,25 +57,22 @@ struct NonBuyXGetYService {
             // compute cents-off discounts (eg) on lines that were not totally used as BuyXGetY promos (as free goods or trigger items). But, keep lines that came in as zero-quantity lines (just to return the case-1 discount)
             for orderLine in orderLinesForThisItem.filter({x in x.qtyAvailableForStandardPromos > 0 || x.qtyAvailableToDiscount == 0 })
             {
-                let unitPriceToUse = orderLine.frontlinePrice
-   
-                let unitPrice = unitPriceToUse.withCurrency(transactionCurrency)
+                let unitPrice = orderLine.frontlinePrice
                 
-                guard var unitDiscount = promoItem.promoItem.getUnitDisc(promoCurrency: promoCurrency, unitPrice: unitPrice, nbrPriceDecimals: nbrPriceDecimals) else {
-                    continue
-                }
+                var unitDiscount = promoItem.promoItem.getUnitDisc(promoCurrency: promoCurrency, transactionCurrency: transactionCurrency, frontlinePrice: unitPrice, nbrPriceDecimals: nbrPriceDecimals)
                 
+                // for example, a $3.00 discount for the purchase of (6) casees of beer can be prorated to a per-case discount of $0.50
                 if promoItem.promoItem.promoRateType == .amountOff && qtyOnOrderInTotal > 0 {
                     let rawProrated = unitDiscount.decimalValue / Decimal(qtyOnOrderInTotal)
-                    let proratedDiscount = Money(rawProrated, transactionCurrency, numberOfDecimals: nbrPriceDecimals)
+                    let proratedDiscount = MoneyWithoutCurrency(amount: rawProrated, numberOfDecimals: nbrPriceDecimals)
                     unitDiscount = proratedDiscount
                 }
-               
-                let unitDiscountWithoutCurrency = unitDiscount.withoutCurrency()
                 
-                let promoDiscount = PromoDiscount(dcOrderLine: orderLine.dcOrderLine, potentialPromoItem: promoItem, qtyDiscounted: orderLine.qtyAvailableForStandardPromos, unitDisc: unitDiscountWithoutCurrency, rebateAmount: promoItem.promoItem.unitRebate)
-                
-                allDiscounts.append(promoDiscount)
+                if unitDiscount.isPositive {
+                    let promoDiscount = PromoDiscount(dcOrderLine: orderLine.dcOrderLine, potentialPromoItem: promoItem, qtyDiscounted: orderLine.qtyAvailableForStandardPromos, unitDisc: unitDiscount, rebateAmount: promoItem.promoItem.unitRebate)
+                    
+                    allDiscounts.append(promoDiscount)
+                }
             }
         }
         
