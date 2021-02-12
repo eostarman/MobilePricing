@@ -27,7 +27,10 @@ extension MobileDownload {
     }
     func testCustomer() -> CustomerRecord { customers.add(testRecord()) }
     func testPriceSheet() -> PriceSheetRecord { priceSheets.add(testRecord()) }
-    func testPriceRule() -> PriceRuleRecord { priceRules.add(testRecord())}
+    func testPriceRule() -> PriceRuleRecord { priceRules.add(testRecord()) }
+    func testOrderType() -> OrderTypeRecord { orderTypes.add(testRecord()) }
+    func testCRVcontainerType() -> CrvContainerTypeRecord { crvContainerTypes.add(testRecord()) }
+    func testContainer() -> ContainerRecord { containers.add(testRecord()) }
     
     func testPromoCode(customers: CustomerRecord ..., currency: Currency = .USD) -> PromoCodeRecord {
         let promoCode = promoCodes.add(testRecord())

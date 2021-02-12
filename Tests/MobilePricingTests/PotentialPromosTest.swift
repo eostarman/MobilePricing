@@ -34,7 +34,7 @@ class PotentialPromosTest: XCTestCase {
         promoService.computeDiscounts(beerSale)
         XCTAssertEqual(beerSale.unitDiscount, 1.55)
         
-        let potentialDiscounts = beerSale.potentialDiscounts.map({ $0.unitDisc }).sorted { $0.decimalValue < $1.decimalValue }
+        let potentialDiscounts = beerSale.potentialDiscounts.map({ $0.unitDiscount }).sorted { $0.decimalValue < $1.decimalValue }
         
         XCTAssertEqual(potentialDiscounts.count, 2)
         XCTAssertEqual(potentialDiscounts[0], 1.74)

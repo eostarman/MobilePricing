@@ -5,11 +5,11 @@ import MoneyAndExchangeRates
 import MobileDownload
 
 class MockOrderLine: DCOrderLine {
- 
+
     var freeGoods: [LineFreeGoods] = []
     var discounts: [LineDiscount] = []
-    var fees: [LineFee] = []
-    var taxes: [LineTax] = []
+    var charges: [LineItemCharge] = []
+    var credits: [LineItemCredit] = []
     var potentialDiscounts: [PotentialDiscount] = []
     
     convenience init(_ item: ItemRecord, _ qtyOrdered: Int, _ unitPrice: MoneyWithoutCurrency = 10.00) {
@@ -43,7 +43,6 @@ class MockOrderLine: DCOrderLine {
     
     var unitSplitCaseCharge: MoneyWithoutCurrency
     
-    
     var qtyFree: Int {
         freeGoods.map({ $0.qtyFree}).reduce(0, +)
     }
@@ -56,14 +55,14 @@ class MockOrderLine: DCOrderLine {
         discounts.map({ $0.unitDisc }).reduce(.zero, +)
     }
     
-    var unitFee: MoneyWithoutCurrency {
-        fees.map({ $0.unitFee }).reduce(.zero, +)
+    var unitCharge: MoneyWithoutCurrency {
+        charges.map({ $0.amount }).reduce(.zero, +)
     }
     
-    var unitTax: MoneyWithoutCurrency {
-        taxes.map({ $0.unitTax }).reduce(.zero, +)
+    var unitCredit: MoneyWithoutCurrency {
+        credits.map({ $0.amount }).reduce(.zero, +)
     }
-    
+
     var unitNetAfterDiscount: MoneyWithoutCurrency {
         (unitPrice ?? .zero) - unitDiscount
     }
@@ -75,8 +74,8 @@ class MockOrderLine: DCOrderLine {
     func clearAllPromoData() {
         freeGoods = []
         discounts = []
-        fees = []
-        taxes = []
+        charges = []
+        credits = []
         potentialDiscounts = []
     }
     
@@ -88,12 +87,12 @@ class MockOrderLine: DCOrderLine {
         discounts.append(LineDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
     }
     
-    func addFee(promoSectionNid: Int, unitFee: MoneyWithoutCurrency) {
-        fees.append(LineFee(promoSectionNid: promoSectionNid, unitFee: unitFee))
+    func addCharge(_ charge: LineItemCharge) {
+        charges.append(charge)
     }
     
-    func addTax(promoSectionNid: Int, unitTax: MoneyWithoutCurrency) {
-        taxes.append(LineTax(promoSectionNid: promoSectionNid, unitTax: unitTax))
+    func addCredit(_ credit: LineItemCredit) {
+        credits.append(credit)
     }
     
     public func addPotentialDiscount(potentialDiscount: PotentialDiscount) {
@@ -114,15 +113,5 @@ extension MockOrderLine {
         let promoSectionNid: Int
         let unitDisc: MoneyWithoutCurrency
         let rebateAmount: MoneyWithoutCurrency
-    }
-    
-    struct LineTax {
-        let promoSectionNid: Int
-        let unitTax: MoneyWithoutCurrency
-    }
-    
-    struct LineFee {
-        let promoSectionNid: Int
-        let unitFee: MoneyWithoutCurrency
     }
 }

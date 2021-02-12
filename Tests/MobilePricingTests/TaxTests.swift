@@ -34,7 +34,7 @@ class TaxTests: XCTestCase {
         if true {
             let solution = getPromoTestSolution([promoSection], [beerSale(3)])
             
-            XCTAssertEqual(solution.sale.unitTax, 1.00)
+            XCTAssertEqual(solution.sale.unitCharge, 1.00)
         }
     }
     
@@ -66,7 +66,7 @@ class TaxTests: XCTestCase {
             let solution = getPromoTestSolution([discountPromoSection, taxPromoSection], [beerSale(3)])
             
             XCTAssertEqual(solution.sale.unitDiscount, 2.00)
-            XCTAssertEqual(solution.sale.unitTax, 0.80)
+            XCTAssertEqual(solution.sale.unitCharge, 0.80)
         }
     }
     
@@ -93,7 +93,7 @@ class TaxTests: XCTestCase {
             let solution = getPromoTestSolution([discountPromoSection, taxPromoSection], [beerSale(3)])
             
             XCTAssertEqual(solution.sale.unitDiscount, 2.00)
-            XCTAssertEqual(solution.sale.unitTax, 1.00)
+            XCTAssertEqual(solution.sale.unitCharge, 1.00)
         }
     }
     

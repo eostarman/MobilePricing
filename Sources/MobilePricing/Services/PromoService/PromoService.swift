@@ -343,9 +343,9 @@ public class PromoService
                     
                     if promoPlan == .AdditionalFee {
                         if promoTuple.promoSectionRecord.isTax {
-                            dcOrderLine.addTax(promoSectionNid: promoSectionNid, unitTax: unitDisc)
+                            dcOrderLine.addCharge(.tax(amount: unitDisc, promoSectionNid: promoSectionNid))
                         } else {
-                            dcOrderLine.addFee(promoSectionNid: promoSectionNid, unitFee: unitDisc)
+                            dcOrderLine.addCharge(.fee(amount: unitDisc, promoSectionNid: promoSectionNid))
                         }
                     } else {
                         dcOrderLine.addDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount)

@@ -13,25 +13,27 @@ import MoneyAndExchangeRates
 /// Get a customer's front-line price (before any discounts, deposits or taxes). This ties together the DefaultPriceService, the PriceSheetService and the SpecialPriceService
 public struct FrontlinePriceService {
     let shipFrom: WarehouseRecord
-    let sellTo: CustomerRecord
+    let sellToCustomer: CustomerRecord
     let pricingParent: CustomerRecord
     let pricingDate: Date
     let transactionCurrency: Currency
     let numberOfDecimals: Int
     
     var priceSheetService: PriceSheetService
+    var priceSheetServiceForDeposits: PriceSheetService
     
     /// The front-line price is a function of which warehouse ships the product (potentially), which customer is buying the product, when they are getting the product (deliveer-date rather than order-date). It will be converted to
     /// the transaction currency (the currency of the order) and the number of decimals (e.g. dairies and bakeries in the U.S. sell to schools and hospitals in fractions of a penny)
     public init(shipFrom: WarehouseRecord, sellTo: CustomerRecord, pricingDate: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
         self.shipFrom = shipFrom
-        self.sellTo = sellTo
+        self.sellToCustomer = sellTo
         self.pricingParent = mobileDownload.customers[sellTo.pricingParentNid ?? sellTo.recNid]
         self.pricingDate = pricingDate
         self.transactionCurrency = transactionCurrency
         self.numberOfDecimals = numberOfDecimals
         
         priceSheetService = PriceSheetService(shipFrom, sellTo, pricingDate, isDepositSchedule: false)
+        priceSheetServiceForDeposits = PriceSheetService(shipFrom, sellTo, pricingDate, isDepositSchedule: true)
     }
     
     enum FrontlinePrice {
@@ -56,12 +58,12 @@ public struct FrontlinePriceService {
     ///   - itemNid: the item being priced
     ///   - triggerQuantities: Quantities being sold on the order (excluding any pickups - those are different from a sale)
     /// - Returns: front-line price (either from the customer's special price for the item, from a price sheet or from the item's default price)
-    func getPrice(_ item: ItemRecord, triggerQuantities: TriggerQtys) -> FrontlinePrice? {
-        if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(sellTo, item, pricingDate) {
+    func getPrice(_ priceSheetOrDepositService: PriceSheetService, _ item: ItemRecord, triggerQuantities: TriggerQtys) -> FrontlinePrice? {
+        if let specialPrice = SpecialPriceService.getCustomerSpecialPrice(sellToCustomer, item, pricingDate) {
             return .specialPriceForCustomer(price: specialPrice)
         }
         
-        if let priceSheetPrice = priceSheetService.getPrice(item, triggerQuantities: triggerQuantities, transactionCurrency: transactionCurrency) {
+        if let priceSheetPrice = priceSheetOrDepositService.getPrice(item, triggerQuantities: triggerQuantities, transactionCurrency: transactionCurrency) {
             return .fromPriceSheet(priceSheetPrice: priceSheetPrice)
         }
         
@@ -76,12 +78,40 @@ public struct FrontlinePriceService {
     /// - Parameter itemNid: the item (or alt pack) to get the price for. Note that split-case charges are not handled here
     /// - Returns: the price (with the currency set to the current transaction currency based on the exchange rates) or nil if there is *no* frontline price
     public func getPrice(_ item: ItemRecord) -> Money? {
-        guard let frontlinePrice = getPrice(item, triggerQuantities: [:]) else {
+        guard let frontlinePrice = getPrice(priceSheetService, item, triggerQuantities: [:]) else {
             return nil
         }
         
         let price = frontlinePrice.price.converted(to: transactionCurrency, withDecimals: numberOfDecimals)
 
         return price
+    }
+    
+    /// Return the deposit from the customer's special price information, or from the deposit "schedules" or by using the item's default price.
+    /// - Parameters:
+    ///   - item: The item or empty
+    ///   - isEmptyOrDunnage: (item.isEmpty || item.isDunnage) && !item.isKeg (kegs can be sold, so don't use the customer's special price or the item's default price as a deposit
+    /// - Returns: nil or the deposit (converted to the transactionCurrency)
+    public func getDeposit(_ item: ItemRecord, isEmptyOrDunnage: Bool) -> Money? {
+        
+        // note: if the item is an empty or dunnage then the bottler never sells these - so, we can use the "price" of the item as its deposit
+        // For kegs, the bottler *may* sell them directly to the retailer, so we can't trust that their price is a deposit - it may be what you sell the (empty) keg for
+        if isEmptyOrDunnage {
+            if let specialPriceInterpretedAsTheDeposit = SpecialPriceService.getCustomerSpecialPrice(sellToCustomer, item, pricingDate) {
+                return specialPriceInterpretedAsTheDeposit.converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+            }
+        }
+        
+        if let depositFromTheDepositSchedules = priceSheetServiceForDeposits.getPrice(item, triggerQuantities: [:], transactionCurrency: transactionCurrency) {
+            return depositFromTheDepositSchedules.price.converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+        }
+        
+        if isEmptyOrDunnage {
+            if let itemDefaultPriceInterpretedAsTheDeposit = DefaultPriceService.getDefaultPrice(item, pricingDate) {
+                return itemDefaultPriceInterpretedAsTheDeposit.withCurrency(mobileDownload.handheld.defaultCurrency).converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+            }
+        }
+        
+        return nil
     }
 }

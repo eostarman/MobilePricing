@@ -18,8 +18,8 @@ public protocol DCOrderLine: AnyObject {
     var unitPrice: MoneyWithoutCurrency? { get }
     
     var unitDiscount: MoneyWithoutCurrency { get }
-    var unitFee: MoneyWithoutCurrency { get }
-    var unitTax: MoneyWithoutCurrency { get }
+    var unitCharge: MoneyWithoutCurrency { get }
+    var unitCredit: MoneyWithoutCurrency { get }
     
     var unitSplitCaseCharge: MoneyWithoutCurrency { get set }
     
@@ -38,7 +38,7 @@ public protocol DCOrderLine: AnyObject {
     func clearAllPromoData()
     func addFreeGoods(promoSectionNid: Int, qtyFree: Int, rebateAmount: MoneyWithoutCurrency)
     func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency)
-    func addFee(promoSectionNid: Int, unitFee: MoneyWithoutCurrency)
-    func addTax(promoSectionNid: Int, unitTax: MoneyWithoutCurrency)
+    func addCharge(_ charge: LineItemCharge)
+    func addCredit(_ credit: LineItemCredit)
     func addPotentialDiscount(potentialDiscount: PotentialDiscount)
 }

@@ -143,7 +143,7 @@ class BuyXGetYCalculatorFreebieBundleTests: XCTestCase {
             let beerSale = MockOrderLine(beer, 8)
             let wineSale = MockOrderLine(wine, 2)
             
-            let solution = getPromoTestSolution(promoSection, wineSale, beerSale)
+            getPromoTestSolution(promoSection, wineSale, beerSale)
             
             XCTAssertEqual(beerSale.qtyFree, 0)
             XCTAssertEqual(wineSale.qtyFree, 0)
