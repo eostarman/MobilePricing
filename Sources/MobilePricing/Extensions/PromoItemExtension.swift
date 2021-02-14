@@ -64,7 +64,7 @@ extension PromoItem {
                 return frontlinePrice
             }
             
-            guard let promoPrice = getPromoPrice().converted(to: transactionCurrency, withDecimals: nbrPriceDecimals, from: promoCurrency) else {
+            guard let promoPrice = getPromoPrice().converted(to: transactionCurrency, numberOfDecimals: nbrPriceDecimals, from: promoCurrency) else {
                 return .zero
             }
 
@@ -77,7 +77,7 @@ extension PromoItem {
 
             return discount
         } else if promoRateType == .amountOff {
-            guard let amountOff = getAmountOff().converted(to: transactionCurrency, withDecimals: nbrPriceDecimals, from: promoCurrency) else {
+            guard let amountOff = getAmountOff().converted(to: transactionCurrency, numberOfDecimals: nbrPriceDecimals, from: promoCurrency) else {
                 return .zero
             }
             return amountOff

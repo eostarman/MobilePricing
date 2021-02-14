@@ -10,6 +10,7 @@ public enum LineItemCharge {
     case CRV(amount: MoneyWithoutCurrency, crvContainerTypeNid: Int)
     case tax(amount: MoneyWithoutCurrency, promoSectionNid: Int)
     case fee(amount: MoneyWithoutCurrency, promoSectionNid: Int)
+    case splitCaseCharge(amount: MoneyWithoutCurrency)
     
     public var amount: MoneyWithoutCurrency {
         switch self {
@@ -20,6 +21,7 @@ public enum LineItemCharge {
         case .fee(let amount, _): return amount
         case .kegDeposit(let amount): return amount
         case .tax(let amount, _): return amount
+        case .splitCaseCharge(let amount): return amount
         }
     }
     

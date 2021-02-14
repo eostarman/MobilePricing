@@ -82,7 +82,7 @@ public struct FrontlinePriceService {
             return nil
         }
         
-        let price = frontlinePrice.price.converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+        let price = frontlinePrice.price.converted(to: transactionCurrency, numberofDecimals: numberOfDecimals)
 
         return price
     }
@@ -98,17 +98,17 @@ public struct FrontlinePriceService {
         // For kegs, the bottler *may* sell them directly to the retailer, so we can't trust that their price is a deposit - it may be what you sell the (empty) keg for
         if isEmptyOrDunnage {
             if let specialPriceInterpretedAsTheDeposit = SpecialPriceService.getCustomerSpecialPrice(sellToCustomer, item, pricingDate) {
-                return specialPriceInterpretedAsTheDeposit.converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+                return specialPriceInterpretedAsTheDeposit.converted(to: transactionCurrency, numberofDecimals: numberOfDecimals)
             }
         }
         
         if let depositFromTheDepositSchedules = priceSheetServiceForDeposits.getPrice(item, triggerQuantities: [:], transactionCurrency: transactionCurrency) {
-            return depositFromTheDepositSchedules.price.converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+            return depositFromTheDepositSchedules.price.converted(to: transactionCurrency, numberofDecimals: numberOfDecimals)
         }
         
         if isEmptyOrDunnage {
             if let itemDefaultPriceInterpretedAsTheDeposit = DefaultPriceService.getDefaultPrice(item, pricingDate) {
-                return itemDefaultPriceInterpretedAsTheDeposit.withCurrency(mobileDownload.handheld.defaultCurrency).converted(to: transactionCurrency, withDecimals: numberOfDecimals)
+                return itemDefaultPriceInterpretedAsTheDeposit.withCurrency(mobileDownload.handheld.defaultCurrency).converted(to: transactionCurrency, numberofDecimals: numberOfDecimals)
             }
         }
         
