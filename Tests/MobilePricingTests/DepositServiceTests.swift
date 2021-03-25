@@ -253,7 +253,7 @@ class DepositServiceTests: XCTestCase {
         
         mobileDownload.handheld.exchangeRates = ExchangeRatesService(ExchangeRate(from: botswananPula, to: zambianKwacha, date: christmasDay, rate: 2))
         
-        XCTAssertEqual(mobileDownload.exchange(Money(1.00, .BWP), to: .ZMW), Money(2.00, .ZMW))
+        XCTAssertEqual(mobileDownload.exchange(Money(1.00, .BWP), to: .ZMW, numberOfDecimals: 2), Money(2.00, .ZMW))
         
         let zambiaDepositSchedule = mobileDownload.testPriceSheet()
         let botswanaDepositSchedule = mobileDownload.testPriceSheet()

@@ -21,7 +21,7 @@ public protocol DCOrderLine: AnyObject {
     var unitCharge: MoneyWithoutCurrency { get }
     var unitCredit: MoneyWithoutCurrency { get }
     
-    var unitSplitCaseCharge: MoneyWithoutCurrency { get set }
+    var unitSplitCaseCharge: MoneyWithoutCurrency { get }
     
     /// how many of the qtyShipped will be free due to buy-x-get-y promos
     var qtyFree: Int { get }

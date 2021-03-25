@@ -19,7 +19,7 @@ class PromoSectionDayOfWeekTests: XCTestCase {
 
         promoSection.isDayOfWeekPromo = true
         
-        let christmasDay: Date = "12-25-2020" // christmas eve, 2020
+        let christmasDay: Date = "2020-12-24" // christmas eve, 2020
         var date: Date
         
         date = Calendar.current.date(byAdding: .day, value: 0, to: christmasDay)!
