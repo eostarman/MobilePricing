@@ -5,7 +5,7 @@ import MobileDownload
 import MoneyAndExchangeRates
 
 // this is based on the code in OrderCalculatorCache.cs:GetItemDepositsAndCRV()
-struct DepositService {
+public struct DepositService {
     
     let depositService: FrontlinePriceService
     let customer: CustomerRecord
@@ -16,14 +16,28 @@ struct DepositService {
         self.init(shipFrom: shipFrom, sellTo: sellTo, pricingDate: pricingDate, transactionCurrency: sellTo.transactionCurrency, numberOfDecimals: sellTo.transactionCurrency.numberOfDecimals)
     }
     
-    init(shipFrom: WarehouseRecord, sellTo: CustomerRecord, pricingDate: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
+    public init(shipFrom: WarehouseRecord, sellTo: CustomerRecord, pricingDate: Date, transactionCurrency: Currency, numberOfDecimals: Int) {
         // this is a FrontlinePriceService, but I'm using it to get deposits
         depositService = FrontlinePriceService(shipFrom: shipFrom, sellTo: sellTo, pricingDate: pricingDate, transactionCurrency: transactionCurrency, numberOfDecimals: numberOfDecimals)
         self.customer = sellTo
         self.transactionCurrency = transactionCurrency
     }
     
-    func getitemDepositsAndCRV(item: ItemRecord,orderTypeNid: Int? = nil) -> ItemDeposits {
+    public func applyDeposits(orderLines: [DCOrderLine]) {
+        for orderLine in orderLines {
+            let itemDeposits = getitemDepositsAndCRV(item: mobileDownload.items[orderLine.itemNid])
+            
+            for charge in itemDeposits.lineItemCharges() {
+                orderLine.addCharge(charge)
+            }
+            
+            for credit in itemDeposits.lineItemCredits() {
+                orderLine.addCredit(credit)
+            }         
+        }
+    }
+    
+    func getitemDepositsAndCRV(item: ItemRecord, orderTypeNid: Int? = nil) -> ItemDeposits {
         
         if customer.doNotChargeDunnageDeposits && item.isDunnage { // this is a Dunnage item and this customer doesn't pay deposits on dunnage (kegs, pallets)
             return ItemDeposits()
