@@ -37,7 +37,11 @@ class MockOrderLine: DCOrderLine {
     
     var qtyOrdered: Int
     
-    var qtyShipped: Int
+    var qtyShipped: Int?
+    
+    var qtyShippedOrExpectedToBeShipped: Int {
+        qtyShipped ?? qtyOrdered
+    }
     
     var unitPrice: MoneyWithoutCurrency?
     
@@ -48,7 +52,7 @@ class MockOrderLine: DCOrderLine {
     }
     
     var qtyDiscounted: Int {
-        discounts.isEmpty ? 0 : qtyShipped - qtyFree
+        discounts.isEmpty ? 0 : qtyShippedOrExpectedToBeShipped - qtyFree
     }
 
     var unitDiscount: MoneyWithoutCurrency {
@@ -79,11 +83,11 @@ class MockOrderLine: DCOrderLine {
         potentialDiscounts = []
     }
     
-    func addFreeGoods(promoSectionNid: Int, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
+    func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
         freeGoods.append(LineFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
     }
     
-    func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
+    func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
         discounts.append(LineDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
     }
     
@@ -103,14 +107,14 @@ class MockOrderLine: DCOrderLine {
 extension MockOrderLine {
     
     struct LineFreeGoods {
-        let promoSectionNid: Int
+        let promoSectionNid: Int?
         let qtyFree: Int
         let rebateAmount: MoneyWithoutCurrency
     }
     
     struct LineDiscount {
         let promoPlan: ePromoPlan
-        let promoSectionNid: Int
+        let promoSectionNid: Int?
         let unitDisc: MoneyWithoutCurrency
         let rebateAmount: MoneyWithoutCurrency
     }

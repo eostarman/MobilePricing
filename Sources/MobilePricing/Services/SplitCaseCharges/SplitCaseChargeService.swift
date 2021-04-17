@@ -23,11 +23,13 @@ public struct SplitCaseChargeService {
             
             for record in allSplitCaseChargeRecords {
                 
-                if orderLine.qtyShipped > 0 && orderLine.qtyFree == orderLine.qtyShipped { // we don't compute the split-case charge on samples
+                let qtyShipped = orderLine.qtyShippedOrExpectedToBeShipped
+                
+                if qtyShipped > 0 && orderLine.qtyFree == qtyShipped { // we don't compute the split-case charge on samples
                     continue
                 }
                 
-                if orderLine.qtyShipped < 0 {                  // we don't compute it on product returns either
+                if qtyShipped < 0 {                  // we don't compute it on product returns either
                     continue
                 }
                 

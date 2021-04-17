@@ -7,7 +7,7 @@ public enum LineItemCharge {
     case bottleOrCanDeposit(amount: MoneyWithoutCurrency)
     case kegDeposit(amount: MoneyWithoutCurrency)
     case carrierDeposit(amount: MoneyWithoutCurrency)
-    case CRV(amount: MoneyWithoutCurrency, crvContainerTypeNid: Int)
+    case CRV(amount: MoneyWithoutCurrency, crvContainerTypeNid: Int?)
     case tax(amount: MoneyWithoutCurrency, promoSectionNid: Int)
     case fee(amount: MoneyWithoutCurrency, promoSectionNid: Int)
     case splitCaseCharge(amount: MoneyWithoutCurrency)

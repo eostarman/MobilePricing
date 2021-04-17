@@ -62,11 +62,13 @@ class FreebieAccumulator
         self.itemNid = dcOrderLine.itemNid
         self.isPreferredFreeGoodLine = dcOrderLine.isPreferredFreeGoodLine
         
+        // when entering a new pre-sell order, the qtyShipped is nil. But we'll be optimistic and assume the quantity given to the customer will match what's ordered
+
         self.originalQty = mayUseQtyOrderedForBuyXGetY && (useQtyOrderedForPricingAndPromos || dcOrderLine.basePricesAndPromosOnQtyOrdered)
-            ? max(dcOrderLine.qtyOrdered, dcOrderLine.qtyShipped)
-            : dcOrderLine.qtyShipped
+            ? max(dcOrderLine.qtyOrdered, dcOrderLine.qtyShippedOrExpectedToBeShipped)
+            : dcOrderLine.qtyShippedOrExpectedToBeShipped
         
-        qtyAvailableToDiscount = dcOrderLine.qtyShipped
+        qtyAvailableToDiscount = dcOrderLine.qtyShippedOrExpectedToBeShipped
         
         seq = dcOrderLine.seq
         
