@@ -35,7 +35,7 @@ public final class PriceSheetService {
         self.sellTo = sellTo
         self.pricingParent = mobileDownload.customers[sellTo.pricingParentNid ?? sellTo.recNid]
         self.pricingDate = pricingDate
-        self.isDepositSchedule = isDepositSchedule
+        self.isDepositSchedule = isDepositSchedule // "price books" are used to determine "deposits" as well - so, deposits have the same flexibility as frontline prices
 
         getAllPriceSheetLinks()
     }
@@ -93,7 +93,7 @@ public final class PriceSheetService {
 
             if bestPrice == nil {
                 bestPrice = thisPrice
-            } else if thisPrice.price.amount < bestPrice!.price.amount { //HACK - mpr - convert to the transactionCurrency
+            } else if thisPrice.price.amount < bestPrice!.price.amount {
                 bestPrice = thisPrice
             }
         }
@@ -101,6 +101,7 @@ public final class PriceSheetService {
         return bestPrice
     }
 
+    /// return the best price from a price sheet - converted to the transaction currency
     public func getPrice(_ priceSheetLink: PriceSheetLink, _ item: ItemRecord, triggerQuantities: TriggerQtys, transactionCurrency: Currency) -> PriceSheetPrice? {
         let priceSheet = priceSheetLink.priceSheet
         
@@ -142,7 +143,7 @@ public final class PriceSheetService {
             }
         }
 
-        if let price = bestPrice {
+        if let bestPrice = bestPrice, let price = bestPrice.converted(to: transactionCurrency) {
             return PriceSheetPrice(priceSheetNid: priceSheetLink.priceSheet.recNid, priceLevel: levelForBestPrice, price: price)
         } else {
             return nil
@@ -164,6 +165,8 @@ public final class PriceSheetService {
                 continue
             }
 
+            // a price rules points to a price book. But the price book has a collection of price sheets. So, for convenience
+            // I convert the single rule into multiple PriceSheetLinks
             let priceSheets = activePriceSheets.filter { priceSheet in
                 priceSheet.priceBookNid == priceRule.priceBookNid
             }

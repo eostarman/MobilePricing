@@ -17,7 +17,7 @@ extension PriceSheetRecord {
     /// to the primary packs is performed.
     /// - Parameters:
     ///   - triggerQuantities: the quantities ordered, by item
-    ///   - itemNid: the item (used only when the minimums are per-item)
+    ///   - item: the item (used only when the minimums are per-item)
     ///   - priceLevel: the price level (column) in the price sheet
     /// - Returns: true if the minimum is met for the price(s) in this column to take effect
     func isFrontlinePriceLevelTriggered(_ item: ItemRecord, priceLevel: Int, triggerQuantities: TriggerQtys) -> Bool {

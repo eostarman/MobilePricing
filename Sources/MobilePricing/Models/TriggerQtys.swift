@@ -72,6 +72,7 @@ extension TriggerQtys {
         return resultTotal
     }
     
+    /// the item's gross weight (see StarBase/ProductsDimensionPanel.cs)
     func getWeight(itemNid: Int) -> Double {
         if let qty = quantitiesByItem[itemNid] {
             let weight = mobileDownload.items[itemNid].itemWeight
