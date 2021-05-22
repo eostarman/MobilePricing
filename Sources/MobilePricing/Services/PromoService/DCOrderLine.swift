@@ -9,6 +9,7 @@ import MobileDownload
 
 /// In c# this is an interface to the orderLine data needed in the DiscountCalculator
 public protocol DCOrderLine: AnyObject {
+    var id: UUID { get }
     var itemNid: Int { get }
     var isPreferredFreeGoodLine: Bool { get }
     var basePricesAndPromosOnQtyOrdered: Bool { get }
@@ -22,8 +23,6 @@ public protocol DCOrderLine: AnyObject {
     var unitCharge: MoneyWithoutCurrency { get }
     var unitCredit: MoneyWithoutCurrency { get }
     
-    var unitSplitCaseCharge: MoneyWithoutCurrency { get }
-
     /// how many of the qtyShipped will be free due to buy-x-get-y promos
     var qtyFree: Int { get }
     /// now many of the qtyShipped have a discount (zero if there is no unitDisc)

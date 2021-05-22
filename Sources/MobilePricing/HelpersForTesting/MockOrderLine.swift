@@ -4,7 +4,8 @@ import Foundation
 import MoneyAndExchangeRates
 import MobileDownload
 
-class MockOrderLine: DCOrderLine {
+class MockOrderLine: DCOrderLine, Identifiable {
+    var id = UUID()
 
     var freeGoods: [LineFreeGoods] = []
     var discounts: [LineDiscount] = []
