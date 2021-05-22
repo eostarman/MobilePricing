@@ -9,13 +9,14 @@ public struct SplitCaseChargeService {
     
     /// calculate split-case charges for an order-line. If an item is priced per-case (typically inexpensive wine), but a customer would like to buy 2 single bottles, the distributor will charge the customer for "splitting the case". This is
     /// called after computing free goods and discounts since it's suppressed for free-goods
-    public static func computeSplitCaseCharges(deliveryDate: Date, transactionCurrency: Currency, orderLines: [DCOrderLine]) {
+    public static func computeSplitCaseCharges(deliveryDate: Date, transactionCurrency: Currency, orderLines: [SplitCaseChargeSource]) -> [UUID: MoneyWithoutCurrency] {
         // sort them so that the most recent effective date is found first for an item
         let allSplitCaseChargeRecords = mobileDownload.splitCaseCharges.getAll().sorted { $0.effectiveDate ?? .distantPast > $1.effectiveDate ?? .distantPast}
         
         if allSplitCaseChargeRecords.isEmpty {
-            return
+            return [:]
         }
+        var splitCaseCharges: [UUID: MoneyWithoutCurrency] = [:]
         
         for orderLine in orderLines {
         
@@ -33,16 +34,19 @@ public struct SplitCaseChargeService {
                     continue
                 }
                 
-                guard let unitPrice = orderLine.unitPrice else {// nor do we compute it if there's no price
+                if orderLine.unitPrice == .zero {// nor do we compute it if there's no price
                     continue
                 }
                 
-                if let charge = record.getCharge(item: item, altPackUnitPrice: unitPrice, deliveryDate: deliveryDate, transactionCurrency: transactionCurrency) {
-                    orderLine.addCharge(.splitCaseCharge(amount: charge))
+                if let charge = record.getCharge(item: item, altPackUnitPrice: orderLine.unitPrice, deliveryDate: deliveryDate, transactionCurrency: transactionCurrency) {
+                    splitCaseCharges[orderLine.id] = charge
+                    // orderLine.addCharge(.splitCaseCharge(amount: charge))
                     break
                 }
             }
         }
+        
+        return splitCaseCharges
     }
 }
 
