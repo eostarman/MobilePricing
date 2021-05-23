@@ -9,45 +9,73 @@ public struct SplitCaseChargeService {
     
     /// calculate split-case charges for an order-line. If an item is priced per-case (typically inexpensive wine), but a customer would like to buy 2 single bottles, the distributor will charge the customer for "splitting the case". This is
     /// called after computing free goods and discounts since it's suppressed for free-goods
-    public static func computeSplitCaseCharges(deliveryDate: Date, transactionCurrency: Currency, orderLines: [SplitCaseChargeSource]) -> [UUID: MoneyWithoutCurrency] {
+    public static func computeSplitCaseCharges(deliveryDate: Date, transactionCurrency: Currency, orderLines: [SplitCaseChargeSource]) {
         // sort them so that the most recent effective date is found first for an item
         let allSplitCaseChargeRecords = mobileDownload.splitCaseCharges.getAll().sorted { $0.effectiveDate ?? .distantPast > $1.effectiveDate ?? .distantPast}
         
         if allSplitCaseChargeRecords.isEmpty {
-            return [:]
+            return
         }
-        var splitCaseCharges: [UUID: MoneyWithoutCurrency] = [:]
         
-        for orderLine in orderLines {
-        
-            let item = mobileDownload.items[orderLine.itemNid]
+        for var orderLine in orderLines {
             
-            for record in allSplitCaseChargeRecords {
+            let item = mobileDownload.items[orderLine.itemNid]
+            var splitCaseCharge: MoneyWithoutCurrency = .zero
+            
+            // we don't compute the split-case charge on samples (with a zero-price) or on product returns
+            if orderLine.qtyShippedOrExpectedToBeShipped > 0,
+               orderLine.qtyShippedOrExpectedToBeShipped != orderLine.qtyFree,
+               let unitPrice = orderLine.unitPrice,
+               unitPrice > .zero {
                 
-                let qtyShipped = orderLine.qtyShippedOrExpectedToBeShipped
-                
-                if qtyShipped > 0 && orderLine.qtyFree == qtyShipped { // we don't compute the split-case charge on samples
-                    continue
-                }
-                
-                if qtyShipped < 0 {                  // we don't compute it on product returns either
-                    continue
-                }
-                
-                if orderLine.unitPrice == .zero {// nor do we compute it if there's no price
-                    continue
-                }
-                
-                if let charge = record.getCharge(item: item, altPackUnitPrice: orderLine.unitPrice, deliveryDate: deliveryDate, transactionCurrency: transactionCurrency) {
-                    splitCaseCharges[orderLine.id] = charge
-                    // orderLine.addCharge(.splitCaseCharge(amount: charge))
-                    break
+                for record in allSplitCaseChargeRecords {
+                    
+                    if let charge = record.getCharge(item: item, altPackUnitPrice: unitPrice, deliveryDate: deliveryDate, transactionCurrency: transactionCurrency) {
+                        splitCaseCharge = charge
+                        break
+                    }
                 }
             }
+            
+            if getCurrentSplitCaseCharge(orderLine: orderLine) != splitCaseCharge {
+                orderLine.charges = chargesWithNewSplitCaseCharge(orderLine: orderLine, splitCaseCharge: splitCaseCharge)
+            }
         }
-        
-        return splitCaseCharges
     }
+}
+
+fileprivate func getCurrentSplitCaseCharge(orderLine: SplitCaseChargeSource) -> MoneyWithoutCurrency {
+    var splitCaseCharge: MoneyWithoutCurrency = .zero
+    for charge in orderLine.charges {
+        switch charge {
+        case .splitCaseCharge(let amount):
+            splitCaseCharge += amount
+        default:
+            break
+        }
+    }
+    
+    return splitCaseCharge
+}
+
+fileprivate func chargesWithNewSplitCaseCharge(orderLine: SplitCaseChargeSource, splitCaseCharge: MoneyWithoutCurrency) -> [LineItemCharge] {
+    
+    var newCharges: [LineItemCharge] = []
+    
+    for charge in orderLine.charges {
+        switch charge {
+        case .splitCaseCharge(amount: ):
+            break
+        default:
+            newCharges.append(charge)
+        }
+    }
+    
+    if splitCaseCharge > .zero {
+        newCharges.append(.splitCaseCharge(amount: splitCaseCharge))
+    }
+    
+    return newCharges
 }
 
 fileprivate extension SplitCaseChargeRecord {

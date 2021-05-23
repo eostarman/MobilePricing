@@ -13,5 +13,7 @@ public protocol SplitCaseChargeSource {
     var itemNid: Int { get }
     var qtyShippedOrExpectedToBeShipped: Int { get }
     var qtyFree: Int { get }
-    var unitPrice: MoneyWithoutCurrency { get }
+    var unitPrice: MoneyWithoutCurrency? { get }
+    
+    var charges: [LineItemCharge] { get set }
 }
