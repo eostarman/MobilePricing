@@ -91,7 +91,7 @@ public class PromoService
         
         return orderLines
     }
-    
+
     private func getNonBuyXGetYPromoSections(_ promoSections: [DCPromoSection], _ dcOrderLines: [DCOrderLine], _ promoPlan: ePromoPlan, processingTaxes: Bool) -> [DCPromoSection] {
         
         let itemNidsOnTheOrder = dcOrderLines.map { $0.itemNid }.unique()
@@ -127,7 +127,9 @@ public class PromoService
         
         var promoSolution = NonBuyXGetYSolution()
         
-        let orderLines = getFreebieAccumulators(dcOrderLines)
+        let orderLines = dcOrderLines.map {
+            DiscountAccumulator(dcOrderLine: $0, useQtyOrderedForPricingAndPromos: useQtyOrderedForPricingAndPromos)
+        }
         
         let nonBuyXGetYPromoSections = getNonBuyXGetYPromoSections(promoSections, dcOrderLines, promoPlan, processingTaxes: processingTaxes)
         
@@ -236,7 +238,7 @@ public class PromoService
         return results
     }
     
-    private func getBuyXGetYPromoSolution(_ promoSections: [DCPromoSection], _ dcOrderLines: [DCOrderLine]) -> BuyXGetYSolution {
+    private func getFreeGoods(_ promoSections: [DCPromoSection], _ dcOrderLines: [DCOrderLine]) -> BuyXGetYSolution {
         
         // old note: for BuyX, it's important to put the largest (X) first (so, Buy5get3 and Buy2Get1 will work)
         
@@ -271,7 +273,7 @@ public class PromoService
         return NonBuyXGetYSolution(bestPromoTuples)
     }
     
-    private func applyPromoSolutionToOrderLines(_ promoSolution: BuyXGetYSolution, _ dcOrderLines: [DCOrderLine]) {
+    private func applyFreeGoodsToOrderLines(_ promoSolution: BuyXGetYSolution, _ dcOrderLines: [DCOrderLine]) {
         if promoSolution.promoTuples.isEmpty {
             return
         }
@@ -412,7 +414,6 @@ public class PromoService
         return solution
     }
     
-    
     public func computeContractDiscounts(dcOrderLines: [DCOrderLine], triggeredFlag: Bool) -> PromoSolution {
 
         let contractLines = dcOrderLines.filter { itemNidsCoveredByContractPromos.contains($0.itemNid) }
@@ -421,8 +422,8 @@ public class PromoService
         let buyXGetYSolution: BuyXGetYSolution
             
         if triggeredFlag {
-            buyXGetYSolution = getBuyXGetYPromoSolution(contractPromoSections.filter({ $0.isBuyXGetY }), contractLines)
-            applyPromoSolutionToOrderLines(buyXGetYSolution, contractLines)
+            buyXGetYSolution = getFreeGoods(contractPromoSections.filter({ $0.isBuyXGetY }), contractLines)
+            applyFreeGoodsToOrderLines(buyXGetYSolution, contractLines)
         } else {
             buyXGetYSolution = BuyXGetYSolution()
         }
@@ -440,8 +441,8 @@ public class PromoService
         let buyXGetYSolution: BuyXGetYSolution
             
         if triggeredFlag {
-            buyXGetYSolution = getBuyXGetYPromoSolution(nonContractPromoSections.filter({ $0.isBuyXGetY }), nonContractLines)
-            applyPromoSolutionToOrderLines(buyXGetYSolution, nonContractLines)
+            buyXGetYSolution = getFreeGoods(nonContractPromoSections.filter({ $0.isBuyXGetY }), nonContractLines)
+            applyFreeGoodsToOrderLines(buyXGetYSolution, nonContractLines)
         } else {
             buyXGetYSolution = BuyXGetYSolution()
         }

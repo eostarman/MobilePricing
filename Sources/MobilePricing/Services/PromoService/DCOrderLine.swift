@@ -15,22 +15,10 @@ public protocol DCOrderLine: AnyObject {
     var basePricesAndPromosOnQtyOrdered: Bool { get }
     
     var qtyOrdered: Int { get }
-    //var qtyShipped: Int? { get } // nil when entering a new pre-sell order; set to a value when it's downloaded to the driver for delivery
     var qtyShippedOrExpectedToBeShipped: Int { get }
     var unitPrice: MoneyWithoutCurrency? { get }
     
-    //var unitDiscount: MoneyWithoutCurrency { get }
-    //var unitCharge: MoneyWithoutCurrency { get }
-    //var unitCredit: MoneyWithoutCurrency { get }
-    
-    /// how many of the qtyShipped will be free due to buy-x-get-y promos
-    var qtyFree: Int { get }
-    /// now many of the qtyShipped have a discount (zero if there is no unitDisc)
-    //var qtyDiscounted: Int { get }
-    
     var unitNetAfterDiscount: MoneyWithoutCurrency { get }
-    
-    func getCokePromoTotal() -> MoneyWithoutCurrency
     
     var seq: Int { get set }
     

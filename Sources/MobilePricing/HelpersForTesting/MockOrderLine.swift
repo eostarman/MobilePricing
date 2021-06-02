@@ -7,8 +7,8 @@ import MobileDownload
 class MockOrderLine: DCOrderLine, Identifiable {
     var id = UUID()
 
-    var freeGoods: [LineFreeGoods] = []
-    var discounts: [LineDiscount] = []
+    var freeGoods: [LineItemFreeGoods] = []
+    var discounts: [LineItemDiscount] = []
     var charges: [LineItemCharge] = []
     var credits: [LineItemCredit] = []
     var potentialDiscounts: [PotentialDiscount] = []
@@ -85,11 +85,11 @@ class MockOrderLine: DCOrderLine, Identifiable {
     }
     
     func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
-        freeGoods.append(LineFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
+        freeGoods.append(LineItemFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
     }
     
     func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
-        discounts.append(LineDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
+        discounts.append(LineItemDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
     }
     
     func addCharge(_ charge: LineItemCharge) {
@@ -102,21 +102,5 @@ class MockOrderLine: DCOrderLine, Identifiable {
     
     public func addPotentialDiscount(potentialDiscount: PotentialDiscount) {
         potentialDiscounts.append(potentialDiscount)
-    }
-}
-
-extension MockOrderLine {
-    
-    struct LineFreeGoods {
-        let promoSectionNid: Int?
-        let qtyFree: Int
-        let rebateAmount: MoneyWithoutCurrency
-    }
-    
-    struct LineDiscount {
-        let promoPlan: ePromoPlan
-        let promoSectionNid: Int?
-        let unitDisc: MoneyWithoutCurrency
-        let rebateAmount: MoneyWithoutCurrency
     }
 }

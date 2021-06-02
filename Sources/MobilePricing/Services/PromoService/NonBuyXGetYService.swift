@@ -11,7 +11,7 @@ struct NonBuyXGetYService {
         transactionCurrency: Currency,
         promoDate: Date,
         dcPromoSection: DCPromoSection,
-        orderLinesByItemNid: [Int: [FreebieAccumulator]],
+        orderLinesByItemNid: [Int: [DiscountAccumulator]],
         nbrPriceDecimals: Int,
         triggeredFlag: Bool) -> [PromoDiscount] {
         
@@ -23,24 +23,24 @@ struct NonBuyXGetYService {
         for (itemNid, lines) in orderLinesByItemNid {
             itemNids.append(itemNid)
             for line in lines {
-                triggerQtys.addItemAndQty(itemNid: itemNid, qty: line.originalQty)
+                triggerQtys.addItemAndQty(itemNid: itemNid, qty: line.qtyForTriggers)
             }
         }
         
         let earnedDiscounts = Self.getPotentialPromoItems(promoSections: [dcPromoSection.promoSectionRecord], promoDate: promoDate, triggerQtys: triggerQtys, itemNids: itemNids, triggeredFlag: triggeredFlag)
         
         let targetItemNids = dcPromoSection.promoSectionRecord.getTargetItemNids(promoDate: promoDate)
-        var orderLinesForItemNids: [FreebieAccumulator] = []
+        var orderLinesForItemNids: [DiscountAccumulator] = []
         for itemNid in targetItemNids {
             if let lines = orderLinesByItemNid[itemNid] {
                 orderLinesForItemNids.append(contentsOf: lines)
             }
         }
         
-        let availableOrderLines = orderLinesForItemNids.filter { $0.qtyAvailableForStandardPromos > 0 || $0.qtyAvailableToDiscount == 0 }
+        let availableOrderLines = orderLinesForItemNids.filter { $0.qtyToDiscount >= 0 }
         
         //  there is a promotion where when we give (e.g.) $1.00 off, this amount is pro-rated over all targets. I'm not sure about this implementation
-        let qtyOnOrderInTotal = dcPromoSection.promoSectionRecord.isProratedAmount ? availableOrderLines.map({$0.qtyAvailableForStandardPromos}).reduce(0, +) : 0
+        let qtyOnOrderInTotal = dcPromoSection.promoSectionRecord.isProratedAmount ? availableOrderLines.map({$0.qtyToDiscount}).reduce(0, +) : 0
         
         var allDiscounts: [PromoDiscount] = []
         
@@ -55,7 +55,7 @@ struct NonBuyXGetYService {
             }
             
             // compute cents-off discounts (eg) on lines that were not totally used as BuyXGetY promos (as free goods or trigger items). But, keep lines that came in as zero-quantity lines (just to return the case-1 discount)
-            for orderLine in orderLinesForThisItem.filter({x in x.qtyAvailableForStandardPromos > 0 || x.qtyAvailableToDiscount == 0 })
+            for orderLine in orderLinesForThisItem.filter({ $0.qtyToDiscount >= 0 })
             {
                 let unitPrice = orderLine.frontlinePrice
                 
@@ -69,7 +69,7 @@ struct NonBuyXGetYService {
                 }
                 
                 if unitDiscount.isPositive {
-                    let promoDiscount = PromoDiscount(dcOrderLine: orderLine.dcOrderLine, potentialPromoItem: promoItem, qtyDiscounted: orderLine.qtyAvailableForStandardPromos, unitDisc: unitDiscount, rebateAmount: promoItem.promoItem.unitRebate)
+                    let promoDiscount = PromoDiscount(dcOrderLine: orderLine.dcOrderLine, potentialPromoItem: promoItem, qtyDiscounted: orderLine.qtyToDiscount, unitDisc: unitDiscount, rebateAmount: promoItem.promoItem.unitRebate)
                     
                     allDiscounts.append(promoDiscount)
                 }
