@@ -9,7 +9,7 @@ import Foundation
 import MobileDownload
 import MoneyAndExchangeRates
 
-public struct LineItemDiscount {
+public struct LineItemDiscount: Equatable {
     public init(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
         self.promoPlan = promoPlan
         self.promoSectionNid = promoSectionNid

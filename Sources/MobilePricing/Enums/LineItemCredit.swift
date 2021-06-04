@@ -4,7 +4,7 @@ import Foundation
 import MoneyAndExchangeRates
 
 /// credits (for bags of empties and state pickup credits) assigned to an orderLine
-public enum LineItemCredit {
+public enum LineItemCredit: Equatable {
     case bagCredit(amount: MoneyWithoutCurrency)
     case statePickupCredit(amount: MoneyWithoutCurrency)
     

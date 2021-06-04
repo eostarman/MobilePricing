@@ -3,7 +3,7 @@
 import MoneyAndExchangeRates
 
 /// charges (deposits, taxes and additional fees) added to an order line
-public enum LineItemCharge {
+public enum LineItemCharge: Equatable {
     case bottleOrCanDeposit(amount: MoneyWithoutCurrency)
     case kegDeposit(amount: MoneyWithoutCurrency)
     case carrierDeposit(amount: MoneyWithoutCurrency)

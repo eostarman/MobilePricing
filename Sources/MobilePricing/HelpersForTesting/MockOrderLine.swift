@@ -4,51 +4,59 @@ import Foundation
 import MoneyAndExchangeRates
 import MobileDownload
 
-class MockOrderLine: DCOrderLine, Identifiable {
-    var id = UUID()
-
-    var freeGoods: [LineItemFreeGoods] = []
-    var discounts: [LineItemDiscount] = []
-    var charges: [LineItemCharge] = []
-    var credits: [LineItemCredit] = []
-    var potentialDiscounts: [PotentialDiscount] = []
+public class MockOrderLine: DCOrderLine, SplitCaseChargeSource, Identifiable {
+    public var id: UUID
+    
+    public var unitPrice: MoneyWithoutCurrency?
+    
+    public var freeGoods: [LineItemFreeGoods] = []
+    public var discounts: [LineItemDiscount] = []
+    public var charges: [LineItemCharge] = []
+    public var credits: [LineItemCredit] = []
+    public var potentialDiscounts: [PotentialDiscount] = []
     
     convenience init(_ item: ItemRecord, _ qtyOrdered: Int, _ unitPrice: MoneyWithoutCurrency = 10.00) {
         self.init(itemNid: item.recNid, qtyOrdered: qtyOrdered, unitPrice: unitPrice)
     }
     
     internal init(itemNid: Int, qtyOrdered: Int, unitPrice: MoneyWithoutCurrency) {
-        self.itemNid = itemNid
+        self.id = UUID()
         self.seq = 0
+        self.itemNid = itemNid
         self.isPreferredFreeGoodLine = false
         self.qtyOrdered = qtyOrdered
         self.qtyShipped = qtyOrdered
         self.basePricesAndPromosOnQtyOrdered = false
         self.unitPrice = unitPrice
-        self.unitSplitCaseCharge = .zero
     }
     
-    let itemNid: Int
+    public init(id: UUID, seq: Int, itemNid: Int, qtyOrdered: Int, qtyShipped: Int, basePricesAndPromosOnQtyOrdered: Bool, isPreferredFreeGoodLine: Bool) {
+        self.id = id
+        self.seq = seq
+        self.itemNid = itemNid
+        self.qtyOrdered = qtyOrdered
+        self.qtyShipped = qtyShipped
+        self.basePricesAndPromosOnQtyOrdered = basePricesAndPromosOnQtyOrdered
+        self.isPreferredFreeGoodLine = isPreferredFreeGoodLine
+    }
     
-    var seq: Int
+    public var seq: Int
+
+    public let itemNid: Int
     
-    var isPreferredFreeGoodLine: Bool
+    public var qtyOrdered: Int
     
-    var basePricesAndPromosOnQtyOrdered: Bool
+    public var qtyShipped: Int?
+
+    public var basePricesAndPromosOnQtyOrdered: Bool
     
-    var qtyOrdered: Int
+    public var isPreferredFreeGoodLine: Bool
     
-    var qtyShipped: Int?
-    
-    var qtyShippedOrExpectedToBeShipped: Int {
+    public var qtyShippedOrExpectedToBeShipped: Int {
         qtyShipped ?? qtyOrdered
     }
     
-    var unitPrice: MoneyWithoutCurrency?
-    
-    var unitSplitCaseCharge: MoneyWithoutCurrency
-    
-    var qtyFree: Int {
+    public var qtyFree: Int {
         freeGoods.map({ $0.qtyFree}).reduce(0, +)
     }
     
@@ -68,7 +76,7 @@ class MockOrderLine: DCOrderLine, Identifiable {
         credits.map({ $0.amount }).reduce(.zero, +)
     }
 
-    var unitNetAfterDiscount: MoneyWithoutCurrency {
+    public var unitNetAfterDiscount: MoneyWithoutCurrency {
         (unitPrice ?? .zero) - unitDiscount
     }
     
@@ -76,7 +84,7 @@ class MockOrderLine: DCOrderLine, Identifiable {
         discounts.filter({ $0.promoPlan.isCokePromo }).map({ $0.unitDisc }).reduce(.zero, +)
     }
     
-    func clearAllPromoData() {
+    public func clearAllPromoData() {
         freeGoods = []
         discounts = []
         charges = []
@@ -84,19 +92,19 @@ class MockOrderLine: DCOrderLine, Identifiable {
         potentialDiscounts = []
     }
     
-    func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
+    public func addFreeGoods(promoSectionNid: Int?, qtyFree: Int, rebateAmount: MoneyWithoutCurrency) {
         freeGoods.append(LineItemFreeGoods(promoSectionNid: promoSectionNid, qtyFree: qtyFree, rebateAmount: rebateAmount))
     }
     
-    func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
+    public func addDiscount(promoPlan: ePromoPlan, promoSectionNid: Int?, unitDisc: MoneyWithoutCurrency, rebateAmount: MoneyWithoutCurrency) {
         discounts.append(LineItemDiscount(promoPlan: promoPlan, promoSectionNid: promoSectionNid, unitDisc: unitDisc, rebateAmount: rebateAmount))
     }
     
-    func addCharge(_ charge: LineItemCharge) {
+    public func addCharge(_ charge: LineItemCharge) {
         charges.append(charge)
     }
     
-    func addCredit(_ credit: LineItemCredit) {
+    public func addCredit(_ credit: LineItemCredit) {
         credits.append(credit)
     }
     
